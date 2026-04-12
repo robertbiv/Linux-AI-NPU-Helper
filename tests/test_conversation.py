@@ -131,3 +131,48 @@ class TestConversationHistory:
         for t in threads: t.join()
         assert not errors
         assert len(h) <= 200  # default max
+
+    def test_load_oserror_handled(self, tmp_path, monkeypatch):
+        p = tmp_path / "history.json"
+        p.touch() # Make the file exist so it bypasses `not self._path.exists()` check
+
+        # Mock Path.read_text to raise an OSError
+        def mock_read_text(*args, **kwargs):
+            raise OSError("Mock OSError during read")
+
+        monkeypatch.setattr(Path, "read_text", mock_read_text)
+
+        # Initialize History. The exception during load should be caught and logged
+        h = ConversationHistory(persist_path=p)
+        assert len(h) == 0
+
+    def test_save_oserror_handled(self, tmp_path, monkeypatch):
+        p = tmp_path / "history.json"
+
+        # Mock secure_write to raise an OSError
+        import src.conversation
+        def mock_secure_write(*args, **kwargs):
+            raise OSError("Mock OSError during save")
+
+        monkeypatch.setattr(src.conversation, "secure_write", mock_secure_write)
+
+        h = ConversationHistory(persist_path=p)
+        # Adding a message triggers _save(), which should catch the OSError gracefully
+        h.add("user", "test")
+
+        # Ensure message is added to memory even if save failed
+        assert len(h) == 1
+
+    def test_load_trims_messages(self, tmp_path):
+        p = tmp_path / "history.json"
+
+        # Create a file with 10 messages
+        messages = [{"role": "user", "content": f"msg {i}"} for i in range(10)]
+        p.write_text(json.dumps(messages), encoding="utf-8")
+
+        # Load it with max_messages=5
+        h = ConversationHistory(max_messages=5, persist_path=p)
+
+        # Should trim oldest messages (first 5), keeping last 5
+        assert len(h) == 5
+        assert h.all_messages()[0].content == "msg 5"
