@@ -16,7 +16,7 @@ Example
 >>> reporter = DiagnosticReporter(load_config())
 >>> report = reporter.full_report()
 >>> print(report["backend"]["status"])
-'ok'
+ok
 """
 
 from __future__ import annotations
