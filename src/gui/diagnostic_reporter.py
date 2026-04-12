@@ -15,7 +15,7 @@ Example
 >>> from src.config import load as load_config
 >>> reporter = DiagnosticReporter(load_config())
 >>> report = reporter.full_report()
->>> print(report["backend"]["status"])
+>>> print(report["backend"].get("status"))
 'ok'
 """
 
