@@ -11,12 +11,14 @@ call individual ``check_*`` methods for targeted checks.
 
 Example
 -------
->>> from src.diagnostic_reporter import DiagnosticReporter
->>> from src.config import load as load_config
->>> reporter = DiagnosticReporter(load_config())
->>> report = reporter.full_report()
->>> print(report["backend"]["status"])
-'ok'
+::
+
+    >>> from src.diagnostic_reporter import DiagnosticReporter
+    >>> from src.config import load as load_config
+    >>> reporter = DiagnosticReporter(load_config())
+    >>> report = reporter.full_report()
+    >>> print(report["backend"]["status"])
+    'ok'
 """
 
 from __future__ import annotations
