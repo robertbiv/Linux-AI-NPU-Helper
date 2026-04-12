@@ -134,6 +134,18 @@ _DEFAULTS: dict[str, Any] = {
         #   name and the exact arguments the AI supplied.
         #   web_search is in this list by default because it opens external URLs.
         "requires_approval": ["web_search"],
+        # Man page reader tool
+        "man_reader": {
+            # Set to false to remove read_man_page from the tool registry
+            # entirely (AI will not see or use it).
+            "enabled": True,
+            # Maximum characters returned per man-page lookup.
+            # Larger values give the AI more detail at the cost of context space.
+            "max_chars": 8000,
+            # Section names extracted by default when the AI doesn't ask for
+            # specific ones.  Use [] to return the full page.
+            "default_sections": ["SYNOPSIS", "OPTIONS", "EXAMPLES"],
+        },
         # Web-search browser tool
         "web_search": {
             # Which engine to use by default.  Must be a key in "engines" below.
