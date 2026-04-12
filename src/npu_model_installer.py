@@ -802,6 +802,7 @@ class NPUModelInstaller:
 def install_model_from_catalog(
     entry: ModelCatalogEntry,
     *,
+    install_dir: str | Path | None = None,
     progress_callback: Callable[[str], None] | None = None,
     allow_external: bool = True,
 ) -> Path:
@@ -811,6 +812,8 @@ def install_model_from_catalog(
     ----------
     entry:
         A :class:`ModelCatalogEntry` from :data:`MODEL_CATALOG`.
+    install_dir:
+        Override the default install location.
     progress_callback:
         Optional callable receiving progress strings.
     allow_external:
@@ -826,7 +829,7 @@ def install_model_from_catalog(
     InstallError
         Download or verification failed.
     """
-    installer = NPUModelInstaller(entry=entry)
+    installer = NPUModelInstaller(install_dir=install_dir, entry=entry)
     return installer.install(
         progress_callback=progress_callback,
         allow_external=allow_external,
@@ -869,9 +872,10 @@ def ensure_default_model(
     Path | None
         Path to the ONNX file, or ``None`` if installation failed.
     """
-    installer = NPUModelInstaller(install_dir)
     try:
-        return installer.install(
+        return install_model_from_catalog(
+            get_default_entry(),
+            install_dir=install_dir,
             progress_callback=progress_callback,
             allow_external=allow_external,
         )
