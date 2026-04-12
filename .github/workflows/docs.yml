@@ -120,13 +120,13 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Download coverage HTML from test job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.3
         with:
           name: coverage-html
           path: docs/_site/coverage
 
       - name: Download coverage badge JSON from test job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.3
         with:
           name: coverage-xml
           # We re-generate the badge here since we need the HTML artefact first
