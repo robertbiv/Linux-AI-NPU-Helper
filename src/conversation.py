@@ -209,7 +209,7 @@ class ConversationHistory:
                 mode=0o600,
             )
         except OSError as exc:
-            logger.warning("Could not persist conversation history: %s", exc)
+            logger.warning("Could not save conversation history: %s", exc)
 
     def _load(self) -> None:
         if self._path is None or not self._path.exists():
