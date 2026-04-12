@@ -1,0 +1,30 @@
+/* Linux AI NPU Helper — MkDocs Material extra styles */
+
+/* Make the coverage badge stand out */
+.coverage-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  background: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+}
+
+/* Slightly wider content on large screens */
+@media screen and (min-width: 1220px) {
+  .md-content {
+    max-width: 960px;
+  }
+}
+
+/* Admonition: NPU warning uses amber */
+.md-typeset .admonition.npu-warn,
+.md-typeset details.npu-warn {
+  border-color: #ff8f00;
+}
+.md-typeset .npu-warn > .admonition-title,
+.md-typeset .npu-warn > summary {
+  background-color: #fff8e1;
+  color: #ff6f00;
+}
