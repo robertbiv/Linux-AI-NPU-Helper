@@ -14,10 +14,21 @@ Built-in tools
 
 ``search_in_files``
     Search for text inside files.  Uses ``ripgrep`` (``rg``) for speed and
-    falls back to ``grep -r``.
+    falls back to ``grep -r``.  Blocked paths (e.g. ``~/.ssh``) are never
+    read.
 
-Both tools accept a natural-language ``query`` as well as explicit pattern /
-path parameters, letting the AI expand vague requests into concrete searches.
+``web_search``
+    Opens the user's **default browser** with their preferred search engine.
+    The assistant itself makes **zero HTTP requests** to search engines —
+    it only calls ``xdg-open`` with a URL.  All data stays on-device.
+
+Privacy & security
+------------------
+- ``SearchInFilesTool`` refuses to read paths that match the configured
+  ``blocked_paths`` list (``~/.ssh``, ``~/.gnupg``, ``/etc/shadow``, etc.).
+- ``WebSearchTool`` never contacts any server itself; it delegates entirely
+  to the user's browser.
+- No tool sends any data off-device.
 """
 
 from __future__ import annotations
@@ -27,6 +38,7 @@ import logging
 import re
 import shutil
 import subprocess
+import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -307,9 +319,26 @@ class SearchInFilesTool(Tool):
         "required": ["query"],
     }
 
-    def __init__(self, default_search_path: str | Path | None = None) -> None:
+    def __init__(self, default_search_path: str | Path | None = None,
+                 blocked_paths: list[str] | None = None) -> None:
         self._default_path = Path(default_search_path or Path.home())
         self._backend: str | None = None
+        # Expand and resolve blocked paths at init time so the check is fast
+        self._blocked: list[Path] = [
+            Path(p).expanduser().resolve()
+            for p in (blocked_paths or [])
+        ]
+
+    def _is_blocked(self, path: Path) -> bool:
+        """Return True if *path* is inside a blocked directory."""
+        try:
+            resolved = path.resolve()
+        except OSError:
+            return False
+        return any(
+            resolved == b or b in resolved.parents
+            for b in self._blocked
+        )
 
     def _detect_backend(self) -> str:
         if self._backend is None:
@@ -323,6 +352,17 @@ class SearchInFilesTool(Tool):
             return ToolResult(tool_name=self.name, error="'query' is required.")
 
         search_path = Path(args.get("path") or self._default_path).expanduser()
+
+        # Security: refuse to search inside blocked paths
+        if self._is_blocked(search_path):
+            logger.warning(
+                "SearchInFilesTool: search path %s is blocked.", search_path
+            )
+            return ToolResult(
+                tool_name=self.name,
+                error=f"Searching in {search_path} is not permitted for security reasons.",
+            )
+
         file_pattern: str | None = args.get("file_pattern")
         case_sensitive: bool = bool(args.get("case_sensitive", False))
         max_results: int = int(args.get("max_results", 30))
@@ -340,6 +380,9 @@ class SearchInFilesTool(Tool):
         except Exception as exc:  # noqa: BLE001
             logger.warning("SearchInFilesTool error: %s", exc)
             return ToolResult(tool_name=self.name, error=str(exc))
+
+        # Filter out any results that landed inside a blocked path
+        hits = [h for h in hits if not self._is_blocked(Path(h.path))]
 
         truncated = len(hits) > max_results
         return ToolResult(
@@ -423,7 +466,119 @@ def _has_hidden_component(path: str) -> bool:
     return any(part.startswith(".") for part in Path(path).parts)
 
 
-# ── ToolRegistry ──────────────────────────────────────────────────────────────
+# ── WebSearchTool ─────────────────────────────────────────────────────────────
+
+# Built-in engine URL templates (query placeholder: {query})
+_DEFAULT_ENGINES: dict[str, str] = {
+    "duckduckgo": "https://duckduckgo.com/?q={query}",
+    "startpage":  "https://www.startpage.com/search?q={query}",
+    "brave":      "https://search.brave.com/search?q={query}",
+    "ecosia":     "https://www.ecosia.org/search?q={query}",
+    "google":     "https://www.google.com/search?q={query}",
+    "bing":       "https://www.bing.com/search?q={query}",
+}
+
+
+class WebSearchTool(Tool):
+    """Open the user's default browser to search the web.
+
+    Privacy model
+    -------------
+    This tool **never makes any HTTP request itself**.  It builds a search URL
+    and hands it to ``xdg-open``, which opens the URL in whatever browser the
+    user has set as their default.  The assistant has no visibility into what
+    the browser does after that point.
+
+    The tool is useful for:
+    - Letting the AI suggest search queries based on conversation context.
+    - Giving the user a one-click way to look something up without the
+      assistant having to access the internet itself.
+    """
+
+    name = "web_search"
+    description = (
+        "Open the user's default browser with a search query. "
+        "The assistant does NOT access the internet — it only opens a browser tab."
+    )
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "The search query to look up.",
+            },
+            "engine": {
+                "type": "string",
+                "description": (
+                    "Search engine to use. One of: "
+                    + ", ".join(_DEFAULT_ENGINES)
+                    + ". Defaults to the configured engine."
+                ),
+            },
+        },
+        "required": ["query"],
+    }
+
+    def __init__(
+        self,
+        default_engine: str = "duckduckgo",
+        engines: dict[str, str] | None = None,
+    ) -> None:
+        self._default_engine = default_engine
+        # Merge user-defined engines over the built-in set
+        self._engines: dict[str, str] = {**_DEFAULT_ENGINES, **(engines or {})}
+
+    def run(self, args: dict[str, Any]) -> ToolResult:
+        query: str = args.get("query", "").strip()
+        if not query:
+            return ToolResult(tool_name=self.name, error="'query' is required.")
+
+        engine_key = args.get("engine", self._default_engine).lower()
+        template = self._engines.get(engine_key)
+        if template is None:
+            available = ", ".join(self._engines)
+            return ToolResult(
+                tool_name=self.name,
+                error=f"Unknown engine {engine_key!r}. Available: {available}",
+            )
+
+        encoded = urllib.parse.quote_plus(query)
+        url = template.format(query=encoded)
+
+        logger.info("WebSearchTool: opening %s with query %r", engine_key, query)
+        try:
+            # Non-blocking: spawn xdg-open and return immediately.
+            # The subprocess is fully detached — we do not wait for it.
+            subprocess.Popen(
+                ["xdg-open", url],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+            )
+        except FileNotFoundError:
+            return ToolResult(
+                tool_name=self.name,
+                error=(
+                    "xdg-open not found. Install xdg-utils or open your browser "
+                    f"manually and search for: {query}"
+                ),
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.error("WebSearchTool error: %s", exc)
+            return ToolResult(tool_name=self.name, error=str(exc))
+
+        return ToolResult(
+            tool_name=self.name,
+            results=[
+                SearchResult(
+                    path=url,
+                    snippet=f'Opened {engine_key} search for "{query}" in your browser.',
+                )
+            ],
+        )
+
+
+
 
 
 class ToolRegistry:
@@ -545,11 +700,30 @@ def build_default_registry(tools_config: dict | None = None) -> ToolRegistry:
 
         ``search_path`` (str)
             Default root directory for file searches.  Defaults to ``~``.
+        ``blocked_paths`` (list[str])
+            Paths the content-search tool will never read.  Expanded with
+            ``~`` at startup.
+        ``web_search.engine`` (str)
+            Default search engine name (e.g. ``"duckduckgo"``).
+        ``web_search.engines`` (dict)
+            Additional or override engine URL templates.
     """
     cfg = tools_config or {}
     default_path = cfg.get("search_path", str(Path.home()))
+    blocked_paths: list[str] = cfg.get("blocked_paths", [])
+
+    web_cfg = cfg.get("web_search", {})
+    default_engine = web_cfg.get("engine", "duckduckgo")
+    extra_engines: dict[str, str] = web_cfg.get("engines", {})
 
     registry = ToolRegistry()
     registry.register(FindFilesTool(default_search_path=default_path))
-    registry.register(SearchInFilesTool(default_search_path=default_path))
+    registry.register(SearchInFilesTool(
+        default_search_path=default_path,
+        blocked_paths=blocked_paths,
+    ))
+    registry.register(WebSearchTool(
+        default_engine=default_engine,
+        engines=extra_engines,
+    ))
     return registry

@@ -20,6 +20,14 @@ _DEFAULTS: dict[str, Any] = {
     # Use 'copilot' to listen for the physical Copilot/Fn key via evdev.
     # Alternatively supply a pynput-style key combo, e.g. "<ctrl>+<alt>+space".
     "hotkey": "copilot",
+    # ── Network / privacy ─────────────────────────────────────────────────────
+    # SECURITY: By default the assistant never contacts any external server.
+    # All AI inference must run on localhost or a private-network address.
+    # Set allow_external to true ONLY if you are self-hosting on a LAN server
+    # you control and fully trust.
+    "network": {
+        "allow_external": False,
+    },
     # ── Resource / power management ───────────────────────────────────────────
     "resources": {
         # Unload the NPU/ONNX session from memory after each inference call.
@@ -37,6 +45,9 @@ _DEFAULTS: dict[str, Any] = {
     },
     # ── AI backend ────────────────────────────────────────────────────────────
     # Supported backends: "ollama", "openai", "npu"
+    # NOTE: "openai" here means any *local* OpenAI-compatible server such as
+    # LM Studio (default port 1234) or llama.cpp server.  The application
+    # blocks all external URLs by default (see network.allow_external above).
     "backend": "ollama",
     "ollama": {
         "base_url": "http://localhost:11434",
@@ -44,10 +55,13 @@ _DEFAULTS: dict[str, Any] = {
         "timeout": 120,
     },
     "openai": {
-        "base_url": "https://api.openai.com/v1",
-        "api_key_env": "OPENAI_API_KEY",
-        "model": "gpt-4o",
-        "timeout": 60,
+        # Point this at a LOCAL OpenAI-compatible server only.
+        # e.g. LM Studio: http://localhost:1234/v1
+        #      llama.cpp : http://localhost:8080/v1
+        "base_url": "http://localhost:1234/v1",
+        "api_key_env": "",         # not needed for local servers
+        "model": "local-model",
+        "timeout": 120,
     },
     # ── AMD NPU ───────────────────────────────────────────────────────────────
     "npu": {
@@ -94,6 +108,36 @@ _DEFAULTS: dict[str, Any] = {
             r">\s*/dev/[sh]d",
         ],
     },
+    # ── Tools ─────────────────────────────────────────────────────────────────
+    "tools": {
+        # Root directory used as the default for file/content searches
+        "search_path": "~",
+        # Paths the SearchInFilesTool will NEVER read from (security/privacy)
+        "blocked_paths": [
+            "~/.ssh",
+            "~/.gnupg",
+            "/etc/shadow",
+            "/etc/sudoers",
+            "/proc",
+            "/sys",
+        ],
+        # Web-search browser tool
+        "web_search": {
+            # Which engine to use by default.  Must be a key in "engines" below.
+            "engine": "duckduckgo",
+            # Engine URL templates.  Use {query} as the placeholder.
+            # The app opens these with xdg-open — it never makes HTTP requests
+            # to search engines itself.
+            "engines": {
+                "duckduckgo": "https://duckduckgo.com/?q={query}",
+                "startpage":  "https://www.startpage.com/search?q={query}",
+                "brave":      "https://search.brave.com/search?q={query}",
+                "ecosia":     "https://www.ecosia.org/search?q={query}",
+                "google":     "https://www.google.com/search?q={query}",
+                "bing":       "https://www.bing.com/search?q={query}",
+            },
+        },
+    },
     # ── Logging ───────────────────────────────────────────────────────────────
     "log_level": "INFO",
     "log_file": "",   # empty = stderr only
@@ -129,6 +173,14 @@ class Config:
         return key in self._data
 
     # ── Convenience properties ────────────────────────────────────────────────
+
+    @property
+    def network(self) -> dict:
+        return self._data.get("network", {"allow_external": False})
+
+    @property
+    def tools(self) -> dict:
+        return self._data.get("tools", {})
 
     @property
     def resources(self) -> dict:
@@ -207,8 +259,9 @@ def load(path: str | Path | None = None) -> Config:
             user_data = yaml.safe_load(fh) or {}
         data = _deep_merge(data, user_data)
 
-    # Allow environment variable to override API key
-    openai_key_env = data["openai"].get("api_key_env", "OPENAI_API_KEY")
+    # Allow environment variable to override API key (local servers may not
+    # need one; only look it up when api_key_env is explicitly set).
+    openai_key_env = data["openai"].get("api_key_env", "")
     if openai_key_env and os.environ.get(openai_key_env):
         data["openai"]["api_key"] = os.environ[openai_key_env]
     else:

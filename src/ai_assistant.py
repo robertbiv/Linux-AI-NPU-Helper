@@ -5,9 +5,17 @@ Supported backends
 - **ollama**  – Local Ollama server (recommended; supports llava and other
   vision models out of the box).  Uses the ``/api/chat`` endpoint so
   conversation history is passed natively.
-- **openai**  – OpenAI-compatible REST API (gpt-4o or any vision endpoint).
-  Passes the full ``messages`` array so multi-turn conversations work.
+- **openai**  – *Local* OpenAI-compatible REST API (LM Studio, llama.cpp,
+  etc.).  **External cloud endpoints are blocked by default.**
 - **npu**     – AMD Ryzen AI ONNX model running on the NPU / iGPU.
+
+Privacy & security
+------------------
+By default (``network.allow_external: false``) every backend URL is validated
+before each request.  Only ``localhost``, ``127.x.x.x``, ``::1``, and RFC-1918
+private-network addresses are accepted.  Any attempt to configure an external
+endpoint raises :class:`ExternalNetworkBlockedError` at request time so the
+check cannot be bypassed by a bad config file without explicitly opting in.
 
 Backend resource efficiency
 ---------------------------
@@ -23,14 +31,49 @@ Backend resource efficiency
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import logging
 from typing import TYPE_CHECKING, Generator, Iterator
+from urllib.parse import urlparse
 
 if TYPE_CHECKING:
     from src.conversation import ConversationHistory
 
 logger = logging.getLogger(__name__)
+
+
+# ── Network guard ─────────────────────────────────────────────────────────────
+
+class ExternalNetworkBlockedError(RuntimeError):
+    """Raised when a request to an external host is attempted while
+    ``network.allow_external`` is ``False``."""
+
+
+def _is_local_url(url: str) -> bool:
+    """Return True if *url* resolves to a loopback or RFC-1918 private address."""
+    host = urlparse(url).hostname or ""
+    if host in ("localhost", "::1"):
+        return True
+    try:
+        addr = ipaddress.ip_address(host)
+        return addr.is_loopback or addr.is_private
+    except ValueError:
+        # Not a bare IP — treat as external (could be a hostname)
+        return False
+
+
+def _assert_local(url: str, allow_external: bool) -> None:
+    """Raise :class:`ExternalNetworkBlockedError` if *url* is external and
+    external traffic is not allowed."""
+    if allow_external:
+        return
+    if not _is_local_url(url):
+        raise ExternalNetworkBlockedError(
+            f"Blocked attempt to contact external host: {url!r}\n"
+            "All AI processing must stay local (network.allow_external is false).\n"
+            "Point your backend URL at localhost or a private-network address."
+        )
 
 
 class AIAssistant:
@@ -163,6 +206,9 @@ class AIAssistant:
         url = f"{base_url}/api/chat"
         logger.debug("Sending request to Ollama at %s (model=%s)", url, model)
 
+        # Privacy guard: block external hosts unless explicitly permitted
+        _assert_local(url, self._config.network.get("allow_external", False))
+
         # Backend resource efficiency: close the TCP socket after this request
         headers = {"Connection": "close"}
 
@@ -256,6 +302,8 @@ class AIAssistant:
             ) from exc
 
         url = f"{base_url}/chat/completions"
+        # Privacy guard: block external hosts unless explicitly permitted
+        _assert_local(url, self._config.network.get("allow_external", False))
         # Backend resource efficiency: close socket after response
         headers: dict[str, str] = {
             "Authorization": f"Bearer {api_key}",
