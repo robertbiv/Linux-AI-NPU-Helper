@@ -160,6 +160,26 @@ class TestCheckSystem:
         for key in ("status", "python_version", "app_version", "is_immutable"):
             assert key in r
 
+    @patch("src.os_detector.detect")
+    def test_shell_detection_exception_handled(self, mock_os_detect):
+        # Prevent OS detection from failing and changing the status to WARN
+        mock_info = MagicMock()
+        mock_info.name = "TestOS"
+        mock_info.version = "1.0"
+        mock_info.id = "test"
+        mock_info.package_manager = "apt"
+        mock_info.desktop_environment = "gnome"
+        mock_info.kernel = "test-kernel"
+        mock_info.architecture = "x86_64"
+        mock_info.is_immutable = False
+        mock_os_detect.return_value = mock_info
+
+        with patch("src.shell_detector.detect", side_effect=Exception("Mock shell error")):
+            r = DiagnosticReporter(_make_config()).check_system()
+
+        assert r["shell"] == ""
+        assert r["status"] == STATUS_OK
+
 
 class TestCheckDependencies:
     def test_returns_list(self):
