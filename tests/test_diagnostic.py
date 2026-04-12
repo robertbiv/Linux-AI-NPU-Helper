@@ -122,6 +122,18 @@ class TestCheckSecurity:
         rate_check = next(c for c in r["checks"] if "rate" in c["label"].lower())
         assert rate_check["status"] == STATUS_OK
 
+    def test_file_stat_oserror(self):
+        cfg = _make_config(allow_external=False)
+        with patch("pathlib.Path.exists", return_value=True):
+            with patch("pathlib.Path.stat", side_effect=OSError("mock error")):
+                r = DiagnosticReporter(cfg).check_security()
+
+        assert r["issues"] > 0
+
+        # Check if at least one file check has STATUS_WARN with the expected detail
+        fail_checks = [c for c in r["checks"] if c["status"] == STATUS_WARN and "mock error" in c.get("detail", "")]
+        assert len(fail_checks) > 0
+
 
 class TestCheckNetwork:
     def test_local_url_ok(self):

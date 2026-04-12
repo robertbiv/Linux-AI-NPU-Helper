@@ -232,8 +232,8 @@ class DiagnosticReporter:
                     checks.append({"label": label, "status": STATUS_OK,
                                    "detail": f"Mode {oct(mode)} — owner only."})
             except OSError as exc:
-                checks.append({"label": label, "status": STATUS_FAIL,
-                                "detail": str(exc)})
+                checks.append({"label": label, "status": STATUS_WARN,
+                               "detail": f"Could not read permissions: {exc}"})
                 issues += 1
 
         # Check settings file
