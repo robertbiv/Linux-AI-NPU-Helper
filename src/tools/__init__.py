@@ -45,6 +45,8 @@ def build_default_registry(tools_config: dict | None = None) -> ToolRegistry:
     from src.tools.system_control  import SystemControlTool
     from src.tools.app             import AppTool
     from src.tools.system_info     import SystemInfoTool
+    from src.tools.installed_apps  import InstalledAppsTool
+    from src.tools.process_info    import ProcessInfoTool
 
     cfg = tools_config or {}
     global_unload: bool = bool(cfg.get("unload_after_use", False))
@@ -76,6 +78,14 @@ def build_default_registry(tools_config: dict | None = None) -> ToolRegistry:
     si_cfg         = cfg.get("system_info", {})
     si_enabled     = bool(si_cfg.get("enabled", True))
     si_unload      = bool(si_cfg.get("unload_after_use", global_unload))
+
+    ia_cfg         = cfg.get("installed_apps", {})
+    ia_enabled     = bool(ia_cfg.get("enabled", True))
+    ia_unload      = bool(ia_cfg.get("unload_after_use", global_unload))
+
+    pi_cfg         = cfg.get("process_info", {})
+    pi_enabled     = bool(pi_cfg.get("enabled", True))
+    pi_unload      = bool(pi_cfg.get("unload_after_use", global_unload))
 
     default_approval = ["web_search", "web_fetch", "system_control", "app"]
     permissions = ToolPermissions(
@@ -159,5 +169,21 @@ def build_default_registry(tools_config: dict | None = None) -> ToolRegistry:
             schema=SystemInfoTool.parameters_schema,
             factory=SystemInfoTool,
             unload_after_use=si_unload,
+        )
+    if ia_enabled:
+        registry.register_lazy(
+            name=InstalledAppsTool.name,
+            description=InstalledAppsTool.description,
+            schema=InstalledAppsTool.parameters_schema,
+            factory=InstalledAppsTool,
+            unload_after_use=ia_unload,
+        )
+    if pi_enabled:
+        registry.register_lazy(
+            name=ProcessInfoTool.name,
+            description=ProcessInfoTool.description,
+            schema=ProcessInfoTool.parameters_schema,
+            factory=ProcessInfoTool,
+            unload_after_use=pi_unload,
         )
     return registry
