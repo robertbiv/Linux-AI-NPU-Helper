@@ -211,12 +211,32 @@ class NPUManager:
 
     # ── Session management ────────────────────────────────────────────────────
 
-    def load_model(self) -> NPUSession | None:
+    def load_model(
+        self,
+        progress_callback=None,  # Callable[[str], None] | None
+    ) -> "NPUSession | None":
         """Load the configured ONNX model onto the NPU (or CPU fallback).
 
-        Returns *None* if no model path is configured.
+        When ``npu.model_path`` is ``"auto"`` (the default), the bundled
+        Phi-3-mini-4k-instruct ONNX model is used.  If it is not yet installed
+        and ``npu.auto_install_default_model`` is ``True``, it is downloaded
+        automatically from Hugging Face on first call.
+
+        Parameters
+        ----------
+        progress_callback:
+            Optional callable receiving download-progress strings.
+
+        Returns
+        -------
+        NPUSession | None
+            Loaded session, or ``None`` if no model is available.
         """
         model_path = self._config.get("model_path", "")
+
+        if model_path == "auto":
+            model_path = self._resolve_auto_model(progress_callback)
+
         if not model_path:
             logger.debug("No NPU model_path configured; skipping model load.")
             return None
@@ -232,14 +252,57 @@ class NPUManager:
             )
         return self._session
 
-    def run_inference(self, feeds: dict[str, Any]) -> list[Any]:
+    def _resolve_auto_model(self, progress_callback=None) -> str:
+        """Resolve the ``"auto"`` model path to a real ONNX file path.
+
+        Installs the bundled default Phi-3-mini model if not already present
+        and ``auto_install_default_model`` is enabled in config.
+
+        Returns an empty string if the model cannot be resolved.
+        """
+        from src.npu_model_installer import NPUModelInstaller, InstallError
+
+        installer = NPUModelInstaller()
+        if installer.is_installed():
+            return str(installer.model_path())
+
+        if not self._config.get("auto_install_default_model", True):
+            logger.info(
+                "Default NPU model not installed and auto-install is disabled. "
+                "Set npu.model_path to an ONNX file path, or enable "
+                "npu.auto_install_default_model."
+            )
+            return ""
+
+        logger.info(
+            "Default NPU model (Phi-3-mini ONNX) not found; "
+            "downloading automatically…"
+        )
+        try:
+            path = installer.install(
+                progress_callback=progress_callback,
+                allow_external=True,
+            )
+            return str(path)
+        except InstallError as exc:
+            logger.warning("Auto-install of default NPU model failed: %s", exc)
+            return ""
+
+    def run_inference(self, feeds: dict[str, Any], progress_callback=None) -> list[Any]:
         """Load the model, run inference, and immediately unload if configured.
 
         When ``resources.unload_model_after_inference`` is ``True`` (default)
         the ONNX session is destroyed after the call so NPU/GPU memory is
         released straight away.
+
+        Parameters
+        ----------
+        feeds:
+            Dict mapping input names to numpy arrays.
+        progress_callback:
+            Optional callable for download-progress messages on first run.
         """
-        session = self.load_model()
+        session = self.load_model(progress_callback=progress_callback)
         if session is None:
             raise RuntimeError("No NPU model_path configured; cannot run inference.")
         try:
@@ -248,10 +311,16 @@ class NPUManager:
             if self._resource_config.get("unload_model_after_inference", True):
                 self.unload()
 
-    def get_session(self) -> NPUSession | None:
-        """Return the cached session, loading it if necessary."""
+    def get_session(self, progress_callback=None) -> "NPUSession | None":
+        """Return the cached session, loading it if necessary.
+
+        Parameters
+        ----------
+        progress_callback:
+            Optional callable for download-progress messages on first run.
+        """
         if self._session is None:
-            return self.load_model()
+            return self.load_model(progress_callback=progress_callback)
         return self._session
 
     def unload(self) -> None:

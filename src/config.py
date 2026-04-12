@@ -65,13 +65,27 @@ _DEFAULTS: dict[str, Any] = {
     },
     # ── AMD NPU ───────────────────────────────────────────────────────────────
     "npu": {
-        # Path to a pre-compiled ONNX vision model for the AMD Ryzen AI NPU.
-        # When empty the assistant falls back to the configured backend above.
-        "model_path": "",
+        # Path to a pre-compiled ONNX model for the AMD Ryzen AI NPU.
+        #
+        # DEFAULT BUNDLED MODEL: Phi-3-mini-4k-instruct (INT4, ~2.3 GB)
+        # ---------------------------------------------------------------
+        # When this is "auto" (the default), the application uses the bundled
+        # Phi-3-mini-4k-instruct ONNX model.  On first launch it is downloaded
+        # automatically from:
+        #   https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx
+        # and installed to:
+        #   ~/.local/share/linux-ai-npu-helper/models/phi-3-mini-4k-instruct-onnx/
+        #
+        # Set to an absolute path to use a different ONNX model, e.g.:
+        #   model_path: "/path/to/my-model.onnx"
+        # Set to "" to disable the NPU backend entirely.
+        "model_path": "auto",
         # Execution provider preference order (VitisAI first, then fallbacks)
         "providers": ["VitisAIExecutionProvider", "CPUExecutionProvider"],
         # Ryzen AI config JSON expected by VitisAI EP
         "vitisai_config": "/opt/xilinx/xrt/share/vitis_ai_library/models/vitisai_ep_json_config.json",
+        # Auto-download the bundled default model on first NPU use
+        "auto_install_default_model": True,
     },
     # ── Screen capture ────────────────────────────────────────────────────────
     "capture": {
