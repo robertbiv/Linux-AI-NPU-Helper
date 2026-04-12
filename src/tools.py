@@ -353,6 +353,7 @@ class SearchInFilesTool(Tool):
 
     def _detect_backend(self) -> str:
         if self._backend is None:
+            import shutil  # lazy — only when tool actually runs
             self._backend = "rg" if shutil.which("rg") else "grep"
             logger.debug("SearchInFilesTool backend: %s", self._backend)
         return self._backend
@@ -412,6 +413,7 @@ class SearchInFilesTool(Tool):
         case_sensitive: bool,
         limit: int,
     ) -> list[SearchResult]:
+        import subprocess  # lazy
         cmd = ["rg", "--line-number", "--no-heading", "--max-count", "1",
                "--max-filesize", "10M"]
         if not case_sensitive:
@@ -419,7 +421,6 @@ class SearchInFilesTool(Tool):
         if file_pattern:
             cmd += ["--glob", file_pattern]
         cmd += ["--", query, str(search_path)]
-
         proc = subprocess.run(
             cmd, capture_output=True, text=True, timeout=20
         )
@@ -433,6 +434,7 @@ class SearchInFilesTool(Tool):
         case_sensitive: bool,
         limit: int,
     ) -> list[SearchResult]:
+        import subprocess  # lazy
         cmd = ["grep", "-r", "-n", "--binary-files=without-match",
                "--max-count=1"]
         if not case_sensitive:
@@ -440,7 +442,6 @@ class SearchInFilesTool(Tool):
         if file_pattern:
             cmd += ["--include", file_pattern]
         cmd += ["--", query, str(search_path)]
-
         try:
             proc = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=30
@@ -1133,6 +1134,320 @@ class ManPageTool(Tool):
         )
 
 
+# ── SystemControlTool ─────────────────────────────────────────────────────────
+
+# Maps resource → (get_cmds, on_cmds, off_cmds, toggle_cmds)
+# Each entry is a list of candidate command lists tried in order until one
+# succeeds.  Commands are chosen by detecting which executables are on PATH.
+#
+# Backends tried in preference order:
+#   audio/microphone : WirePlumber (wpctl) → PulseAudio (pactl) → ALSA (amixer)
+#   bluetooth        : bluetoothctl → rfkill
+#   wifi             : nmcli → rfkill
+#   power_mode       : power-profiles-daemon (powerprofilesctl) → TuneD (tuned-adm)
+#   brightness       : brightnessctl → xbacklight → light
+
+_RESOURCE_ACTIONS: dict[str, dict[str, list[list[str]]]] = {
+    "audio": {
+        "get": [
+            ["wpctl",  "get-volume", "@DEFAULT_AUDIO_SINK@"],
+            ["pactl",  "get-sink-mute", "@DEFAULT_SINK@"],
+            ["amixer", "get", "Master"],
+        ],
+        "mute": [
+            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SINK@", "1"],
+            ["pactl",  "set-sink-mute", "@DEFAULT_SINK@", "1"],
+            ["amixer", "sset", "Master", "mute"],
+        ],
+        "unmute": [
+            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SINK@", "0"],
+            ["pactl",  "set-sink-mute", "@DEFAULT_SINK@", "0"],
+            ["amixer", "sset", "Master", "unmute"],
+        ],
+        "toggle": [
+            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],
+            ["pactl",  "set-sink-mute", "@DEFAULT_SINK@", "toggle"],
+            ["amixer", "sset", "Master", "toggle"],
+        ],
+    },
+    "microphone": {
+        "get": [
+            ["wpctl",  "get-volume", "@DEFAULT_AUDIO_SOURCE@"],
+            ["pactl",  "get-source-mute", "@DEFAULT_SOURCE@"],
+            ["amixer", "get", "Capture"],
+        ],
+        "mute": [
+            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SOURCE@", "1"],
+            ["pactl",  "set-source-mute", "@DEFAULT_SOURCE@", "1"],
+            ["amixer", "sset", "Capture", "nocap"],
+        ],
+        "unmute": [
+            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SOURCE@", "0"],
+            ["pactl",  "set-source-mute", "@DEFAULT_SOURCE@", "0"],
+            ["amixer", "sset", "Capture", "cap"],
+        ],
+        "toggle": [
+            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"],
+            ["pactl",  "set-source-mute", "@DEFAULT_SOURCE@", "toggle"],
+            ["amixer", "sset", "Capture", "toggle"],
+        ],
+    },
+    "bluetooth": {
+        "get": [
+            ["bluetoothctl", "show"],
+            ["rfkill", "list", "bluetooth"],
+        ],
+        "on": [
+            ["bluetoothctl", "power", "on"],
+            ["rfkill", "unblock", "bluetooth"],
+        ],
+        "off": [
+            ["bluetoothctl", "power", "off"],
+            ["rfkill", "block", "bluetooth"],
+        ],
+    },
+    "wifi": {
+        "get": [
+            ["nmcli", "radio", "wifi"],
+            ["rfkill", "list", "wifi"],
+        ],
+        "on": [
+            ["nmcli", "radio", "wifi", "on"],
+            ["rfkill", "unblock", "wifi"],
+        ],
+        "off": [
+            ["nmcli", "radio", "wifi", "off"],
+            ["rfkill", "block", "wifi"],
+        ],
+    },
+    "power_mode": {
+        "get": [
+            ["powerprofilesctl", "get"],
+            ["tuned-adm", "active"],
+        ],
+        "performance": [
+            ["powerprofilesctl", "set", "performance"],
+            ["tuned-adm", "profile", "throughput-performance"],
+        ],
+        "balanced": [
+            ["powerprofilesctl", "set", "balanced"],
+            ["tuned-adm", "profile", "balanced"],
+        ],
+        "power-saver": [
+            ["powerprofilesctl", "set", "power-saver"],
+            ["tuned-adm", "profile", "powersave"],
+        ],
+    },
+    "brightness": {
+        "get": [
+            ["brightnessctl", "get"],
+            ["xbacklight", "-get"],
+            ["light", "-G"],
+        ],
+    },
+}
+
+# Valid actions for each resource
+_VALID_ACTIONS: dict[str, list[str]] = {
+    "audio":       ["get", "mute", "unmute", "toggle"],
+    "microphone":  ["get", "mute", "unmute", "toggle"],
+    "bluetooth":   ["get", "on", "off"],
+    "wifi":        ["get", "on", "off"],
+    "power_mode":  ["get", "performance", "balanced", "power-saver"],
+    "brightness":  ["get", "set"],
+}
+
+
+def _run_first_available(candidates: list[list[str]]) -> "tuple[bool, str]":
+    """Try each command list in *candidates* until one succeeds.
+
+    Returns ``(success, output)`` where ``output`` is stdout on success or the
+    last error message on failure.
+    """
+    import shutil    # lazy
+    import subprocess  # lazy
+
+    last_err = "No suitable backend found."
+    for cmd in candidates:
+        if not shutil.which(cmd[0]):
+            continue
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=8,
+            )
+            if proc.returncode == 0:
+                return True, proc.stdout.strip()
+            last_err = proc.stderr.strip() or proc.stdout.strip()
+        except subprocess.TimeoutExpired:
+            last_err = f"{cmd[0]} timed out."
+        except Exception as exc:  # noqa: BLE001
+            last_err = str(exc)
+    return False, last_err
+
+
+class SystemControlTool(Tool):
+    """Control system resources: audio, microphone, Bluetooth, Wi-Fi,
+    power mode, and display brightness.
+
+    Backend detection
+    -----------------
+    For each resource the tool tries available backends in order:
+
+    - **Audio / Microphone**: WirePlumber (``wpctl``) → PulseAudio (``pactl``)
+      → ALSA (``amixer``)
+    - **Bluetooth**: ``bluetoothctl`` → ``rfkill``
+    - **Wi-Fi**: ``nmcli`` (NetworkManager) → ``rfkill``
+    - **Power mode**: ``powerprofilesctl`` (power-profiles-daemon) →
+      ``tuned-adm`` (TuneD)
+    - **Brightness**: ``brightnessctl`` → ``xbacklight`` → ``light``
+
+    The first backend whose executable is on ``$PATH`` is used.  All
+    subprocess imports and ``shutil.which`` checks are deferred to the
+    first ``run()`` call so loading this module is free.
+
+    Safety
+    ------
+    This tool is in ``requires_approval`` by default.  The user sees exactly
+    which resource and action the AI is requesting before anything changes.
+    Read-only ``get`` queries skip approval.
+    """
+
+    name = "system_control"
+    description = (
+        "Control system resources: toggle/query audio, microphone, Bluetooth, "
+        "Wi-Fi, power mode, and brightness. "
+        "Uses native Linux backends (wpctl/pactl, bluetoothctl, nmcli, etc.)."
+    )
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "resource": {
+                "type": "string",
+                "enum": list(_VALID_ACTIONS),
+                "description": (
+                    "The system resource to control. One of: "
+                    + ", ".join(f"'{k}'" for k in _VALID_ACTIONS) + "."
+                ),
+            },
+            "action": {
+                "type": "string",
+                "description": (
+                    "Action to perform. Depends on resource:\n"
+                    "  audio/microphone: get | mute | unmute | toggle\n"
+                    "  bluetooth/wifi:   get | on | off\n"
+                    "  power_mode:       get | performance | balanced | power-saver\n"
+                    "  brightness:       get | set (requires value)\n"
+                ),
+            },
+            "value": {
+                "type": "string",
+                "description": (
+                    "Value for actions that need one.\n"
+                    "  brightness set: percentage string, e.g. '50%' or '50'.\n"
+                    "  audio/microphone set-volume: e.g. '75%'."
+                ),
+            },
+        },
+        "required": ["resource", "action"],
+    }
+
+    def run(self, args: dict[str, Any]) -> ToolResult:
+        resource: str = args.get("resource", "").lower().strip()
+        action: str = args.get("action", "").lower().strip()
+        value: str = args.get("value", "").strip()
+
+        if resource not in _VALID_ACTIONS:
+            return ToolResult(
+                tool_name=self.name,
+                error=(
+                    f"Unknown resource '{resource}'. "
+                    f"Valid resources: {', '.join(_VALID_ACTIONS)}."
+                ),
+            )
+
+        valid = _VALID_ACTIONS[resource]
+        if action not in valid:
+            return ToolResult(
+                tool_name=self.name,
+                error=(
+                    f"Invalid action '{action}' for '{resource}'. "
+                    f"Valid actions: {', '.join(valid)}."
+                ),
+            )
+
+        # ── Special case: brightness set ──────────────────────────────────────
+        if resource == "brightness" and action == "set":
+            return self._set_brightness(value)
+
+        # ── Look up backend commands ───────────────────────────────────────────
+        resource_map = _RESOURCE_ACTIONS.get(resource, {})
+        candidates = resource_map.get(action)
+        if not candidates:
+            return ToolResult(
+                tool_name=self.name,
+                error=f"No backend commands defined for {resource}/{action}.",
+            )
+
+        success, output = _run_first_available(candidates)
+        if not success:
+            return ToolResult(
+                tool_name=self.name,
+                error=(
+                    f"Could not {action} {resource}. "
+                    f"No supported backend found or command failed: {output}"
+                ),
+            )
+
+        snippet = f"{resource} {action}: {output}" if output else f"{resource} {action}: OK"
+        return ToolResult(
+            tool_name=self.name,
+            results=[SearchResult(path=f"system:{resource}", snippet=snippet)],
+        )
+
+    def _set_brightness(self, value: str) -> ToolResult:
+        """Handle brightness set with a percentage or absolute value."""
+        import shutil    # lazy
+        import subprocess  # lazy
+
+        if not value:
+            return ToolResult(
+                tool_name=self.name,
+                error="brightness set requires a 'value', e.g. '50%'.",
+            )
+
+        # Normalise to percentage string for tools that accept it
+        pct = value if value.endswith("%") else f"{value}%"
+
+        candidates = [
+            ["brightnessctl", "set", pct],
+            ["xbacklight", "-set", value.rstrip("%")],
+            ["light", "-S", value.rstrip("%")],
+        ]
+        success, output = _run_first_available(candidates)
+        if not success:
+            return ToolResult(
+                tool_name=self.name,
+                error=f"Could not set brightness to {value}: {output}",
+            )
+        return ToolResult(
+            tool_name=self.name,
+            results=[SearchResult(
+                path="system:brightness",
+                snippet=f"Brightness set to {value}.",
+            )],
+        )
+
+    def schema_text(self) -> str:
+        resources = ", ".join(_VALID_ACTIONS)
+        return (
+            f"  {self.name}(resource: {resources}; action: string; value?: string)"
+            f" — {self.description}"
+        )
+
+
 # ── Tool permissions ──────────────────────────────────────────────────────────
 
 
@@ -1258,93 +1573,270 @@ def _terminal_approve(tool_name: str, args: dict) -> bool:
         return False
 
 
+# ── ToolDescriptor ────────────────────────────────────────────────────────────
+
+
+@dataclass
+class ToolDescriptor:
+    """Metadata + factory for a single tool — the instance is created lazily.
+
+    The descriptor holds everything the :class:`ToolRegistry` needs to:
+    - Advertise the tool to the AI (name, description, schema) **without**
+      instantiating it.
+    - Create the tool instance on first use via *factory*.
+    - Release the instance after use when *unload_after_use* is ``True``.
+
+    Lifecycle
+    ---------
+    .. code-block:: text
+
+        UNLOADED  ──(get_instance)──►  LOADED  ──(release)──►  UNLOADED
+                                          │
+                                     run() called here
+
+    The transition back to UNLOADED is triggered automatically by
+    :meth:`ToolRegistry.dispatch` when *unload_after_use* is ``True``, or
+    manually via :meth:`ToolRegistry.unload` / :meth:`ToolRegistry.unload_all`.
+    """
+
+    name: str
+    description: str
+    parameters_schema: dict
+    factory: Callable[[], Tool]
+    unload_after_use: bool = False
+
+    # Private — managed by get_instance() / release()
+    _instance: Tool | None = field(default=None, init=False, repr=False)
+
+    # ── Instance lifecycle ────────────────────────────────────────────────────
+
+    def get_instance(self) -> Tool:
+        """Return the live tool instance, creating it on first call."""
+        if self._instance is None:
+            logger.debug("Lazy-loading tool: %s", self.name)
+            self._instance = self.factory()
+        return self._instance
+
+    def release(self) -> None:
+        """Release the tool instance so it can be garbage-collected."""
+        if self._instance is not None:
+            logger.debug("Unloading tool: %s", self.name)
+            self._instance = None
+
+    @property
+    def is_loaded(self) -> bool:
+        """``True`` if the tool instance is currently in memory."""
+        return self._instance is not None
+
+    # ── System-prompt metadata ────────────────────────────────────────────────
+
+    def schema_text(self) -> str:
+        """Return a compact one-line description for the AI system prompt.
+
+        Reads only from the descriptor fields — never touches the instance.
+        """
+        props = self.parameters_schema.get("properties", {})
+        params = ", ".join(
+            f"{k}: {v.get('type', 'string')}"
+            for k, v in props.items()
+        )
+        return f"  {self.name}({params}) — {self.description}"
+
+
 # ── ToolRegistry ──────────────────────────────────────────────────────────────
 
 
 class ToolRegistry:
     """Registry of all available tools.
 
-    The registry:
-    - Stores tool instances by name.
-    - Enforces allow / disallow / approval rules via :class:`ToolPermissions`.
-    - Generates a system-prompt snippet that only advertises tools the AI is
-      permitted to call.
-    - Dispatches ``[TOOL: name {...}]`` call markers to the right tool.
+    Tools are stored as :class:`ToolDescriptor` objects and instantiated
+    **lazily** — only when ``dispatch()`` actually calls them.  After each
+    call the instance can optionally be released (unloaded) so it is
+    garbage-collected, keeping memory usage at a minimum.
+
+    Key properties
+    --------------
+    - **Zero startup cost**: registering tools is free; nothing is imported
+      or constructed until the first ``dispatch()`` for that tool.
+    - **Selective unloading**: set ``unload_after_use=True`` per tool (or
+      globally via config) to release instances between calls.
+    - **System-prompt generation** uses descriptor metadata only — no tool
+      is ever instantiated just to build the prompt.
+    - **Permission enforcement** via :class:`ToolPermissions` happens before
+      the tool instance is even loaded, so blocked tools cost nothing.
     """
 
-    # Pattern that the AI uses to call a tool in its response.
-    # Example: [TOOL: find_files {"pattern": "*.pdf", "path": "~/Documents"}]
-    _CALL_RE = re.compile(
-        r"\[TOOL:\s*(\w+)\s*(\{.*?\})\]",
-        re.DOTALL,
-    )
+    _CALL_RE = re.compile(r"\[TOOL:\s*(\w+)\s*(\{.*?\})\]", re.DOTALL)
 
-    def __init__(self, permissions: ToolPermissions | None = None) -> None:
-        self._tools: dict[str, Tool] = {}
+    def __init__(
+        self,
+        permissions: ToolPermissions | None = None,
+        unload_after_use: bool = False,
+    ) -> None:
+        self._descriptors: dict[str, ToolDescriptor] = {}
         self._permissions = permissions or ToolPermissions()
+        self._default_unload = unload_after_use
+
+    # ── Registration ──────────────────────────────────────────────────────────
+
+    def register_lazy(
+        self,
+        name: str,
+        description: str,
+        schema: dict,
+        factory: Callable[[], Tool],
+        *,
+        unload_after_use: bool | None = None,
+    ) -> None:
+        """Register a tool using a factory function (primary API).
+
+        The factory is only called on the first ``dispatch()`` for this tool.
+        Subsequent calls reuse the cached instance unless *unload_after_use*
+        is ``True``, in which case the instance is released after every call.
+
+        Parameters
+        ----------
+        name:
+            Tool name used in ``[TOOL: name {...}]`` markers.
+        description:
+            One-line description shown to the AI in the system prompt.
+        schema:
+            JSON Schema dict for the tool's parameters.
+        factory:
+            Zero-argument callable that returns a fresh ``Tool`` instance.
+        unload_after_use:
+            Override the registry's default unload policy for this tool.
+            ``None`` → inherit the registry default.
+        """
+        unload = self._default_unload if unload_after_use is None else unload_after_use
+        self._descriptors[name] = ToolDescriptor(
+            name=name,
+            description=description,
+            parameters_schema=schema,
+            factory=factory,
+            unload_after_use=unload,
+        )
+        logger.debug("Registered tool (lazy): %s  unload_after_use=%s", name, unload)
 
     def register(self, tool: Tool) -> None:
-        """Add a tool to the registry."""
-        self._tools[tool.name] = tool
-        logger.debug("Registered tool: %s", tool.name)
+        """Register an already-constructed tool instance (convenience API).
+
+        The instance is wrapped in a descriptor so it participates in the
+        same lazy-load / unload lifecycle.  The instance is considered
+        pre-loaded (``is_loaded == True``) immediately after registration.
+        """
+        desc = ToolDescriptor(
+            name=tool.name,
+            description=tool.description,
+            parameters_schema=tool.parameters_schema,
+            factory=lambda t=tool: t,
+            unload_after_use=self._default_unload,
+        )
+        desc._instance = tool  # already loaded
+        self._descriptors[tool.name] = desc
+        logger.debug("Registered tool (eager): %s", tool.name)
+
+    # ── Inspection ────────────────────────────────────────────────────────────
 
     def get(self, name: str) -> Tool | None:
-        return self._tools.get(name)
+        """Return the live instance for *name* if it is currently loaded."""
+        desc = self._descriptors.get(name)
+        return desc._instance if desc else None
+
+    def get_descriptor(self, name: str) -> ToolDescriptor | None:
+        """Return the :class:`ToolDescriptor` for *name*."""
+        return self._descriptors.get(name)
 
     def names(self) -> list[str]:
-        return list(self._tools.keys())
+        """Return all registered tool names."""
+        return list(self._descriptors)
+
+    def loaded_names(self) -> list[str]:
+        """Return names of tools whose instances are currently in memory."""
+        return [n for n, d in self._descriptors.items() if d.is_loaded]
+
+    # ── Load / unload ─────────────────────────────────────────────────────────
+
+    def unload(self, name: str) -> bool:
+        """Release the instance for tool *name*.
+
+        Returns ``True`` if the tool was loaded and is now released,
+        ``False`` if the tool is unknown or was already unloaded.
+        """
+        desc = self._descriptors.get(name)
+        if desc and desc.is_loaded:
+            desc.release()
+            return True
+        return False
+
+    def unload_all(self) -> list[str]:
+        """Release all currently loaded tool instances.
+
+        Returns the list of tool names that were unloaded.
+        """
+        released = []
+        for name, desc in self._descriptors.items():
+            if desc.is_loaded:
+                desc.release()
+                released.append(name)
+        if released:
+            logger.debug("Unloaded %d tool(s): %s", len(released), released)
+        return released
 
     # ── System-prompt generation ──────────────────────────────────────────────
 
     def system_prompt_section(self) -> str:
-        """Return the block of text to inject into the system prompt.
+        """Return the block injected into the AI system prompt.
 
-        Only advertises tools the AI is permitted to call (respects the
-        allow/disallow lists so the model doesn't attempt blocked tools).
+        Only lists tools the AI is permitted to call.
+        **No tool instance is created** — reads descriptor metadata only.
         """
-        visible = self._permissions.visible_names(list(self._tools.keys()))
+        visible = self._permissions.visible_names(list(self._descriptors))
         if not visible:
             return ""
 
         lines = [
             "## Available tools",
             "",
-            "You have access to the following tools. Call a tool by outputting a",
-            "line in this exact format (valid JSON arguments, all on one line):",
+            "You have access to the following tools. When you need to use one,",
+            "output exactly one line in this format (valid JSON, on a single line):",
             "",
-            "  [TOOL: tool_name {\"arg\": \"value\"}]",
+            '  [TOOL: tool_name {"arg": "value"}]',
             "",
-            "After the tool result is shown to you, continue your response",
-            "using that information. Only call one tool per response turn.",
+            "Wait for the tool result before continuing your response.",
+            "Only call one tool per response turn.",
             "",
             "Tools:",
         ]
         for name in visible:
-            lines.append(self._tools[name].schema_text())
+            lines.append(self._descriptors[name].schema_text())
         lines.append("")
         return "\n".join(lines)
 
     # ── Dispatch ──────────────────────────────────────────────────────────────
 
-    def dispatch(self, call_text: str) -> "ToolResult | None":
-        """Parse and execute a single ``[TOOL: ...]`` call string.
+    def dispatch(self, call_text: str) -> ToolResult | None:
+        """Parse and execute a ``[TOOL: name {...}]`` call from the AI.
 
-        Enforces all three permission tiers before running the tool:
-
-        1. **Disallowed** — returns an error result immediately.
-        2. **Not in allowed list** — returns an error result immediately.
-        3. **Requires approval** — calls the approval callback; returns an
-           error result if the user declines.
+        Lifecycle per call
+        ------------------
+        1. Parse *call_text* — return ``None`` if no marker found.
+        2. Permission check (allow/disallow/approval) — return error result
+           if blocked.  **No instance is created for blocked tools.**
+        3. Lazily load the tool instance via ``descriptor.get_instance()``.
+        4. Run ``tool.run(args)`` and collect the result.
+        5. If ``descriptor.unload_after_use`` is ``True``, release the
+           instance immediately so memory is reclaimed.
 
         Parameters
         ----------
         call_text:
-            The full ``[TOOL: name {...}]`` string as emitted by the AI.
+            Text containing a ``[TOOL: name {...}]`` marker.
 
         Returns
         -------
         ToolResult | None
-            The result, or ``None`` if the string doesn't match the format.
+            Result of the tool call, or ``None`` if no marker was found.
         """
         m = self._CALL_RE.search(call_text)
         if not m:
@@ -1353,16 +1845,20 @@ class ToolRegistry:
         tool_name = m.group(1).strip()
         args_str = m.group(2).strip()
 
-        # Unknown tool check (before permission check so the error is accurate)
-        tool = self._tools.get(tool_name)
-        if tool is None:
+        # 1. Unknown tool — report visible tools, not all tools
+        desc = self._descriptors.get(tool_name)
+        if desc is None:
             logger.warning("AI called unknown tool %r", tool_name)
+            visible = self._permissions.visible_names(list(self._descriptors))
             return ToolResult(
                 tool_name=tool_name,
-                error=f"Unknown tool: {tool_name!r}. "
-                      f"Available: {', '.join(self._permissions.visible_names(list(self._tools)))}",
+                error=(
+                    f"Unknown tool: '{tool_name}'. "
+                    f"Available: {', '.join(visible) or 'none'}."
+                ),
             )
 
+        # 2. Parse JSON args
         try:
             args = json.loads(args_str)
         except json.JSONDecodeError as exc:
@@ -1371,13 +1867,21 @@ class ToolRegistry:
                 error=f"Invalid tool arguments (not valid JSON): {exc}",
             )
 
-        # Permission gate — returns a ToolResult on failure, None on success
+        # 3. Permission gate — no instance created if blocked
         blocked = self._permissions.check(tool_name, args)
         if blocked is not None:
             return blocked
 
-        logger.info("Running tool %r with args %s", tool_name, args)
-        return tool.run(args)
+        # 4. Lazy-load and run
+        tool = desc.get_instance()
+        logger.info("Dispatching tool '%s' args=%s", tool_name, args)
+        result = tool.run(args)
+
+        # 5. Optional unload after use
+        if desc.unload_after_use:
+            desc.release()
+
+        return result
 
     def find_calls(self, text: str) -> list[str]:
         """Return all ``[TOOL: ...]`` substrings found in *text*."""
@@ -1387,35 +1891,41 @@ class ToolRegistry:
 # ── Factory ───────────────────────────────────────────────────────────────────
 
 def build_default_registry(tools_config: dict | None = None) -> ToolRegistry:
-    """Create and return a :class:`ToolRegistry` with all built-in tools.
+    """Create a :class:`ToolRegistry` with all built-in tools registered lazily.
+
+    No tool instance is created by this function — factories are stored and
+    called only when each tool is first dispatched.
 
     Parameters
     ----------
     tools_config:
         The ``tools`` section from the application config.  Recognised keys:
 
+        ``unload_after_use`` (bool)
+            Global default: release each tool instance after every call.
+            Default ``False`` (instances cached for speed).
         ``search_path`` (str)
-            Default root directory for file searches.  Defaults to ``~``.
+            Default root directory for file/content searches.
         ``blocked_paths`` (list[str])
             Paths the content-search tool will never read.
-        ``allowed`` (list[str])
-            Whitelist of tool names the AI may call.  Empty = all allowed.
-        ``disallowed`` (list[str])
-            Blacklist of tool names that are always blocked.
-        ``requires_approval`` (list[str])
-            Tools that need user confirmation before running.
-        ``web_search.engine`` (str)
-            Default search engine name (e.g. ``"duckduckgo"``).
-        ``web_search.engines`` (dict)
-            Additional or override engine URL templates.
+        ``allowed`` / ``disallowed`` / ``requires_approval`` (list[str])
+            Tool permission lists.
+        ``web_search.engine`` / ``web_search.engines``
+            Browser search engine configuration.
+        ``web_fetch.enabled`` (bool)
+            Enable the web-fetch tool (default ``False``).
         ``man_reader.enabled`` (bool)
-            Whether to register the ``read_man_page`` tool.  Default ``True``.
-        ``man_reader.max_chars`` (int)
-            Max characters per man-page result.  Default ``8000``.
-        ``man_reader.default_sections`` (list[str])
-            Man-page sections extracted by default.
+            Enable the man-page reader (default ``True``).
+        ``man_reader.max_chars`` / ``man_reader.default_sections``
+            Man-page reader tuning.
+        ``system_control.enabled`` (bool)
+            Enable the system-control tool (default ``True``).
+        ``system_control.unload_after_use`` (bool)
+            Per-tool unload override for system_control.
     """
     cfg = tools_config or {}
+    global_unload: bool = bool(cfg.get("unload_after_use", False))
+
     default_path = cfg.get("search_path", str(Path.home()))
     blocked_paths: list[str] = cfg.get("blocked_paths", [])
 
@@ -1423,32 +1933,98 @@ def build_default_registry(tools_config: dict | None = None) -> ToolRegistry:
     default_engine = web_cfg.get("engine", "duckduckgo")
     extra_engines: dict[str, str] = web_cfg.get("engines", {})
 
+    fetch_cfg = cfg.get("web_fetch", {})
+    fetch_enabled: bool = bool(fetch_cfg.get("enabled", False))
+
     man_cfg = cfg.get("man_reader", {})
-    man_enabled: bool = man_cfg.get("enabled", True)
+    man_enabled: bool = bool(man_cfg.get("enabled", True))
     man_max_chars: int = int(man_cfg.get("max_chars", 8_000))
-    man_default_sections: list[str] = man_cfg.get(
+    man_sections: list[str] = man_cfg.get(
         "default_sections", ["SYNOPSIS", "OPTIONS", "EXAMPLES"]
     )
+    man_unload: bool = bool(man_cfg.get("unload_after_use", global_unload))
 
+    sc_cfg = cfg.get("system_control", {})
+    sc_enabled: bool = bool(sc_cfg.get("enabled", True))
+    sc_unload: bool = bool(sc_cfg.get("unload_after_use", global_unload))
+
+    default_approval = ["web_search", "web_fetch", "system_control"]
     permissions = ToolPermissions(
         allowed=cfg.get("allowed", []),
         disallowed=cfg.get("disallowed", []),
-        requires_approval=cfg.get("requires_approval", ["web_search"]),
+        requires_approval=cfg.get("requires_approval", default_approval),
     )
 
-    registry = ToolRegistry(permissions=permissions)
-    registry.register(FindFilesTool(default_search_path=default_path))
-    registry.register(SearchInFilesTool(
-        default_search_path=default_path,
-        blocked_paths=blocked_paths,
-    ))
-    registry.register(WebSearchTool(
-        default_engine=default_engine,
-        engines=extra_engines,
-    ))
+    registry = ToolRegistry(permissions=permissions, unload_after_use=global_unload)
+
+    # ── find_files ────────────────────────────────────────────────────────────
+    registry.register_lazy(
+        name=FindFilesTool.name,
+        description=FindFilesTool.description,
+        schema=FindFilesTool.parameters_schema,
+        factory=lambda: FindFilesTool(default_search_path=default_path),
+    )
+
+    # ── search_in_files ───────────────────────────────────────────────────────
+    registry.register_lazy(
+        name=SearchInFilesTool.name,
+        description=SearchInFilesTool.description,
+        schema=SearchInFilesTool.parameters_schema,
+        factory=lambda: SearchInFilesTool(
+            default_search_path=default_path,
+            blocked_paths=blocked_paths,
+        ),
+    )
+
+    # ── web_search ────────────────────────────────────────────────────────────
+    registry.register_lazy(
+        name=WebSearchTool.name,
+        description=WebSearchTool.description,
+        schema=WebSearchTool.parameters_schema,
+        factory=lambda: WebSearchTool(
+            default_engine=default_engine,
+            engines=extra_engines,
+        ),
+    )
+
+    # ── web_fetch (off by default) ────────────────────────────────────────────
+    if fetch_enabled:
+        registry.register_lazy(
+            name=WebFetchTool.name,
+            description=WebFetchTool.description,
+            schema=WebFetchTool.parameters_schema,
+            factory=lambda: WebFetchTool(
+                max_response_chars=int(fetch_cfg.get("max_response_chars", 8_000)),
+                allowed_content_types=fetch_cfg.get("allowed_content_types"),
+                domain_allowlist=fetch_cfg.get("domain_allowlist"),
+                domain_blocklist=fetch_cfg.get("domain_blocklist"),
+                max_redirects=int(fetch_cfg.get("max_redirects", 5)),
+                connect_timeout=float(fetch_cfg.get("connect_timeout", 5.0)),
+                read_timeout=float(fetch_cfg.get("read_timeout", 15.0)),
+            ),
+        )
+
+    # ── read_man_page ─────────────────────────────────────────────────────────
     if man_enabled:
-        registry.register(ManPageTool(
-            max_chars=man_max_chars,
-            default_sections=man_default_sections,
-        ))
+        registry.register_lazy(
+            name=ManPageTool.name,
+            description=ManPageTool.description,
+            schema=ManPageTool.parameters_schema,
+            factory=lambda: ManPageTool(
+                max_chars=man_max_chars,
+                default_sections=man_sections,
+            ),
+            unload_after_use=man_unload,
+        )
+
+    # ── system_control ────────────────────────────────────────────────────────
+    if sc_enabled:
+        registry.register_lazy(
+            name=SystemControlTool.name,
+            description=SystemControlTool.description,
+            schema=SystemControlTool.parameters_schema,
+            factory=SystemControlTool,
+            unload_after_use=sc_unload,
+        )
+
     return registry
