@@ -558,6 +558,7 @@ class WebSearchTool(Tool):
 
         logger.info("WebSearchTool: opening %s with query %r", engine_key, query)
         try:
+            import subprocess  # lazy — only when tool actually runs
             # Non-blocking: spawn xdg-open and return immediately.
             # The subprocess is fully detached — we do not wait for it.
             subprocess.Popen(
@@ -1047,24 +1048,24 @@ class ManPageTool(Tool):
         requested_sections: list[str] = args.get("sections") or []
         extract_sections = requested_sections or self._default_sections
 
-        # Check man is available
+        # Check man is available (lazy import shutil — only on first run)
+        import shutil  # lazy
         if not shutil.which("man"):
             return ToolResult(
                 tool_name=self.name,
                 error="'man' is not installed on this system.",
             )
 
-        # Build the man command — MANPAGER=cat gives plain text, MANWIDTH
-        # limits line length to something readable in a chat context.
         cmd = ["man"]
         if man_section:
             cmd.append(man_section)
         cmd.append(command)
 
+        import os        # lazy
+        import subprocess  # lazy
         env = os.environ.copy()
         env["MANPAGER"] = "cat"
         env["MANWIDTH"] = "100"
-        # Disable colour from groff/man-db
         env["GROFF_NO_SGR"] = "1"
         env.pop("LESS", None)
         env.pop("MORE", None)
