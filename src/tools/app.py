@@ -57,10 +57,16 @@ _PKG_SEARCH_CMDS: dict[str, list[str]] = {
 }
 
 
-def _read_desktop_files(query: str) -> list[dict[str, str]]:
-    """Search installed .desktop files for *query* (name/comment match)."""
-    query_lower = query.lower()
-    results: list[dict[str, str]] = []
+_desktop_cache: list[dict[str, Any]] | None = None
+
+
+def _load_desktop_cache() -> list[dict[str, Any]]:
+    """Load and parse all .desktop files into a global cache."""
+    global _desktop_cache
+    if _desktop_cache is not None:
+        return _desktop_cache
+
+    _desktop_cache = []
     seen: set[str] = set()
 
     for d in _DESKTOP_DIRS:
@@ -79,16 +85,28 @@ def _read_desktop_files(query: str) -> list[dict[str, str]]:
             exec_val = _desktop_field(text, "Exec") or ""
             no_display = _desktop_field(text, "NoDisplay", "false").lower()
 
+            seen.add(desktop.name)
             if no_display == "true":
                 continue
-            if query_lower in name.lower() or query_lower in comment.lower():
-                seen.add(desktop.name)
-                results.append({
-                    "name":    name,
-                    "comment": comment,
-                    "exec":    exec_val,
-                    "file":    str(desktop),
-                })
+
+            _desktop_cache.append({
+                "name":    name,
+                "comment": comment,
+                "exec":    exec_val,
+                "file":    str(desktop),
+                "stem":    desktop.stem,
+            })
+    return _desktop_cache
+
+
+def _read_desktop_files(query: str) -> list[dict[str, Any]]:
+    """Search installed .desktop files for *query* (name/comment match)."""
+    query_lower = query.lower()
+    results: list[dict[str, Any]] = []
+
+    for hit in _load_desktop_cache():
+        if query_lower in hit["name"].lower() or query_lower in hit["comment"].lower():
+            results.append(hit)
     return results[:20]
 
 
@@ -128,33 +146,25 @@ def _launch_app(name: str) -> tuple[bool, str]:
                 pass
 
     # 2. Exec= field from .desktop file
-    for d in _DESKTOP_DIRS:
-        if not d.is_dir():
+    for hit in _load_desktop_cache():
+        if hit["name"].lower() != name.lower():
             continue
-        for desktop in d.glob("*.desktop"):
-            try:
-                text = desktop.read_text(errors="replace")
-            except OSError:
-                continue
-            desk_name = _desktop_field(text, "Name")
-            if desk_name.lower() != name.lower():
-                continue
-            exec_val = _desktop_field(text, "Exec")
-            if not exec_val:
-                continue
-            # Strip field codes like %U %f %F
-            exec_clean = re.sub(r"%[a-zA-Z]", "", exec_val).strip()
-            try:
-                subprocess.Popen(
-                    exec_clean,
-                    shell=True,
-                    start_new_session=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                return True, f"Launched '{name}' via {desktop.name}."
-            except Exception as exc:  # noqa: BLE001
-                logger.debug("Exec launch failed: %s", exc)
+        exec_val = hit["exec"]
+        if not exec_val:
+            continue
+        # Strip field codes like %U %f %F
+        exec_clean = re.sub(r"%[a-zA-Z]", "", exec_val).strip()
+        try:
+            subprocess.Popen(
+                exec_clean,
+                shell=True,
+                start_new_session=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return True, f"Launched '{name}' via {Path(hit['file']).name}."
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Exec launch failed: %s", exc)
 
     # 3. Plain binary
     binary = shutil.which(name)
@@ -180,13 +190,10 @@ def _find_desktop_ids(name: str) -> list[str]:
     """Return .desktop IDs (stem) matching *name*."""
     ids = []
     name_lower = name.lower()
-    for d in _DESKTOP_DIRS:
-        if not d.is_dir():
-            continue
-        for desktop in d.glob("*.desktop"):
-            stem = desktop.stem.lower()
-            if name_lower in stem or stem in name_lower:
-                ids.append(desktop.stem)
+    for hit in _load_desktop_cache():
+        stem_lower = hit["stem"].lower()
+        if name_lower in stem_lower or stem_lower in name_lower:
+            ids.append(hit["stem"])
     return ids
 
 
