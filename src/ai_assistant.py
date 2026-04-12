@@ -3,31 +3,35 @@
 Supported backends
 ------------------
 - **ollama**  – Local Ollama server (recommended; supports llava and other
-  vision models out of the box).
+  vision models out of the box).  Uses the ``/api/chat`` endpoint so
+  conversation history is passed natively.
 - **openai**  – OpenAI-compatible REST API (gpt-4o or any vision endpoint).
+  Passes the full ``messages`` array so multi-turn conversations work.
 - **npu**     – AMD Ryzen AI ONNX model running on the NPU / iGPU.
 
-Resource efficiency
--------------------
+Backend resource efficiency
+---------------------------
 - ``requests`` is imported lazily; no persistent ``Session`` is kept between
-  calls unless ``close_http_after_request`` is ``False``.
+  calls (``Connection: close`` is sent with every request so the socket is
+  released immediately after the response).
 - Responses are streamed token-by-token and yielded to the caller so the UI
-  can update incrementally without buffering the full reply.
-- Image bytes are passed through and can be deleted by the caller immediately
-  after :func:`ask` returns (the bytes are not stored anywhere in this module).
-- The module itself carries no global state beyond optional configuration.
+  can update incrementally without buffering the full reply in RAM.
+- Screenshot / image bytes are passed in and can be deleted by the caller as
+  soon as :func:`~AIAssistant.ask` returns — they are not retained here.
+- NPU sessions are unloaded right after inference (see :mod:`npu_manager`).
 """
 
 from __future__ import annotations
 
 import json
 import logging
-from typing import Generator, Iterator
+from typing import TYPE_CHECKING, Generator, Iterator
+
+if TYPE_CHECKING:
+    from src.conversation import ConversationHistory
 
 logger = logging.getLogger(__name__)
 
-
-# ── Public interface ──────────────────────────────────────────────────────────
 
 class AIAssistant:
     """Facade for talking to a vision-capable LLM backend.
@@ -51,26 +55,35 @@ class AIAssistant:
         self,
         prompt: str,
         *,
+        history: "ConversationHistory | None" = None,
         screenshot_jpeg: bytes | None = None,
         attachment_image_jpegs: list[bytes] | None = None,
         attachment_texts: list[str] | None = None,
+        max_context_messages: int | None = 40,
     ) -> Generator[str, None, None]:
-        """Send a prompt (with optional images/text) and stream the reply.
+        """Send a prompt (with optional images/text/history) and stream the reply.
 
         This is a **generator**: iterate over it to receive response tokens as
-        they arrive from the model.  The caller should delete ``screenshot_jpeg``
-        and any attachment bytes once this function returns to free memory.
+        they arrive from the model.  The caller should delete
+        ``screenshot_jpeg`` and any attachment bytes once this function returns
+        to free memory.
 
         Parameters
         ----------
         prompt:
             The user's natural-language question or instruction.
+        history:
+            :class:`~src.conversation.ConversationHistory` whose past messages
+            are passed to the model for multi-turn context.
         screenshot_jpeg:
             JPEG bytes of the current screen (optional).
         attachment_image_jpegs:
             List of JPEG bytes for user-uploaded images (optional).
         attachment_texts:
             List of text file contents to include in the context (optional).
+        max_context_messages:
+            How many of the most recent past messages to include in the
+            request.  ``None`` includes all of them.
 
         Yields
         ------
@@ -80,11 +93,15 @@ class AIAssistant:
         backend = self._config.backend
         if backend == "ollama":
             yield from self._ask_ollama(
-                prompt, screenshot_jpeg, attachment_image_jpegs, attachment_texts
+                prompt, history, screenshot_jpeg,
+                attachment_image_jpegs, attachment_texts,
+                max_context_messages,
             )
         elif backend == "openai":
             yield from self._ask_openai(
-                prompt, screenshot_jpeg, attachment_image_jpegs, attachment_texts
+                prompt, history, screenshot_jpeg,
+                attachment_image_jpegs, attachment_texts,
+                max_context_messages,
             )
         elif backend == "npu":
             yield from self._ask_npu(prompt, screenshot_jpeg)
@@ -96,9 +113,11 @@ class AIAssistant:
     def _ask_ollama(
         self,
         prompt: str,
+        history: "ConversationHistory | None",
         screenshot_jpeg: bytes | None,
         attachment_images: list[bytes] | None,
         attachment_texts: list[str] | None,
+        max_context: int | None,
     ) -> Iterator[str]:
         import base64
 
@@ -108,25 +127,32 @@ class AIAssistant:
         timeout = cfg.get("timeout", 120)
         stream = self._config.resources.get("stream_response", True)
 
-        # Build the full prompt text (include any text attachments)
-        full_prompt = _build_text_prompt(prompt, attachment_texts)
+        # Build previous-turn messages from history
+        if history is not None:
+            messages = history.to_ollama_messages(max_context=max_context)
+        else:
+            messages = []
 
-        # Collect images (screenshot + uploaded)
+        # Collect images to attach to the current user turn
         images_b64: list[str] = []
         if screenshot_jpeg:
             images_b64.append(base64.b64encode(screenshot_jpeg).decode())
         for img in (attachment_images or []):
             images_b64.append(base64.b64encode(img).decode())
 
+        # Build the current user message
+        user_text = _build_text_prompt(prompt, attachment_texts)
+        user_msg: dict = {"role": "user", "content": user_text}
+        if images_b64:
+            user_msg["images"] = images_b64
+        messages.append(user_msg)
+
         payload: dict = {
             "model": model,
-            "prompt": full_prompt,
+            "messages": messages,
             "stream": stream,
         }
-        if images_b64:
-            payload["images"] = images_b64
 
-        # Lazy import of requests – no persistent session held
         try:
             import requests  # type: ignore[import]
         except ImportError as exc:
@@ -134,11 +160,11 @@ class AIAssistant:
                 "requests is not installed.  Install it with: pip install requests"
             ) from exc
 
-        url = f"{base_url}/api/generate"
+        url = f"{base_url}/api/chat"
         logger.debug("Sending request to Ollama at %s (model=%s)", url, model)
 
-        close_after = self._config.resources.get("close_http_after_request", True)
-        headers = {"Connection": "close"} if close_after else {}
+        # Backend resource efficiency: close the TCP socket after this request
+        headers = {"Connection": "close"}
 
         try:
             with requests.post(
@@ -157,14 +183,14 @@ class AIAssistant:
                             chunk = json.loads(line)
                         except json.JSONDecodeError:
                             continue
-                        token = chunk.get("response", "")
+                        token = chunk.get("message", {}).get("content", "")
                         if token:
                             yield token
                         if chunk.get("done"):
                             break
                 else:
                     data = resp.json()
-                    yield data.get("response", "")
+                    yield data.get("message", {}).get("content", "")
         except Exception as exc:
             logger.error("Ollama request failed: %s", exc)
             raise
@@ -174,9 +200,11 @@ class AIAssistant:
     def _ask_openai(
         self,
         prompt: str,
+        history: "ConversationHistory | None",
         screenshot_jpeg: bytes | None,
         attachment_images: list[bytes] | None,
         attachment_texts: list[str] | None,
+        max_context: int | None,
     ) -> Iterator[str]:
         import base64
 
@@ -187,16 +215,24 @@ class AIAssistant:
         timeout = cfg.get("timeout", 60)
         stream = self._config.resources.get("stream_response", True)
 
-        full_prompt = _build_text_prompt(prompt, attachment_texts)
+        # Start from persisted conversation history
+        if history is not None:
+            messages = history.to_openai_messages(max_context=max_context)
+        else:
+            messages = []
 
-        # Build content list for the vision message
-        content: list[dict] = [{"type": "text", "text": full_prompt}]
+        # Build the current user message with optional images
+        user_text = _build_text_prompt(prompt, attachment_texts)
+        content: list[dict] = [{"type": "text", "text": user_text}]
 
         def _img_block(jpeg_bytes: bytes) -> dict:
             b64 = base64.b64encode(jpeg_bytes).decode()
             return {
                 "type": "image_url",
-                "image_url": {"url": f"data:image/jpeg;base64,{b64}", "detail": "auto"},
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{b64}",
+                    "detail": "auto",
+                },
             }
 
         if screenshot_jpeg:
@@ -204,9 +240,11 @@ class AIAssistant:
         for img in (attachment_images or []):
             content.append(_img_block(img))
 
+        messages.append({"role": "user", "content": content})
+
         payload = {
             "model": model,
-            "messages": [{"role": "user", "content": content}],
+            "messages": messages,
             "stream": stream,
         }
 
@@ -218,9 +256,11 @@ class AIAssistant:
             ) from exc
 
         url = f"{base_url}/chat/completions"
-        headers: dict[str, str] = {"Authorization": f"Bearer {api_key}"}
-        if self._config.resources.get("close_http_after_request", True):
-            headers["Connection"] = "close"
+        # Backend resource efficiency: close socket after response
+        headers: dict[str, str] = {
+            "Authorization": f"Bearer {api_key}",
+            "Connection": "close",
+        }
 
         logger.debug("Sending request to OpenAI-compatible API at %s", url)
 
@@ -271,9 +311,8 @@ class AIAssistant:
     ) -> Iterator[str]:
         """Run inference on the AMD NPU via ONNX Runtime.
 
-        The model is loaded, queried, and **immediately unloaded** (unless
-        ``resources.unload_model_after_inference`` is False) so NPU memory is
-        reclaimed right away.
+        The model is loaded, queried, and **immediately unloaded** so NPU
+        memory is reclaimed right away (handled by NPUManager.run_inference).
         """
         if self._npu_manager is None:
             raise RuntimeError(
@@ -287,26 +326,23 @@ class AIAssistant:
                 "numpy is required for NPU inference: pip install numpy"
             ) from exc
 
-        # Build a simple text-only feed; vision preprocessing is model-specific.
-        # This provides a baseline that callers can extend for their ONNX model.
-        logger.info("Running NPU inference (model=%s)", self._config.npu.get("model_path"))
+        logger.info(
+            "Running NPU inference (model=%s)", self._config.npu.get("model_path")
+        )
 
-        # Encode prompt as a basic int64 token sequence (placeholder –
-        # real models need their tokenizer here).
+        # Encode prompt as byte tokens (placeholder — real models need their
+        # tokenizer here).
         token_ids = np.frombuffer(prompt.encode("utf-8"), dtype=np.uint8).astype(
             np.int64
-        )[np.newaxis, :]  # shape [1, seq_len]
+        )[np.newaxis, :]
 
-        feeds = {"input_ids": token_ids}
+        feeds: dict = {"input_ids": token_ids}
         if screenshot_jpeg:
-            # Pass image as raw bytes tensor if the model accepts it
-            img_array = np.frombuffer(screenshot_jpeg, dtype=np.uint8)[np.newaxis, :]
-            feeds["image"] = img_array
+            feeds["image"] = np.frombuffer(screenshot_jpeg, dtype=np.uint8)[np.newaxis, :]
 
-        # run_inference handles load → infer → unload in one call
+        # run_inference loads the model, runs it, then unloads it immediately
         outputs = self._npu_manager.run_inference(feeds)
 
-        # Decode the first output as UTF-8 text (model-specific)
         if outputs:
             result = outputs[0]
             if hasattr(result, "tobytes"):
