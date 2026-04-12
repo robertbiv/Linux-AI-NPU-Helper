@@ -676,7 +676,7 @@ class TestRequiresTos:
             tos_summary="You must agree to our terms.",
         )
         assert e.requires_tos is True
-        assert "example.com" in e.tos_url
+        assert e.tos_url == "https://example.com/tos"
         assert "agree" in e.tos_summary
 
     def test_entry_without_tos(self):

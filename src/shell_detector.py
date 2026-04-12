@@ -151,10 +151,10 @@ def detect() -> ShellInfo:
         return _from_path(parent)
 
     # 3. /etc/passwd
-    passwd_shell = _from_passwd()
-    if passwd_shell and Path(passwd_shell).exists():
-        logger.debug("shell_detector: using passwd shell: %s", passwd_shell)
-        return _from_path(passwd_shell)
+    etc_shell = _from_passwd()
+    if etc_shell and Path(etc_shell).exists():
+        logger.debug("shell_detector: using shell from /etc/passwd: %s", etc_shell)
+        return _from_path(etc_shell)
 
     # 4. Fallback
     logger.debug("shell_detector: falling back to /bin/sh")
