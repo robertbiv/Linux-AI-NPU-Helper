@@ -302,6 +302,10 @@ if _HAS_QT:
         fields.append(_Field(stream_cb, "resources.stream_response", manager))
         form.addRow("", stream_cb)
 
+        auto_send_screen = QCheckBox("Automatically send screen on conversation page")
+        fields.append(_Field(auto_send_screen, "ui.auto_send_screen", manager))
+        form.addRow("", auto_send_screen)
+
         layout.addWidget(grp)
         layout.addStretch()
         return widget, fields

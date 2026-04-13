@@ -104,6 +104,8 @@ _DEFAULTS: dict[str, Any] = {
         "font_size": 12,
         # Opacity 0.0 (transparent) – 1.0 (opaque)
         "opacity": 0.92,
+        # Auto send screen
+        "auto_send_screen": True,
     },
     # ── Safety ────────────────────────────────────────────────────────────────
     "safety": {
