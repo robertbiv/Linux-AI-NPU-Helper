@@ -1,1 +1,1 @@
-# Linux AI NPU Helper – test package
+# Linux AI NPU Assistant – test package

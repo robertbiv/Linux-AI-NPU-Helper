@@ -2,7 +2,7 @@
 """PyQt5 settings dialog — tabbed GUI that stays in sync with settings.json.
 
 Every widget change is written immediately to :class:`~src.settings.SettingsManager`
-which atomically persists to ``~/.config/linux-ai-npu-helper/settings.json``.
+which atomically persists to ``~/.config/linux-ai-npu-assistant/settings.json``.
 The dialog reads its initial state from the same manager, so the GUI and JSON
 file are always consistent.
 
@@ -331,7 +331,7 @@ if _HAS_QT:
             self._manager = manager
             self._fields: list[_Field] = []
 
-            self.setWindowTitle("Linux AI NPU Helper — Settings")
+            self.setWindowTitle("Linux AI NPU Assistant — Settings")
             self.setMinimumWidth(520)
             self.setMinimumHeight(500)
             self.resize(560, 600)

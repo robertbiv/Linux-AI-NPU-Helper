@@ -239,11 +239,11 @@ class DiagnosticReporter:
                 issues += 1
 
         # Check settings file
-        settings_path = Path.home() / ".config" / "linux-ai-npu-helper" / "settings.json"
+        settings_path = Path.home() / ".config" / "linux-ai-npu-assistant" / "settings.json"
         _file_check(settings_path, "Settings file permissions")
 
         # Check conversation history
-        history_path = Path.home() / ".local" / "share" / "linux-ai-npu-helper" / "history.json"
+        history_path = Path.home() / ".local" / "share" / "linux-ai-npu-assistant" / "history.json"
         _file_check(history_path, "Conversation history permissions")
 
         # Network guard
@@ -282,7 +282,7 @@ class DiagnosticReporter:
         """
         result: dict[str, Any] = {
             "status":         STATUS_OK,
-            "path":           str(Path.home() / ".config" / "linux-ai-npu-helper" / "settings.json"),
+            "path":           str(Path.home() / ".config" / "linux-ai-npu-assistant" / "settings.json"),
             "exists":         False,
             "listener_count": 0,
             "backend":        self._config.backend,

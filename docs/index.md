@@ -1,4 +1,4 @@
-# Linux AI NPU Helper
+# Linux AI NPU Assistant
 
 > A privacy-first AI assistant for Linux that runs **entirely on your AMD Ryzen AI NPU** — no cloud, no telemetry, no API keys required.
 
@@ -38,8 +38,8 @@
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/robertbiv/Linux-AI-NPU-Helper.git
-cd Linux-AI-NPU-Helper
+git clone https://github.com/robertbiv/Linux-AI-NPU-Assistant.git
+cd Linux-AI-NPU-Assistant
 pip install -r requirements.txt
 
 # 2. Start Ollama (or LM Studio) with any model
@@ -67,7 +67,7 @@ python -m src
 The test suite and coverage report are generated automatically on every push
 and published to GitHub Pages alongside this documentation.
 
-👉 **[View coverage report](coverage/index.html)**
+👉 **[View coverage report](https://robertbiv.github.io/Linux-AI-NPU-Assistant/coverage/index.html)**
 
 ## Architecture overview
 

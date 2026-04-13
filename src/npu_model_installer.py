@@ -498,7 +498,7 @@ def get_npu_suggestions() -> list[ModelCatalogEntry]:
 
 #: Root directory for all installed models (user-local)
 MODELS_ROOT: Path = (
-    Path.home() / ".local" / "share" / "linux-ai-npu-helper" / "models"
+    Path.home() / ".local" / "share" / "linux-ai-npu-assistant" / "models"
 )
 
 #: Minimum ONNX file size for the default model

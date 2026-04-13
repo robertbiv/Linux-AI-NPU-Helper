@@ -1,7 +1,7 @@
 # AI Model Guide
 
 This guide explains how to **add**, **select**, and **delete** AI models through
-the Linux AI NPU Helper GUI — including browsing for ONNX files and dragging
+the Linux AI NPU Assistant GUI — including browsing for ONNX files and dragging
 models in from your file manager.
 
 ---
@@ -24,8 +24,6 @@ The application supports three kinds of AI model sources:
 2. Click the **⚙ Settings** button in the top-right corner.
 3. Select the **Models** tab.
 
-<!-- Image missing: ![Settings window — Models tab](../assets/models-tab.png) -->
-
 ---
 
 ## Selecting a model from your Ollama server
@@ -44,7 +42,7 @@ The application supports three kinds of AI model sources:
     | ⛔ **Not recommended** | Too large or incompatible format for NPU |
 
 6. Click **✔ Use this model** to activate it.  The change is saved
-   automatically to `~/.config/linux-ai-npu-helper/settings.json`.
+   automatically to `~/.config/linux-ai-npu-assistant/settings.json`.
 
 ---
 

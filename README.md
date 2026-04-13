@@ -1,13 +1,13 @@
-# Linux AI NPU Helper
+# Linux AI NPU Assistant
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github)](https://robertbiv.github.io/Linux-AI-NPU-Helper/)
-[![Tests](https://github.com/robertbiv/Linux-AI-NPU-Helper/actions/workflows/docs.yml/badge.svg)](https://github.com/robertbiv/Linux-AI-NPU-Helper/actions/workflows/docs.yml)
-[![Coverage](https://robertbiv.github.io/Linux-AI-NPU-Helper/coverage-badge.json)](https://robertbiv.github.io/Linux-AI-NPU-Helper/coverage/)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github)](https://robertbiv.github.io/Linux-AI-NPU-Assistant/)
+[![Tests](https://github.com/robertbiv/Linux-AI-NPU-Assistant/actions/workflows/docs.yml/badge.svg)](https://github.com/robertbiv/Linux-AI-NPU-Assistant/actions/workflows/docs.yml)
+[![Coverage](https://robertbiv.github.io/Linux-AI-NPU-Assistant/coverage-badge.json)](https://robertbiv.github.io/Linux-AI-NPU-Assistant/coverage/)
 
 A privacy-first AI assistant for Linux that runs entirely on the **AMD Ryzen AI NPU** — no cloud, no telemetry, no API keys required.
 
-📖 **[Full documentation → robertbiv.github.io/Linux-AI-NPU-Helper](https://robertbiv.github.io/Linux-AI-NPU-Helper/)**
+📖 **[Full documentation → robertbiv.github.io/Linux-AI-NPU-Assistant](https://robertbiv.github.io/Linux-AI-NPU-Assistant/)**
 
 ## Features
 
@@ -23,8 +23,8 @@ A privacy-first AI assistant for Linux that runs entirely on the **AMD Ryzen AI 
 ## Quick start
 
 ```bash
-git clone https://github.com/robertbiv/Linux-AI-NPU-Helper.git
-cd Linux-AI-NPU-Helper
+git clone https://github.com/robertbiv/Linux-AI-NPU-Assistant.git
+cd Linux-AI-NPU-Assistant
 pip install -r requirements.txt
 
 # Start Ollama and pull a model
@@ -36,10 +36,10 @@ python -m src
 
 ## Documentation
 
-- [Building the Flatpak locally](https://robertbiv.github.io/Linux-AI-NPU-Helper/guides/building-flatpak/)
-- [AI Model Guide — browse, add, delete models](https://robertbiv.github.io/Linux-AI-NPU-Helper/guides/model-guide/)
-- [Settings Guide](https://robertbiv.github.io/Linux-AI-NPU-Helper/guides/settings-guide/)
-- [API Reference](https://robertbiv.github.io/Linux-AI-NPU-Helper/api/config/)
+- [Building the Flatpak locally](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/building-flatpak/)
+- [AI Model Guide — browse, add, delete models](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/model-guide/)
+- [Settings Guide](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/settings-guide/)
+- [API Reference](https://robertbiv.github.io/Linux-AI-NPU-Assistant/api/config/)
 
 ## Running tests
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Central security utilities for Linux AI NPU Helper.
+"""Central security utilities for Linux AI NPU Assistant.
 
 All security-sensitive operations are consolidated here so they can be
 reviewed, tested, and updated in one place.

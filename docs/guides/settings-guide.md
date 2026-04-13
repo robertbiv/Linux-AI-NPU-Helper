@@ -1,6 +1,6 @@
 # Settings Guide
 
-All settings are stored in `~/.config/linux-ai-npu-helper/settings.json` (mode `0o600` — owner-read/write only). The GUI and JSON file are always in sync: every change made in the Settings window is written to disk immediately.
+All settings are stored in `~/.config/linux-ai-npu-assistant/settings.json` (mode `0o600` — owner-read/write only). The GUI and JSON file are always in sync: every change made in the Settings window is written to disk immediately.
 
 ---
 

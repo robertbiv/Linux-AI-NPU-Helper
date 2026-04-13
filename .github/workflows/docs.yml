@@ -164,8 +164,8 @@ jobs:
       - name: Copy coverage badge and report to site
         run: |
           mkdir -p site/coverage
-          cp -r docs/_site/coverage/* site/coverage/ || true
-          cp docs/_site/coverage-badge.json site/ || true
+          cp -r docs/coverage/* site/coverage/ || true
+          cp docs/coverage-badge.json site/ || true
 
       - name: Upload Pages artefact
         uses: actions/upload-pages-artifact@v3

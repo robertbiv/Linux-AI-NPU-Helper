@@ -1,6 +1,6 @@
 # Building the Flatpak locally
 
-This guide walks you through building and installing Linux AI NPU Helper as a
+This guide walks you through building and installing Linux AI NPU Assistant as a
 [Flatpak](https://flatpak.org/) package on your own machine so you can run it
 in a sandboxed environment without affecting your system Python installation.
 
@@ -48,8 +48,8 @@ Install the required build tools for your distribution:
 ## Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/robertbiv/Linux-AI-NPU-Helper.git
-cd Linux-AI-NPU-Helper
+git clone https://github.com/robertbiv/Linux-AI-NPU-Assistant.git
+cd Linux-AI-NPU-Assistant
 ```
 
 ---
@@ -78,7 +78,7 @@ flatpak-builder \
   --force-clean \
   --user \
   build-dir \
-  packaging/io.github.robertbiv.LinuxAiNpuHelper.yml
+  packaging/io.github.robertbiv.LinuxAiNpuAssistant.yml
 ```
 
 `--force-clean` removes any previous build artefacts.  
@@ -99,15 +99,15 @@ flatpak-builder \
   --install \
   --force-clean \
   build-dir \
-  packaging/io.github.robertbiv.LinuxAiNpuHelper.yml
+  packaging/io.github.robertbiv.LinuxAiNpuAssistant.yml
 ```
 
 Or install the already-built directory without rebuilding:
 
 ```bash
 flatpak build-export repo build-dir
-flatpak --user remote-add --no-gpg-verify local-npu-helper repo
-flatpak --user install local-npu-helper io.github.robertbiv.LinuxAiNpuHelper
+flatpak --user remote-add --no-gpg-verify local-npu-assistant repo
+flatpak --user install local-npu-assistant io.github.robertbiv.LinuxAiNpuAssistant
 ```
 
 ---
@@ -115,13 +115,13 @@ flatpak --user install local-npu-helper io.github.robertbiv.LinuxAiNpuHelper
 ## Step 5 — Run
 
 ```bash
-flatpak run io.github.robertbiv.LinuxAiNpuHelper
+flatpak run io.github.robertbiv.LinuxAiNpuAssistant
 ```
 
 The application data (settings, conversation history) is stored in:
 
 ```
-~/.var/app/io.github.robertbiv.LinuxAiNpuHelper/
+~/.var/app/io.github.robertbiv.LinuxAiNpuAssistant/
 ```
 
 ---
@@ -135,7 +135,7 @@ access to the NPU device nodes:
 flatpak override \
   --user \
   --device=all \
-  io.github.robertbiv.LinuxAiNpuHelper
+  io.github.robertbiv.LinuxAiNpuAssistant
 ```
 
 !!! warning "Security note"
@@ -149,13 +149,13 @@ flatpak override \
 ## Uninstall
 
 ```bash
-flatpak --user uninstall io.github.robertbiv.LinuxAiNpuHelper
+flatpak --user uninstall io.github.robertbiv.LinuxAiNpuAssistant
 ```
 
 To also remove user data:
 
 ```bash
-rm -rf ~/.var/app/io.github.robertbiv.LinuxAiNpuHelper
+rm -rf ~/.var/app/io.github.robertbiv.LinuxAiNpuAssistant
 ```
 
 ---

@@ -77,7 +77,7 @@ def _build_launch_cmd(terminal: str, style: str, script_path: str,
 # ---------------------------------------------------------------------------
 
 _BANNER = r"""
-printf '\n\033[1;36m  Linux AI NPU Helper — suggested command:\033[0m\n\n'
+printf '\n\033[1;36m  Linux AI NPU Assistant — suggested command:\033[0m\n\n'
 printf '\033[1;33m  %s\033[0m\n\n' "$_CMD"
 """
 

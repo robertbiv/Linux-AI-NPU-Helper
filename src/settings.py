@@ -32,7 +32,7 @@ from src.security import check_path_permissions, secure_write
 logger = logging.getLogger(__name__)
 
 _DEFAULT_SETTINGS_PATH = (
-    Path.home() / ".config" / "linux-ai-npu-helper" / "settings.json"
+    Path.home() / ".config" / "linux-ai-npu-assistant" / "settings.json"
 )
 
 # Type alias for change listeners: (key_path, new_value) → None

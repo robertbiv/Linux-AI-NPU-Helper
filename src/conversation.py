@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_MAX_MESSAGES = 200
 _DEFAULT_HISTORY_FILE = (
-    Path.home() / ".local" / "share" / "linux-ai-npu-helper" / "history.json"
+    Path.home() / ".local" / "share" / "linux-ai-npu-assistant" / "history.json"
 )
 
 

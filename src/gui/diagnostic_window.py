@@ -153,7 +153,7 @@ if _HAS_QT:
             self._reporter = DiagnosticReporter(config, registry, settings_manager)
             self._report: dict = {}
 
-            self.setWindowTitle("Linux AI NPU Helper — Diagnostics")
+            self.setWindowTitle("Linux AI NPU Assistant — Diagnostics")
             self.setMinimumSize(720, 560)
             self.resize(820, 640)
 

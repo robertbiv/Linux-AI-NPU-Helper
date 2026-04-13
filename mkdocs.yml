@@ -1,11 +1,11 @@
-site_name: Linux AI NPU Helper
-site_url: https://robertbiv.github.io/Linux-AI-NPU-Helper/
+site_name: Linux AI NPU Assistant
+site_url: https://robertbiv.github.io/Linux-AI-NPU-Assistant/
 site_description: >-
   A privacy-first AI assistant for Linux that runs locally on the AMD Ryzen AI NPU.
   Zero cloud, zero telemetry — all inference stays on your machine.
 site_author: robertbiv
-repo_url: https://github.com/robertbiv/Linux-AI-NPU-Helper
-repo_name: robertbiv/Linux-AI-NPU-Helper
+repo_url: https://github.com/robertbiv/Linux-AI-NPU-Assistant
+repo_name: robertbiv/Linux-AI-NPU-Assistant
 edit_uri: edit/main/docs/
 
 copyright: Copyright &copy; 2025 robertbiv
@@ -119,7 +119,7 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/robertbiv/Linux-AI-NPU-Helper
+      link: https://github.com/robertbiv/Linux-AI-NPU-Assistant
   version:
     provider: mike
 

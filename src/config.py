@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Configuration management for Linux AI NPU Helper."""
+"""Configuration management for Linux AI NPU Assistant."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ import yaml
 # Default paths searched in order
 _CONFIG_SEARCH_PATHS = [
     Path("config.yaml"),
-    Path.home() / ".config" / "linux-ai-npu-helper" / "config.yaml",
-    Path("/etc/linux-ai-npu-helper/config.yaml"),
+    Path.home() / ".config" / "linux-ai-npu-assistant" / "config.yaml",
+    Path("/etc/linux-ai-npu-assistant/config.yaml"),
 ]
 
 _DEFAULTS: dict[str, Any] = {
