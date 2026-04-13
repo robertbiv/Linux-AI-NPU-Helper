@@ -87,7 +87,7 @@ if _HAS_QT:
 
         def run(self) -> None:
             try:
-                self.finished.emit(self._selector.list_models(timeout=5))
+                self.finished.emit(self._selector.list_models(timeout=5).result())
             except Exception as exc:  # noqa: BLE001
                 self.error.emit(str(exc))
 

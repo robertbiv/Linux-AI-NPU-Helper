@@ -34,6 +34,8 @@ def test_launch_app_safe(mock_desktop_dir, monkeypatch):
             args, kwargs = mock_popen.call_args
             # Before fix: args[0] is "ls -l", shell=True
             # After fix: args[0] is ["ls", "-l"], shell=False (or omitted, default False)
+            assert args[0] == ["ls", "-l"]
+            assert kwargs.get("shell") in (False, None)
             assert kwargs.get("start_new_session") is True
 
 def test_launch_app_injection_prevention(mock_desktop_dir, monkeypatch):
@@ -54,6 +56,7 @@ def test_launch_app_injection_prevention(mock_desktop_dir, monkeypatch):
             # or if split, ["ls;", "touch", "/tmp/pwned"] which will fail to find "ls;".
             # Either way, it won't execute the second command via shell.
             # We will verify the exact behavior after the fix.
+            assert args[0] == ["ls;", "touch", "/tmp/pwned"]
             assert kwargs.get("shell") in (False, None)
 
 def test_app_tool_open(mock_desktop_dir, monkeypatch):

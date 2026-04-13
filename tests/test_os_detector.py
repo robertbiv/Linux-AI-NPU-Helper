@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import shutil
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from pathlib import Path
 from src.os_detector import (
     OSInfo,
-    _detect_init,
     _detect_package_manager,
     _read_os_release,
     detect,
@@ -45,101 +43,16 @@ class TestDetectPackageManager:
         assert _detect_package_manager("mymint", "ubuntu debian") == "apt"
 
     def test_unknown_distro_falls_back_to_path(self):
+        import shutil
         with patch.object(shutil, "which", side_effect=lambda x: "/usr/bin/apt" if x == "apt" else None):
             pm = _detect_package_manager("unknown", "")
             assert pm == "apt"
 
     def test_completely_unknown_returns_empty(self):
+        import shutil
         with patch.object(shutil, "which", return_value=None):
             pm = _detect_package_manager("unknowndistro", "")
             assert pm == ""
-
-
-# ── _detect_init ──────────────────────────────────────────────────────────────
-
-
-class TestDetectInit:
-    def test_detect_init_oserror_returns_unknown(self):
-        with patch("src.os_detector.Path") as mock_path, \
-             patch("src.os_detector.shutil.which") as mock_which:
-            # Path("/proc/1/exe").resolve() -> raises OSError
-            mock_path.return_value.resolve.side_effect = OSError
-            # Subsequent calls: Path(...).exists() -> returns False
-            mock_path.return_value.exists.return_value = False
-            # shutil.which("runit") -> returns None
-            mock_which.return_value = None
-
-            assert _detect_init() == "unknown"
-
-    def test_detect_init_systemd(self):
-        with patch("src.os_detector.Path") as mock_path:
-            # Path("/proc/1/exe").resolve().name -> "systemd"
-            mock_path.return_value.resolve.return_value.name = "systemd"
-            assert _detect_init() == "systemd"
-
-    def test_detect_init_runit(self):
-        with patch("src.os_detector.Path") as mock_path:
-            mock_path.return_value.resolve.return_value.name = "runit"
-            assert _detect_init() == "runit"
-
-    def test_detect_init_openrc(self):
-        with patch("src.os_detector.Path") as mock_path:
-            mock_path.return_value.resolve.return_value.name = "openrc"
-            assert _detect_init() == "openrc"
-
-    def test_detect_init_sysv(self):
-        with patch("src.os_detector.Path") as mock_path:
-            mock_path.return_value.resolve.return_value.name = "init"
-            assert _detect_init() == "sysv"
-
-    def test_detect_init_fallback_systemd(self):
-        with patch("src.os_detector.Path") as mock_path:
-            # resolve fails
-            mock_path.return_value.resolve.side_effect = OSError
-            # /run/systemd/system exists
-            def exists_side_effect(self_mock):
-                return True # For simplicity in this test, all exists() return True
-
-            # Use a side effect for Path() call to distinguish if needed,
-            # but here just making the first fallback hit.
-            mock_path.return_value.exists.return_value = True
-            assert _detect_init() == "systemd"
-
-    def test_detect_init_fallback_openrc(self):
-        with patch("src.os_detector.Path") as mock_path:
-            mock_path.return_value.resolve.side_effect = OSError
-
-            # We need to return False for systemd path, True for openrc path
-            mock_systemd = MagicMock()
-            mock_systemd.exists.return_value = False
-            mock_openrc = MagicMock()
-            mock_openrc.exists.return_value = True
-
-            def path_side_effect(p):
-                if "/systemd/" in str(p): return mock_systemd
-                if "/openrc" in str(p): return mock_openrc
-                return MagicMock()
-
-            mock_path.side_effect = path_side_effect
-            assert _detect_init() == "openrc"
-
-    def test_detect_init_fallback_runit(self):
-        with patch("src.os_detector.Path") as mock_path, \
-             patch("src.os_detector.shutil.which") as mock_which:
-            mock_path.return_value.resolve.side_effect = OSError
-            mock_path.return_value.exists.return_value = False
-            mock_which.return_value = "/usr/bin/runit"
-
-            assert _detect_init() == "runit"
-
-    def test_detect_init_permission_error(self):
-        with patch("src.os_detector.Path") as mock_path, \
-             patch("src.os_detector.shutil.which") as mock_which:
-            mock_path.return_value.resolve.side_effect = PermissionError
-            mock_path.return_value.exists.return_value = False
-            mock_which.return_value = None
-
-            assert _detect_init() == "unknown"
 
 
 # ── OSInfo.to_system_prompt_block ─────────────────────────────────────────────

@@ -121,9 +121,9 @@ class CommandExecutor:
                 command=command,
                 approved=False,
                 blocked=True,
-                returncode=-1,
-                stdout="",
-                stderr="Command blocked by safety policy.",
+                output=CommandOutput(
+                    returncode=-1, stdout="", stderr="Command blocked by safety policy."
+                ),
             )
 
         if self._safety.get("confirm_commands", True):
@@ -134,9 +134,7 @@ class CommandExecutor:
                     command=command,
                     approved=False,
                     blocked=False,
-                    returncode=-1,
-                    stdout="",
-                    stderr="",
+                    output=CommandOutput(returncode=-1, stdout="", stderr=""),
                 )
         else:
             approved = True
@@ -152,16 +150,16 @@ class CommandExecutor:
                 text=True,
                 timeout=120,
             )
-            logger.debug(
-                "Command finished (rc=%d): %s", result.returncode, command
-            )
+            logger.debug("Command finished (rc=%d): %s", result.returncode, command)
             return CommandResult(
                 command=command,
                 approved=True,
                 blocked=False,
-                returncode=result.returncode,
-                stdout=result.stdout,
-                stderr=result.stderr,
+                output=CommandOutput(
+                    returncode=result.returncode,
+                    stdout=result.stdout,
+                    stderr=result.stderr,
+                ),
             )
         except subprocess.TimeoutExpired:
             logger.error("Command timed out: %s", command)
@@ -169,9 +167,11 @@ class CommandExecutor:
                 command=command,
                 approved=True,
                 blocked=False,
-                returncode=-1,
-                stdout="",
-                stderr="Command timed out after 120 seconds.",
+                output=CommandOutput(
+                    returncode=-1,
+                    stdout="",
+                    stderr="Command timed out after 120 seconds.",
+                ),
             )
         except Exception as exc:  # noqa: BLE001
             logger.error("Command execution error: %s", exc)
@@ -179,9 +179,7 @@ class CommandExecutor:
                 command=command,
                 approved=True,
                 blocked=False,
-                returncode=-1,
-                stdout="",
-                stderr=str(exc),
+                output=CommandOutput(returncode=-1, stdout="", stderr=str(exc)),
             )
 
     def process_response(self, ai_response: str) -> list["CommandResult"]:
@@ -205,6 +203,16 @@ class CommandExecutor:
 
 # ── Result dataclass ──────────────────────────────────────────────────────────
 
+
+@dataclass(slots=True)
+class CommandOutput:
+    """Standard output streams and return code from a process."""
+
+    returncode: int
+    stdout: str
+    stderr: str
+
+
 @dataclass(slots=True)
 class CommandResult:
     """Outcome of a single command execution attempt."""
@@ -212,9 +220,19 @@ class CommandResult:
     command: str
     approved: bool
     blocked: bool
-    returncode: int
-    stdout: str
-    stderr: str
+    output: CommandOutput | None = None
+
+    @property
+    def returncode(self) -> int:
+        return self.output.returncode if self.output else -1
+
+    @property
+    def stdout(self) -> str:
+        return self.output.stdout if self.output else ""
+
+    @property
+    def stderr(self) -> str:
+        return self.output.stderr if self.output else ""
 
     @property
     def succeeded(self) -> bool:
@@ -229,6 +247,7 @@ class CommandResult:
 
 
 # ── Terminal confirmation helper ──────────────────────────────────────────────
+
 
 def _terminal_confirm(command: str) -> bool:
     """Ask the user on the terminal whether to run *command*.
