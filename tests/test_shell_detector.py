@@ -126,6 +126,31 @@ class TestDetect:
             assert info.path == "/bin/sh"
             assert info.family == "sh"
 
+    def test_detect_env_shell_not_exists(self):
+        detect.cache_clear()
+        with patch.dict(os.environ, {"SHELL": "/missing/shell"}), \
+             patch("src.shell_detector.Path.exists", return_value=False), \
+             patch("src.shell_detector._from_parent_proc", return_value="/usr/bin/zsh"), \
+             patch("src.shell_detector._version", return_value="5.9"):
+
+            info = detect()
+            # Falls back to parent proc
+            assert info.path == "/usr/bin/zsh"
+            assert info.family == "zsh"
+
+    def test_detect_user_db_shell_not_exists(self):
+        detect.cache_clear()
+        with patch.dict(os.environ, {"SHELL": ""}), \
+             patch("src.shell_detector._from_parent_proc", return_value=None), \
+             patch("src.shell_detector._from_user_db", return_value="/missing/bash"), \
+             patch("src.shell_detector.Path.exists", return_value=False), \
+             patch("src.shell_detector._version", return_value=""):
+
+            info = detect()
+            # Falls back to /bin/sh
+            assert info.path == "/bin/sh"
+            assert info.family == "sh"
+
     def test_detect_is_cached(self):
         with patch.dict(os.environ, {"SHELL": "/bin/bash"}), \
              patch.object(Path, "exists", return_value=True), \
@@ -136,6 +161,18 @@ class TestDetect:
 
             assert first is second
             assert mock_version.call_count == 1
+
+    def test_from_user_db_success(self):
+        mock_entry = MagicMock()
+        mock_entry.pw_shell = "/usr/bin/zsh"
+        with patch("pwd.getpwuid", return_value=mock_entry):
+            assert _from_user_db() == "/usr/bin/zsh"
+
+    def test_from_user_db_empty_shell(self):
+        mock_entry = MagicMock()
+        mock_entry.pw_shell = ""
+        with patch("pwd.getpwuid", return_value=mock_entry):
+            assert _from_user_db() is None
 
     def test_from_user_db_exception(self):
         with patch("pwd.getpwuid", side_effect=KeyError):
@@ -168,4 +205,8 @@ class TestDetect:
             mock_exe.resolve.return_value = resolved_path
             mock_path.return_value = mock_exe
 
+            assert _from_parent_proc() is None
+
+    def test_from_parent_proc_exception(self):
+        with patch("os.getppid", side_effect=OSError):
             assert _from_parent_proc() is None
