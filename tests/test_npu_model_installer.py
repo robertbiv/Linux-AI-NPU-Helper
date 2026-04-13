@@ -589,44 +589,60 @@ class TestInstallModelFromCatalog:
 # ── ensure_default_model ──────────────────────────────────────────────────────
 
 class TestEnsureDefaultModel:
-    def test_returns_none_on_install_error(self, tmp_path):
-        with patch("src.npu_model_installer.NPUModelInstaller") as MockClass:
-            mock_inst = MagicMock()
-            mock_inst.install.side_effect = InstallError("download failed")
-            MockClass.return_value = mock_inst
-            result = ensure_default_model(install_dir=tmp_path)
+    @patch("src.npu_model_installer.install_model_from_catalog")
+    @patch("src.npu_model_installer.get_default_entry")
+    def test_returns_none_on_install_error(self, mock_get_entry, mock_install, tmp_path):
+        mock_install.side_effect = InstallError("download failed")
+        result = ensure_default_model(install_dir=tmp_path)
         assert result is None
+        mock_install.assert_called_once_with(
+            mock_get_entry.return_value,
+            install_dir=tmp_path,
+            progress_callback=None,
+            allow_external=True,
+        )
 
-    def test_returns_path_on_success(self, tmp_path):
+    @patch("src.npu_model_installer.install_model_from_catalog")
+    @patch("src.npu_model_installer.get_default_entry")
+    def test_returns_path_on_success(self, mock_get_entry, mock_install, tmp_path):
         expected = tmp_path / "model.onnx"
-        with patch("src.npu_model_installer.NPUModelInstaller") as MockClass:
-            mock_inst = MagicMock()
-            mock_inst.install.return_value = expected
-            MockClass.return_value = mock_inst
-            result = ensure_default_model(install_dir=tmp_path)
+        mock_install.return_value = expected
+        result = ensure_default_model(install_dir=tmp_path)
         assert result == expected
+        mock_install.assert_called_once_with(
+            mock_get_entry.return_value,
+            install_dir=tmp_path,
+            progress_callback=None,
+            allow_external=True,
+        )
 
-    def test_passes_allow_external(self, tmp_path):
-        with patch("src.npu_model_installer.NPUModelInstaller") as MockClass:
-            mock_inst = MagicMock()
-            mock_inst.install.return_value = tmp_path / "m.onnx"
-            MockClass.return_value = mock_inst
-            ensure_default_model(install_dir=tmp_path, allow_external=False)
-            _, kwargs = mock_inst.install.call_args
-            assert kwargs.get("allow_external") is False
+    @patch("src.npu_model_installer.install_model_from_catalog")
+    @patch("src.npu_model_installer.get_default_entry")
+    def test_passes_allow_external(self, mock_get_entry, mock_install, tmp_path):
+        mock_install.return_value = tmp_path / "m.onnx"
+        ensure_default_model(install_dir=tmp_path, allow_external=False)
+        mock_install.assert_called_once_with(
+            mock_get_entry.return_value,
+            install_dir=tmp_path,
+            progress_callback=None,
+            allow_external=False,
+        )
 
-    def test_passes_progress_callback(self, tmp_path):
+    @patch("src.npu_model_installer.install_model_from_catalog")
+    @patch("src.npu_model_installer.get_default_entry")
+    def test_passes_progress_callback(self, mock_get_entry, mock_install, tmp_path):
         messages = []
-        with patch("src.npu_model_installer.NPUModelInstaller") as MockClass:
-            mock_inst = MagicMock()
-            mock_inst.install.return_value = tmp_path / "m.onnx"
-            MockClass.return_value = mock_inst
-            ensure_default_model(
-                install_dir=tmp_path,
-                progress_callback=messages.append,
-            )
-            _, kwargs = mock_inst.install.call_args
-            assert kwargs.get("progress_callback") == messages.append
+        mock_install.return_value = tmp_path / "m.onnx"
+        ensure_default_model(
+            install_dir=tmp_path,
+            progress_callback=messages.append,
+        )
+        mock_install.assert_called_once_with(
+            mock_get_entry.return_value,
+            install_dir=tmp_path,
+            progress_callback=messages.append,
+            allow_external=True,
+        )
 
 
 # ── _cb helper ────────────────────────────────────────────────────────────────

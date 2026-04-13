@@ -271,6 +271,19 @@ class TestNPUManager:
             mgr.run_inference({"input_ids": []})
         assert mgr._session is None
 
+    def test_run_inference_unloads_on_error(self, tmp_path):
+        onnx = tmp_path / "m.onnx"
+        onnx.write_bytes(b"x")
+        resource_cfg = {"unload_model_after_inference": True}
+        mgr = NPUManager(self._cfg(model_path=str(onnx)), resource_cfg)
+        with patch("src.npu_manager.NPUSession") as MockSess:
+            mock_s = MagicMock()
+            mock_s.run.side_effect = RuntimeError("Mock error")
+            MockSess.return_value = mock_s
+            with pytest.raises(RuntimeError, match="Mock error"):
+                mgr.run_inference({"input_ids": []})
+        assert mgr._session is None
+
     def test_run_inference_no_model_raises(self):
         mgr = NPUManager(self._cfg(model_path=""))
         with pytest.raises(RuntimeError, match="No NPU model_path"):

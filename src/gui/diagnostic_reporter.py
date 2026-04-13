@@ -11,12 +11,14 @@ call individual ``check_*`` methods for targeted checks.
 
 Example
 -------
->>> from src.diagnostic_reporter import DiagnosticReporter
->>> from src.config import load as load_config
->>> reporter = DiagnosticReporter(load_config())
->>> report = reporter.full_report()
->>> print(report["backend"]["status"])
-'ok'
+::
+
+    >>> from src.diagnostic_reporter import DiagnosticReporter
+    >>> from src.config import load as load_config
+    >>> reporter = DiagnosticReporter(load_config())
+    >>> report = reporter.full_report()
+    >>> print(report["backend"]["status"])
+    'ok'
 """
 
 from __future__ import annotations
@@ -73,7 +75,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``backend``, ``url``, ``model``,
+            Keys: `status`, ``backend``, ``url``, ``model``,
             ``latency_ms``, ``error``.
         """
         backend = self._config.backend
@@ -140,7 +142,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``available``, ``providers``,
+            Keys: `status`, ``available``, ``providers``,
             ``onnxruntime_version``, ``model_path``, ``model_exists``,
             ``error``.
         """
@@ -183,7 +185,7 @@ class DiagnosticReporter:
         Returns
         -------
         list[dict]
-            One dict per tool with keys: ``name``, ``status``,
+            One dict per tool with keys: ``name``, `status`,
             ``loaded``, ``unload_after_use``, ``description``.
         """
         if self._registry is None:
@@ -209,7 +211,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``checks`` (list of individual check dicts),
+            Keys: `status`, ``checks`` (list of individual check dicts),
             ``issues``.
         """
         checks = []
@@ -232,8 +234,8 @@ class DiagnosticReporter:
                     checks.append({"label": label, "status": STATUS_OK,
                                    "detail": f"Mode {oct(mode)} — owner only."})
             except OSError as exc:
-                checks.append({"label": label, "status": STATUS_FAIL,
-                                "detail": str(exc)})
+                checks.append({"label": label, "status": STATUS_WARN,
+                               "detail": f"Could not read permissions: {exc}"})
                 issues += 1
 
         # Check settings file
@@ -275,7 +277,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``path``, ``exists``, ``listener_count``,
+            Keys: `status`, ``path``, ``exists``, ``listener_count``,
             ``backend``, ``model``, ``error``.
         """
         result: dict[str, Any] = {
@@ -312,7 +314,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``os_name``, ``os_version``, ``distro_id``,
+            Keys: `status`, ``os_name``, ``os_version``, ``distro_id``,
             ``package_manager``, ``desktop_environment``, ``shell``,
             ``kernel``, ``architecture``, ``python_version``,
             ``is_immutable``, ``app_version``.
@@ -366,7 +368,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``allow_external``, ``backend_url``,
+            Keys: `status`, ``allow_external``, ``backend_url``,
             ``backend_url_is_local``, ``error``.
         """
         from src.security import is_local_url
@@ -411,7 +413,7 @@ class DiagnosticReporter:
         Returns
         -------
         list[dict]
-            One dict per dependency with keys: ``name``, ``status``,
+            One dict per dependency with keys: ``name``, `status`,
             ``version``, ``required``, ``detail``.
         """
         deps = [
@@ -455,7 +457,7 @@ class DiagnosticReporter:
         Returns
         -------
         dict
-            Keys: ``status``, ``passed``, ``failed``, ``errors``,
+            Keys: `status`, ``passed``, ``failed``, ``errors``,
             ``total``, ``duration_s``, ``output``.
         """
         import subprocess

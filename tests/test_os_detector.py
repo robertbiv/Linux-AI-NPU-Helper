@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from pathlib import Path
 from src.os_detector import (
     OSInfo,
     _detect_package_manager,
@@ -148,6 +149,22 @@ class TestDetect:
         info = detect()
         assert info.kernel != ""
 
+
+    def test_read_os_release_manual_fallback_and_malformed_lines(self):
+        detect.cache_clear()
+        malformed_content = """
+# This is a comment
+
+INVALID_LINE_NO_EQUALS
+VALID_KEY="valid_value"
+"""
+        with patch("platform.freedesktop_os_release", side_effect=OSError), \
+             patch.object(Path, "exists", return_value=True), \
+             patch.object(Path, "read_text", return_value=malformed_content):
+            result = _read_os_release()
+
+        assert result == {"VALID_KEY": "valid_value"}
+
     def test_read_os_release_returns_dict(self):
         result = _read_os_release()
         assert isinstance(result, dict)
@@ -180,4 +197,22 @@ class TestDetect:
             detect.cache_clear()
             info = detect()
         assert info.package_manager == "pacman"
+        detect.cache_clear()
+
+    def test_detect_falls_back_to_legacy_release(self):
+        detect.cache_clear()
+        mock_legacy = {
+            "ID": "centos",
+            "NAME": "CentOS",
+            "VERSION_ID": "7",
+        }
+        with patch("src.os_detector._read_os_release", return_value={}), \
+             patch("src.os_detector._read_legacy_release", return_value=mock_legacy):
+            detect.cache_clear()
+            info = detect()
+        assert info.id == "centos"
+        assert info.name == "CentOS"
+        assert info.version == "7"
+        # Since it falls back to centos, and centos is matched in _ID_TO_PKG to dnf.
+        assert info.package_manager == "dnf"
         detect.cache_clear()

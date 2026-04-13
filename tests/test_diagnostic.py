@@ -122,6 +122,18 @@ class TestCheckSecurity:
         rate_check = next(c for c in r["checks"] if "rate" in c["label"].lower())
         assert rate_check["status"] == STATUS_OK
 
+    def test_file_stat_oserror(self):
+        cfg = _make_config(allow_external=False)
+        with patch("pathlib.Path.exists", return_value=True):
+            with patch("pathlib.Path.stat", side_effect=OSError("mock error")):
+                r = DiagnosticReporter(cfg).check_security()
+
+        assert r["issues"] > 0
+
+        # Check if at least one file check has STATUS_WARN with the expected detail
+        fail_checks = [c for c in r["checks"] if c["status"] == STATUS_WARN and "mock error" in c.get("detail", "")]
+        assert len(fail_checks) > 0
+
 
 class TestCheckNetwork:
     def test_local_url_ok(self):
@@ -159,6 +171,26 @@ class TestCheckSystem:
         r = DiagnosticReporter(_make_config()).check_system()
         for key in ("status", "python_version", "app_version", "is_immutable"):
             assert key in r
+
+    @patch("src.os_detector.detect")
+    def test_shell_detection_exception_handled(self, mock_os_detect):
+        # Prevent OS detection from failing and changing the status to WARN
+        mock_info = MagicMock()
+        mock_info.name = "TestOS"
+        mock_info.version = "1.0"
+        mock_info.id = "test"
+        mock_info.package_manager = "apt"
+        mock_info.desktop_environment = "gnome"
+        mock_info.kernel = "test-kernel"
+        mock_info.architecture = "x86_64"
+        mock_info.is_immutable = False
+        mock_os_detect.return_value = mock_info
+
+        with patch("src.shell_detector.detect", side_effect=Exception("Mock shell error")):
+            r = DiagnosticReporter(_make_config()).check_system()
+
+        assert r["shell"] == ""
+        assert r["status"] == STATUS_OK
 
 
 class TestCheckDependencies:
