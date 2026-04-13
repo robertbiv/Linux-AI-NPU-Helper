@@ -29,7 +29,6 @@ import os
 import shlex
 import stat
 import tempfile
-from functools import lru_cache
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -53,13 +52,60 @@ _TERMINALS: list[tuple[str, str]] = [
 ]
 
 
-@lru_cache(maxsize=1)
 def _find_terminal() -> tuple[str, str] | None:
-    import shutil
+    import sys
+
+    path_env = os.environ.get("PATH", None)
+    if path_env is None:
+        try:
+            path_env = os.confstr("CS_PATH")
+        except (AttributeError, ValueError):
+            path_env = os.defpath
+
+    if not path_env:
+        return None
+
+    path_dirs = path_env.split(os.pathsep)
+    if sys.platform == "win32":
+        path_dirs.insert(0, os.curdir)
+        pathext_source = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH")
+        pathext = [ext.upper() for ext in pathext_source.split(os.pathsep) if ext]
+    else:
+        pathext = []
+
+    dir_contents = {}
+    for p in path_dirs:
+        dir_p = p if p else os.curdir
+        normdir = os.path.normcase(dir_p)
+        if normdir not in dir_contents:
+            try:
+                if sys.platform == "win32":
+                    dir_contents[normdir] = {f.upper() for f in os.listdir(dir_p)}
+                else:
+                    dir_contents[normdir] = set(os.listdir(dir_p))
+            except OSError:
+                dir_contents[normdir] = set()
+
     for exe, style in _TERMINALS:
-        path = shutil.which(exe)
-        if path:
-            return path, style
+        exe_upper = exe.upper() if sys.platform == "win32" else exe
+
+        if sys.platform == "win32":
+            files = [exe_upper + ext for ext in pathext]
+            if any(exe_upper.endswith(ext) for ext in pathext):
+                files.insert(0, exe_upper)
+        else:
+            files = [exe]
+
+        for p in path_dirs:
+            dir_p = p if p else os.curdir
+            normdir = os.path.normcase(dir_p)
+            entries = dir_contents.get(normdir, set())
+
+            for thefile in files:
+                if thefile in entries:
+                    full = os.path.join(p, exe if sys.platform != "win32" or thefile == exe_upper else thefile)
+                    if os.access(full, os.X_OK) and not os.path.isdir(full):
+                        return full, style
     return None
 
 
@@ -92,11 +138,7 @@ _CMD={quoted}
 printf 'Edit if needed, then press \\033[1mEnter\\033[0m to run  (Ctrl-C to cancel):\\n\\n'
 read -r -e -p '$ ' -i "$_CMD" _CONFIRMED
 if [ -n "$_CONFIRMED" ]; then
-    _TMP=$(mktemp)
-    echo "[ -f ~/.bashrc ] && source ~/.bashrc" > "$_TMP"
-    echo "$_CONFIRMED" >> "$_TMP"
-    echo "rm -f '$_TMP'" >> "$_TMP"
-    exec bash --rcfile "$_TMP" -i
+    bash -c "$_CONFIRMED"
 fi
 exec bash -i
 """
@@ -106,9 +148,13 @@ _ZSH_SCRIPT = """\
 #!/usr/bin/env zsh
 _CMD={quoted}
 """ + _BANNER + """\
-printf 'Press \\e[1mEnter\\e[0m to edit and run the command.\\n\\n'
-print -z "$_CMD"
-exec zsh -i
+printf 'Edit if needed, then press \\e[1mEnter\\e[0m to run  (Ctrl-C to cancel):\\n\\n'
+vared -p '$ ' -c _CMD
+if [ -n "$_CMD" ]; then
+    zsh -c "$_CMD"
+fi
+printf '\\n\\e[2m[Press Enter to close]\\e[0m'
+read -r _DONE
 """
 
 # fish: --init-command sets the commandline buffer before the prompt appears
@@ -132,9 +178,15 @@ _KSH_SCRIPT = """\
 #!/usr/bin/env ksh
 _CMD={quoted}
 """ + _BANNER + """\
-printf 'Press \\033[1mUp Arrow\\033[0m then \\033[1mEnter\\033[0m to edit and run the command.\\n\\n'
-print -s "$_CMD"
-exec ksh -i
+printf 'Type or edit the command, then press \\033[1mEnter\\033[0m (Ctrl-C to cancel):\\n\\n'
+printf '$ %s' "$_CMD"
+read -r _CONFIRMED
+_CONFIRMED="${_CONFIRMED:-$_CMD}"
+if [ -n "$_CONFIRMED" ]; then
+    ksh -c "$_CONFIRMED"
+fi
+printf '\\n[Press Enter to close]'
+read -r _DONE
 """
 
 # Generic POSIX sh / dash / csh / others: just display and do a plain read

@@ -37,7 +37,6 @@ import logging
 from typing import TYPE_CHECKING, Generator, Iterator
 
 from src.security import (
-    ExternalNetworkBlockedError,  # re-export for callers that import from here
     RateLimiter,
     assert_local_url,
     mask_secret,
@@ -49,9 +48,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# Re-export so existing code that imports ExternalNetworkBlockedError from
-# this module continues to work.
-__all__ = ["AIAssistant", "ExternalNetworkBlockedError"]
+__all__ = ["AIAssistant"]
 
 
 class AIAssistant:
