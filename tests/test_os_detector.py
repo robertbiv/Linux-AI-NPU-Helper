@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from pathlib import Path
 from src.os_detector import (
     OSInfo,
     _detect_package_manager,
@@ -147,6 +148,22 @@ class TestDetect:
         detect.cache_clear()
         info = detect()
         assert info.kernel != ""
+
+
+    def test_read_os_release_manual_fallback_and_malformed_lines(self):
+        detect.cache_clear()
+        malformed_content = """
+# This is a comment
+
+INVALID_LINE_NO_EQUALS
+VALID_KEY="valid_value"
+"""
+        with patch("platform.freedesktop_os_release", side_effect=OSError), \
+             patch.object(Path, "exists", return_value=True), \
+             patch.object(Path, "read_text", return_value=malformed_content):
+            result = _read_os_release()
+
+        assert result == {"VALID_KEY": "valid_value"}
 
     def test_read_os_release_returns_dict(self):
         result = _read_os_release()

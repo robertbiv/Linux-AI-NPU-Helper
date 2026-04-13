@@ -162,6 +162,16 @@ class TestCheckPathPermissions:
     def test_nonexistent_file_no_error(self, tmp_path):
         check_path_permissions(tmp_path / "missing.txt")  # should not raise
 
+    def test_oserror_on_stat(self, tmp_path, caplog):
+        import logging
+        p = tmp_path / "dummy.txt"
+        p.write_text("x")
+        with patch.object(Path, "exists", return_value=True), \
+             patch.object(Path, "stat", side_effect=OSError("Mocked error")):
+            with caplog.at_level(logging.DEBUG):
+                check_path_permissions(p, label="test file")
+        assert "Could not check permissions of" in caplog.text
+
 
 # ── RateLimiter ───────────────────────────────────────────────────────────────
 

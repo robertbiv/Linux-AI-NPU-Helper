@@ -11,12 +11,14 @@ call individual ``check_*`` methods for targeted checks.
 
 Example
 -------
->>> from src.gui.diagnostic_reporter import DiagnosticReporter
->>> from src.config import load as load_config
->>> reporter = DiagnosticReporter(load_config())
->>> report = reporter.full_report()
->>> print(report["backend"].get("status"))
-'ok'
+::
+
+    >>> from src.diagnostic_reporter import DiagnosticReporter
+    >>> from src.config import load as load_config
+    >>> reporter = DiagnosticReporter(load_config())
+    >>> report = reporter.full_report()
+    >>> print(report["backend"]["status"])
+    'ok'
 """
 
 from __future__ import annotations
@@ -232,8 +234,8 @@ class DiagnosticReporter:
                     checks.append({"label": label, "status": STATUS_OK,
                                    "detail": f"Mode {oct(mode)} — owner only."})
             except OSError as exc:
-                checks.append({"label": label, "status": STATUS_FAIL,
-                                "detail": str(exc)})
+                checks.append({"label": label, "status": STATUS_WARN,
+                               "detail": f"Could not read permissions: {exc}"})
                 issues += 1
 
         # Check settings file

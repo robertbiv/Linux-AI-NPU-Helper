@@ -16,15 +16,6 @@ from src.tools._base import SearchResult, Tool, ToolResult
 
 logger = logging.getLogger(__name__)
 
-_DESKTOP_DIRS = [
-    Path("/usr/share/applications"),
-    Path("/usr/local/share/applications"),
-    Path.home() / ".local" / "share" / "applications",
-    Path("/var/lib/flatpak/exports/share/applications"),
-    Path.home() / ".local" / "share" / "flatpak" / "exports" / "share" / "applications",
-    Path("/var/lib/snapd/desktop/applications"),
-]
-
 
 def _run(cmd: list[str], timeout: int = 15) -> str:
     import shutil
@@ -38,34 +29,21 @@ def _run(cmd: list[str], timeout: int = 15) -> str:
         return ""
 
 
-def _desktop_field(text: str, key: str, default: str = "") -> str:
-    m = re.search(rf"^{re.escape(key)}=(.+)$", text, re.MULTILINE)
-    return m.group(1).strip() if m else default
-
-
 def _scan_desktop(query: str = "") -> list[dict]:
+    from src.tools.app import _load_desktop_cache
+
     q = query.lower()
     results: list[dict] = []
-    seen: set[str] = set()
-    for d in _DESKTOP_DIRS:
-        if not d.is_dir():
+
+    for hit in _load_desktop_cache():
+        if q and q not in hit["name"].lower() and q not in hit["comment"].lower():
             continue
-        for f in d.glob("*.desktop"):
-            if f.name in seen:
-                continue
-            try:
-                text = f.read_text(errors="replace")
-            except OSError:
-                continue
-            name = _desktop_field(text, "Name") or f.stem
-            comment = _desktop_field(text, "Comment")
-            if _desktop_field(text, "NoDisplay", "false").lower() == "true":
-                continue
-            if q and q not in name.lower() and q not in comment.lower():
-                continue
-            seen.add(f.name)
-            results.append({"source": "desktop", "name": name,
-                            "comment": comment, "file": str(f)})
+        results.append({
+            "source": "desktop",
+            "name": hit["name"],
+            "comment": hit["comment"],
+            "file": hit["file"]
+        })
     return results
 
 
