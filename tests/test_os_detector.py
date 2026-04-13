@@ -59,6 +59,14 @@ class TestDetectPackageManager:
 
 
 class TestDetectInit:
+    def test_detect_init_oserror(self):
+        with patch("src.os_detector.Path") as mock_path, \
+             patch("src.os_detector.shutil.which") as mock_which:
+            mock_path.return_value.resolve.side_effect = OSError
+            mock_path.return_value.exists.return_value = False
+            mock_which.return_value = None
+            assert _detect_init() == "unknown"
+
     def test_detect_init_oserror_returns_unknown(self):
         with patch("src.os_detector.Path") as mock_path, \
              patch("src.os_detector.shutil.which") as mock_which:
