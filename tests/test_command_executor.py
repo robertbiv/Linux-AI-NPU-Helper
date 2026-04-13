@@ -85,9 +85,9 @@ class TestRunCommand:
         assert result.approved is False
 
     def test_successful_command(self):
+        import subprocess as _sp
         ex = CommandExecutor(_SAFETY)
-        with patch("subprocess.run") as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="ok\n", stderr="")
+        with patch.object(ex, "_execute_pipeline", return_value=_sp.CompletedProcess(args="echo ok", returncode=0, stdout="ok\n", stderr="")):
             result = ex.run_command("echo ok")
         assert result.approved is True
         assert result.blocked is False
@@ -101,10 +101,10 @@ class TestRunCommand:
         assert result.approved is False
 
     def test_command_requiring_confirm_approved(self):
+        import subprocess as _sp
         safety = {**_SAFETY, "confirm_commands": True}
         ex = CommandExecutor(safety, confirm_callback=lambda cmd: True)
-        with patch("subprocess.run") as mock_run:
-            mock_run.return_value = MagicMock(returncode=0, stdout="", stderr="")
+        with patch.object(ex, "_execute_pipeline", return_value=_sp.CompletedProcess(args="ls", returncode=0, stdout="", stderr="")):
             result = ex.run_command("ls")
         assert result.approved is True
 
@@ -112,7 +112,7 @@ class TestRunCommand:
         import subprocess
 
         ex = CommandExecutor(_SAFETY)
-        with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("ls", 120)):
+        with patch.object(ex, "_execute_pipeline", side_effect=subprocess.TimeoutExpired("ls", 120)):
             result = ex.run_command("ls")
         assert result.returncode == -1
         assert "timed out" in result.stderr.lower()
