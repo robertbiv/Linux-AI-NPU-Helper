@@ -138,9 +138,9 @@ def _query_battery() -> str:
             # Ensure exact path match (up to newline or exact end of string)
             block_lines = device_block.splitlines()
             if block_lines and block_lines[0].strip() == device_path:
-                for l in block_lines[1:]:
-                    if "time to" in l.lower():
-                        eta = l.strip()
+                for line_str in block_lines[1:]:
+                    if "time to" in line_str.lower():
+                        eta = line_str.strip()
                         break
                 break
 
@@ -218,7 +218,7 @@ def _query_gpu() -> str:
                 # Remove PCI address prefix
                 parts = row.split(":", 2)
                 desc = parts[-1].strip() if len(parts) >= 2 else row.strip()
-                if not any(desc in l for l in lines):  # avoid duplication
+                if not any(desc in existing for existing in lines):  # avoid duplication
                     lines.append(desc)
 
     # /sys DRM cards as last resort
