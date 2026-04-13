@@ -102,18 +102,14 @@ fi
 exec bash -i
 """
 
-# zsh: vared — ZLE variable editor that accepts an initial value
+# zsh: print -z natively pushes the string onto the ZLE editing buffer stack
 _ZSH_SCRIPT = """\
 #!/usr/bin/env zsh
 _CMD={quoted}
 """ + _BANNER + """\
 printf 'Edit if needed, then press \\e[1mEnter\\e[0m to run  (Ctrl-C to cancel):\\n\\n'
-vared -p '$ ' -c _CMD
-if [ -n "$_CMD" ]; then
-    zsh -c "$_CMD"
-fi
-printf '\\n\\e[2m[Press Enter to close]\\e[0m'
-read -r _DONE
+print -z -- "$_CMD"
+exec zsh -i
 """
 
 # fish: --init-command sets the commandline buffer before the prompt appears
