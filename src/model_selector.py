@@ -20,6 +20,7 @@ Example
 
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 import re
 from dataclasses import dataclass, field
@@ -178,14 +179,15 @@ class ModelSelector:
 
     def __init__(self, config: Any) -> None:  # noqa: ANN001
         self._config = config
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
     # ── Query backend ─────────────────────────────────────────────────────────
 
-    def list_models(self, timeout: int = 10) -> list[ModelInfo]:
-        """Return all models available from the currently configured backend.
+    def list_models(self, timeout: int = 10) -> concurrent.futures.Future[list[ModelInfo]]:
+        """Return a Future for all models available from the currently configured backend.
 
         Network calls are made only to the locally configured backend URL.
-        Returns an empty list (with a log warning) when the backend is
+        Returns a Future containing an empty list (with a log warning) when the backend is
         unreachable rather than raising an exception.
 
         Parameters
@@ -195,23 +197,26 @@ class ModelSelector:
 
         Returns
         -------
-        list[ModelInfo]
-            Models sorted alphabetically by name.
+        concurrent.futures.Future[list[ModelInfo]]
+            Future that resolves to models sorted alphabetically by name.
         """
-        backend = self._config.backend
-        try:
-            if backend == "ollama":
-                return self._list_ollama(timeout)
-            elif backend == "openai":
-                return self._list_openai(timeout)
-            elif backend == "npu":
-                return self._list_npu()
-            else:
-                logger.warning("Unknown backend %r; cannot list models.", backend)
+        def _fetch() -> list[ModelInfo]:
+            backend = self._config.backend
+            try:
+                if backend == "ollama":
+                    return self._list_ollama(timeout)
+                elif backend == "openai":
+                    return self._list_openai(timeout)
+                elif backend == "npu":
+                    return self._list_npu()
+                else:
+                    logger.warning("Unknown backend %r; cannot list models.", backend)
+                    return []
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Could not list models from %r backend: %s", backend, exc)
                 return []
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Could not list models from %r backend: %s", backend, exc)
-            return []
+
+        return self._executor.submit(_fetch)
 
     def _list_ollama(self, timeout: int) -> list[ModelInfo]:
         import requests

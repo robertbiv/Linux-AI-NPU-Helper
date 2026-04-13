@@ -206,7 +206,7 @@ class TestListModels:
 
     def test_npu_returns_model_path(self):
         sel = ModelSelector(self._make_config("npu"))
-        models = sel.list_models()
+        models = sel.list_models().result()
         assert len(models) == 1
         assert models[0].name == "/path/to/model.onnx"
 
@@ -214,7 +214,7 @@ class TestListModels:
         cfg = self._make_config("npu")
         cfg.npu = {"model_path": ""}
         sel = ModelSelector(cfg)
-        assert sel.list_models() == []
+        assert sel.list_models().result() == []
 
     def test_ollama_returns_sorted(self):
         cfg = self._make_config("ollama")
@@ -227,20 +227,20 @@ class TestListModels:
         }
         fake_resp.raise_for_status = MagicMock()
         with patch("requests.get", return_value=fake_resp):
-            models = ModelSelector(cfg).list_models()
+            models = ModelSelector(cfg).list_models().result()
         assert models[0].name == "aaa:3b"
         assert models[1].name == "zzz:7b"
 
     def test_unreachable_backend_returns_empty(self):
         cfg = self._make_config("ollama")
         with patch("requests.get", side_effect=Exception("Connection refused")):
-            models = ModelSelector(cfg).list_models()
+            models = ModelSelector(cfg).list_models().result()
         assert models == []
 
     def test_unknown_backend_returns_empty(self):
         cfg = self._make_config("unknown_backend")
         sel = ModelSelector(cfg)
-        assert sel.list_models() == []
+        assert sel.list_models().result() == []
 
 
 class TestModelSummary:
