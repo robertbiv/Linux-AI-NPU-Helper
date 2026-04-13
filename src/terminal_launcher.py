@@ -92,7 +92,7 @@ _CMD={quoted}
 printf 'Edit if needed, then press \\033[1mEnter\\033[0m to run  (Ctrl-C to cancel):\\n\\n'
 read -r -e -p '$ ' -i "$_CMD" _CONFIRMED
 if [ -n "$_CONFIRMED" ]; then
-    eval "$_CONFIRMED"
+    bash -c "$_CONFIRMED"
 fi
 printf '\\n\\033[2m[Press Enter to close]\\033[0m'
 read -r _DONE
@@ -106,7 +106,7 @@ _CMD={quoted}
 printf 'Edit if needed, then press \\e[1mEnter\\e[0m to run  (Ctrl-C to cancel):\\n\\n'
 vared -p '$ ' -c _CMD
 if [ -n "$_CMD" ]; then
-    eval "$_CMD"
+    zsh -c "$_CMD"
 fi
 printf '\\n\\e[2m[Press Enter to close]\\e[0m'
 read -r _DONE
@@ -138,7 +138,7 @@ printf '$ %s' "$_CMD"
 read -r _CONFIRMED
 _CONFIRMED="${_CONFIRMED:-$_CMD}"
 if [ -n "$_CONFIRMED" ]; then
-    eval "$_CONFIRMED"
+    ksh -c "$_CONFIRMED"
 fi
 printf '\\n[Press Enter to close]'
 read -r _DONE
