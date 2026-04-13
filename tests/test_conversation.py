@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import threading
+from unittest.mock import patch
 import pytest
 from pathlib import Path
 from src.conversation import ConversationHistory, Message
@@ -131,3 +132,12 @@ class TestConversationHistory:
         for t in threads: t.join()
         assert not errors
         assert len(h) <= 200  # default max
+
+    @patch("src.conversation.secure_write")
+    def test_save_oserror(self, mock_secure_write, tmp_path, caplog):
+        """Test that OSError during save is caught and logged."""
+        mock_secure_write.side_effect = OSError("Mock error")
+        p = tmp_path / "history.json"
+        h = ConversationHistory(persist_path=p)
+        h.add("user", "test message")
+        assert "Could not save conversation history: Mock error" in caplog.text
