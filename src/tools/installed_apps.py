@@ -12,21 +12,9 @@ from pathlib import Path
 from typing import Any
 
 from src.tools._base import SearchResult, Tool, ToolResult
+from src.tools._utils import run_command
 
 logger = logging.getLogger(__name__)
-
-
-def _run(cmd: list[str], timeout: int = 15) -> str:
-    import shutil
-    import subprocess
-
-    if not shutil.which(cmd[0]):
-        return ""
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        return r.stdout.strip()
-    except Exception:  # noqa: BLE001
-        return ""
 
 
 def _scan_desktop(query: str = "") -> list[dict]:
@@ -50,7 +38,9 @@ def _scan_desktop(query: str = "") -> list[dict]:
 
 
 def _scan_flatpak(query: str = "") -> list[dict]:
-    out = _run(["flatpak", "list", "--app", "--columns=application,name,version"])
+    out = run_command(
+        ["flatpak", "list", "--app", "--columns=application,name,version"]
+    )
     q = query.lower()
     results: list[dict] = []
     for line in out.splitlines():
@@ -69,7 +59,7 @@ def _scan_flatpak(query: str = "") -> list[dict]:
 
 
 def _scan_snap(query: str = "") -> list[dict]:
-    out = _run(["snap", "list"])
+    out = run_command(["snap", "list"])
     q = query.lower()
     results: list[dict] = []
     for line in out.splitlines()[1:]:
@@ -86,7 +76,7 @@ def _scan_snap(query: str = "") -> list[dict]:
 
 def _scan_packages(query: str = "") -> list[dict]:
     q = query.lower()
-    out = _run(["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Status}\n"])
+    out = run_command(["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Status}\n"])
     if out:
         results: list[dict] = []
         for line in out.splitlines():
@@ -97,7 +87,7 @@ def _scan_packages(query: str = "") -> list[dict]:
                 continue
             results.append({"source": "deb", "name": parts[0], "version": parts[1]})
         return results
-    out = _run(["rpm", "-qa", "--qf", "%{NAME}\t%{VERSION}\n"])
+    out = run_command(["rpm", "-qa", "--qf", "%{NAME}\t%{VERSION}\n"])
     results = []
     for line in out.splitlines():
         parts = line.split("\t")

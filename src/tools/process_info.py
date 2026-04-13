@@ -14,39 +14,21 @@ from pathlib import Path
 from typing import Any
 
 from src.tools._base import SearchResult, Tool, ToolResult
+from src.tools._utils import read_sys_file, run_command
 
 logger = logging.getLogger(__name__)
 
 
-def _read(path: str, default: str = "") -> str:
-    try:
-        return Path(path).read_text(errors="replace").strip()
-    except OSError:
-        return default
-
-
-def _run(cmd: list[str], timeout: int = 8) -> str:
-    import shutil
-    import subprocess
-    if not shutil.which(cmd[0]):
-        return ""
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        return r.stdout.strip()
-    except Exception:  # noqa: BLE001
-        return ""
-
-
 def _proc_name(pid: int) -> str:
-    return _read(f"/proc/{pid}/comm")
+    return read_sys_file(f"/proc/{pid}/comm")
 
 
 def _proc_cmdline(pid: int) -> str:
-    return _read(f"/proc/{pid}/cmdline").replace("\x00", " ").strip()[:60]
+    return read_sys_file(f"/proc/{pid}/cmdline").replace("\x00", " ").strip()[:60]
 
 
 def _proc_mem_kb(pid: int) -> int:
-    for line in _read(f"/proc/{pid}/status").splitlines():
+    for line in read_sys_file(f"/proc/{pid}/status").splitlines():
         if line.startswith("VmRSS:"):
             try:
                 return int(line.split()[1])
@@ -56,8 +38,11 @@ def _proc_mem_kb(pid: int) -> int:
 
 
 def _all_pids() -> list[int]:
-    return [int(p.name) for p in Path("/proc").iterdir()
-            if p.name.isdigit() and (p / "stat").exists()]
+    return [
+        int(p.name)
+        for p in Path("/proc").iterdir()
+        if p.name.isdigit() and (p / "stat").exists()
+    ]
 
 
 _top_cpu_cache: dict[int, int] | None = None
@@ -71,7 +56,7 @@ def _top_cpu(n: int = 10) -> list[dict]:
     pids = _all_pids()
 
     def _jiffies(pid: int) -> int:
-        s = _read(f"/proc/{pid}/stat").split()
+        s = read_sys_file(f"/proc/{pid}/stat").split()
         try:
             return int(s[13]) + int(s[14])
         except (IndexError, ValueError):
@@ -80,7 +65,11 @@ def _top_cpu(n: int = 10) -> list[dict]:
     current_snap = {pid: _jiffies(pid) for pid in pids}
     current_time = time.time()
 
-    if _top_cpu_cache is None or _top_cpu_time is None or (current_time - _top_cpu_time) > 2.0:
+    if (
+        _top_cpu_cache is None
+        or _top_cpu_time is None
+        or (current_time - _top_cpu_time) > 2.0
+    ):
         _top_cpu_cache = current_snap
         time.sleep(0.4)
         _top_cpu_time = current_time
@@ -102,12 +91,15 @@ def _top_cpu(n: int = 10) -> list[dict]:
         pct = (jiffies - prev_jiffies) / clk / time_diff * 100
         if pct < 0.1:
             continue
-        results.append({
-            "pid": pid, "name": _proc_name(pid),
-            "cmdline": _proc_cmdline(pid),
-            "cpu_pct": round(pct, 1),
-            "mem_mb": round(_proc_mem_kb(pid) / 1024, 1),
-        })
+        results.append(
+            {
+                "pid": pid,
+                "name": _proc_name(pid),
+                "cmdline": _proc_cmdline(pid),
+                "cpu_pct": round(pct, 1),
+                "mem_mb": round(_proc_mem_kb(pid) / 1024, 1),
+            }
+        )
 
     _top_cpu_cache = current_snap
     _top_cpu_time = current_time
@@ -122,11 +114,14 @@ def _top_mem(n: int = 10) -> list[dict]:
         kb = _proc_mem_kb(pid)
         if kb < 1024:
             continue
-        results.append({
-            "pid": pid, "name": _proc_name(pid),
-            "cmdline": _proc_cmdline(pid),
-            "mem_mb": round(kb / 1024, 1),
-        })
+        results.append(
+            {
+                "pid": pid,
+                "name": _proc_name(pid),
+                "cmdline": _proc_cmdline(pid),
+                "mem_mb": round(kb / 1024, 1),
+            }
+        )
     results.sort(key=lambda x: x["mem_mb"], reverse=True)
     return results[:n]
 
@@ -149,17 +144,18 @@ def _battery_rate() -> str:
     lines: list[str] = []
     if ps_root.exists():
         for ps in sorted(ps_root.iterdir()):
-            if _read(str(ps / "type")).lower() != "battery":
+            if read_sys_file(str(ps / "type")).lower() != "battery":
                 continue
-            pwr = _read(str(ps / "power_now"))
+            pwr = read_sys_file(str(ps / "power_now"))
             if pwr:
                 try:
-                    lines.append(f"{ps.name}: {int(pwr)/1_000_000:.2f} W")
+                    lines.append(f"{ps.name}: {int(pwr) / 1_000_000:.2f} W")
                 except ValueError:
                     pass
     if not lines:
-        out = _run(["upower", "-i",
-                    "/org/freedesktop/UPower/devices/battery_BAT0"])
+        out = run_command(
+            ["upower", "-i", "/org/freedesktop/UPower/devices/battery_BAT0"]
+        )
         for line in out.splitlines():
             if "energy-rate" in line.lower():
                 lines.append(line.strip())
@@ -168,9 +164,9 @@ def _battery_rate() -> str:
 
 
 def _load_summary() -> str:
-    raw = _read("/proc/loadavg").split()
+    raw = read_sys_file("/proc/loadavg").split()
     mem: dict[str, int] = {}
-    for line in _read("/proc/meminfo").splitlines():
+    for line in read_sys_file("/proc/meminfo").splitlines():
         k, _, v = line.partition(":")
         try:
             mem[k.strip()] = int(v.strip().split()[0])
@@ -178,7 +174,7 @@ def _load_summary() -> str:
             pass
 
     def fmt(kb: int) -> str:
-        return f"{kb/1024:.0f}MB" if kb < 1_048_576 else f"{kb/1_048_576:.1f}GB"
+        return f"{kb / 1024:.0f}MB" if kb < 1_048_576 else f"{kb / 1_048_576:.1f}GB"
 
     lines = []
     if raw:
@@ -230,7 +226,9 @@ class ProcessInfoTool(Tool):
             if topic in ("cpu", "all"):
                 sections.append("### Top by CPU\n" + _fmt_table(_top_cpu(), "cpu_pct"))
             if topic in ("memory", "all"):
-                sections.append("### Top by Memory\n" + _fmt_table(_top_mem(), "mem_mb"))
+                sections.append(
+                    "### Top by Memory\n" + _fmt_table(_top_mem(), "mem_mb")
+                )
             if topic in ("battery", "all"):
                 sections.append("### Battery discharge\n" + _battery_rate())
             if topic in ("load", "all"):

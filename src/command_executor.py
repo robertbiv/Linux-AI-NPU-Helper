@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import logging
 import re
-import shlex
 import subprocess
 from dataclasses import dataclass
 from typing import Callable
@@ -142,15 +141,7 @@ class CommandExecutor:
 
         logger.info("Executing command: %s", command)
         try:
-            # Safely parse the command string into a list of arguments.
-            # The process is reaped by subprocess.run before we return.
-            args = shlex.split(command)
-            result = subprocess.run(
-                args,
-                capture_output=True,
-                text=True,
-                timeout=120,
-            )
+            result = self._execute_pipeline(command, timeout=120)
             logger.debug("Command finished (rc=%d): %s", result.returncode, command)
             return CommandResult(
                 command=command,
@@ -182,6 +173,170 @@ class CommandExecutor:
                 blocked=False,
                 output=CommandOutput(returncode=-1, stdout="", stderr=str(exc)),
             )
+
+    def _execute_pipeline(self, command_str: str, timeout: int = 120) -> subprocess.CompletedProcess:
+        """Execute a shell pipeline safely without shell=True."""
+        import shlex
+        try:
+            tokens = shlex.split(command_str)
+        except ValueError as e:
+            raise ValueError(f"Failed to parse command: {e}") from e
+
+        if not tokens:
+            raise ValueError("Empty command")
+
+        pipelines = []
+        current_cmd = []
+        in_file = None
+        out_file = None
+        append_out = False
+
+        i = 0
+        while i < len(tokens):
+            t = tokens[i]
+            if t == "|":
+                if not current_cmd:
+                    raise ValueError("Syntax error: unexpected '|'")
+                pipelines.append({"args": current_cmd, "in": in_file, "out": out_file, "append": append_out})
+                current_cmd = []
+                in_file = None
+                out_file = None
+                append_out = False
+            elif t == ">":
+                if i + 1 >= len(tokens):
+                    raise ValueError("Syntax error: expected file after '>'")
+                out_file = tokens[i + 1]
+                append_out = False
+                i += 1
+            elif t == ">>":
+                if i + 1 >= len(tokens):
+                    raise ValueError("Syntax error: expected file after '>>'")
+                out_file = tokens[i + 1]
+                append_out = True
+                i += 1
+            elif t == "<":
+                if i + 1 >= len(tokens):
+                    raise ValueError("Syntax error: expected file after '<'")
+                in_file = tokens[i + 1]
+                i += 1
+            elif t in ("&&", "||", ";"):
+                 raise ValueError(f"Shell operator '{t}' is not supported for security reasons.")
+            else:
+                current_cmd.append(t)
+            i += 1
+
+        if current_cmd:
+            pipelines.append({"args": current_cmd, "in": in_file, "out": out_file, "append": append_out})
+        elif pipelines:
+            raise ValueError("Syntax error: unexpected end of command after '|'")
+
+        processes = []
+        opened_files = []
+        prev_stdout = None
+
+        import tempfile
+        import os
+
+        try:
+            for idx, step in enumerate(pipelines):
+                is_first = (idx == 0)
+                is_last = (idx == len(pipelines) - 1)
+
+                cmd_args = step["args"]
+                stdin_f = step["in"]
+                stdout_f = step["out"]
+                append = step["append"]
+
+                if stdin_f:
+                    if not is_first:
+                         raise ValueError("Input redirection '<' is only supported for the first command in a pipeline.")
+                    f = open(stdin_f, "r")  # noqa: SIM115
+                    opened_files.append(f)
+                    stdin_dest = f
+                else:
+                    stdin_dest = prev_stdout
+
+                if stdout_f:
+                    mode = "a" if append else "w"
+                    f = open(stdout_f, mode)  # noqa: SIM115
+                    opened_files.append(f)
+                    stdout_dest = f
+                elif not is_last:
+                    stdout_dest = subprocess.PIPE
+                else:
+                    stdout_dest = subprocess.PIPE
+
+                # Use a temporary file for stderr of all processes to prevent pipe deadlocks
+                # and allow us to gather all errors at the end.
+                fd, stderr_path = tempfile.mkstemp(prefix="ai_cmd_stderr_")
+                stderr_f = open(stderr_path, "w+")  # noqa: SIM115
+                os.close(fd)
+                opened_files.append(stderr_f)
+
+                try:
+                    p = subprocess.Popen(
+                        cmd_args,
+                        stdin=stdin_dest,
+                        stdout=stdout_dest,
+                        stderr=stderr_f,
+                        text=True,
+                    )
+                except FileNotFoundError as e:
+                    raise ValueError(f"Command not found: {cmd_args[0]}") from e
+
+                if prev_stdout:
+                    prev_stdout.close()
+
+                if not is_last and not stdout_f:
+                    prev_stdout = p.stdout
+
+                # Store the process and its stderr file
+                processes.append((p, stderr_f, stderr_path))
+
+            # Wait for the last process to finish and read its stdout
+            last_p, _, _ = processes[-1]
+            out, _ = last_p.communicate(timeout=timeout)
+            returncode = last_p.returncode
+
+            # Gather all stderr outputs from all processes
+            all_stderr = []
+            for p, stderr_f, stderr_path in processes:
+                # Ensure the process is dead
+                if p.poll() is None:
+                    try:
+                        p.wait(timeout=1)
+                    except subprocess.TimeoutExpired:
+                        p.kill()
+                # Read the temp file
+                stderr_f.seek(0)
+                err_content = stderr_f.read().strip()
+                if err_content:
+                    all_stderr.append(err_content)
+                # We'll close and remove the file in the finally block
+
+            final_err = "\n".join(all_stderr)
+
+            return subprocess.CompletedProcess(
+                args=command_str,
+                returncode=returncode,
+                stdout=out or "",
+                stderr=final_err
+            )
+
+        finally:
+            for item in processes:
+                p = item[0] if isinstance(item, tuple) else item
+                if p.poll() is None:
+                    p.kill()
+            for f in opened_files:
+                try:
+                    f.close()
+                    if hasattr(f, "name") and "ai_cmd_stderr_" in f.name:
+                        import os
+                        if os.path.exists(f.name):
+                            os.remove(f.name)
+                except Exception:
+                    pass
 
     def process_response(self, ai_response: str) -> list["CommandResult"]:
         """Extract all commands from *ai_response* and execute them in order.

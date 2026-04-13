@@ -88,34 +88,37 @@ printf '\n\033[1;36m  Linux AI NPU Assistant — suggested command:\033[0m\n\n'
 printf '\033[1;33m  %s\033[0m\n\n' "$_CMD"
 """
 
-# bash: read -e (readline) with -i (initial text)
-_BASH_SCRIPT = """\
-#!/usr/bin/env bash
-set -euo pipefail
+# bash: secure interactive initialization via --rcfile
+_BASH_SCRIPT = r"""#!/usr/bin/env bash
 _CMD={quoted}
-""" + _BANNER + """\
-printf 'Edit if needed, then press \\033[1mEnter\\033[0m to run  (Ctrl-C to cancel):\\n\\n'
-read -r -e -p '$ ' -i "$_CMD" _CONFIRMED
-if [ -n "$_CONFIRMED" ]; then
-    bash -c "$_CONFIRMED"
-fi
-exec bash -i
+""" + _BANNER + r"""_TMP=$(mktemp)
+cat << EOF > "$_TMP"
+[ -f ~/.bashrc ] && source ~/.bashrc
+history -s "\$_CMD"
+rm -f "$_TMP"
+EOF
+printf 'Press \033[1mUp Arrow\033[0m to view and edit the command.\n\n'
+export _CMD
+exec bash --rcfile "$_TMP" -i
 """
 
-# zsh: print -z natively pushes the string onto the ZLE editing buffer stack
-_ZSH_SCRIPT = """\
-#!/usr/bin/env zsh
+# zsh: secure interactive initialization via ZDOTDIR
+_ZSH_SCRIPT = r"""#!/usr/bin/env zsh
 _CMD={quoted}
-""" + _BANNER + """\
-printf 'Edit if needed, then press \\e[1mEnter\\e[0m to run  (Ctrl-C to cancel):\\n\\n'
-print -z -- "$_CMD"
-exec zsh -i
+""" + _BANNER + r"""_TMP_DIR=$(mktemp -d)
+cat << EOF > "$_TMP_DIR/.zshrc"
+[ -f ~/.zshrc ] && source ~/.zshrc
+print -s "\$_CMD"
+rm -rf "$_TMP_DIR"
+EOF
+printf 'Press \e[1mUp Arrow\e[0m to view and edit the command.\n\n'
+export _CMD
+ZDOTDIR="$_TMP_DIR" exec zsh -i
 """
 
 # fish: --init-command sets the commandline buffer before the prompt appears
 # We wrap in a shell script that execs fish with the right flags.
-_FISH_WRAPPER = """\
-#!/bin/sh
+_FISH_WRAPPER = r"""#!/bin/sh
 _CMD={quoted}
 exec fish --init-command "
   function _ai_prefill
@@ -123,43 +126,37 @@ exec fish --init-command "
     commandline --cursor (string length -- '$_CMD')
     functions --erase _ai_prefill
   end
-  bind \\r '_ai_prefill; commandline -f execute'
-  bind \\n '_ai_prefill; commandline -f execute'
+  bind \r '_ai_prefill; commandline -f execute'
+  bind \n '_ai_prefill; commandline -f execute'
 " 2>/dev/null || exec fish
 """
 
-# ksh / mksh: read supports -e (readline) but not -i; display cmd and prompt
-_KSH_SCRIPT = """\
-#!/usr/bin/env ksh
+# ksh / mksh: secure interactive initialization via ENV
+_KSH_SCRIPT = r"""#!/usr/bin/env ksh
 _CMD={quoted}
-""" + _BANNER + """\
-printf 'Type or edit the command, then press \\033[1mEnter\\033[0m (Ctrl-C to cancel):\\n\\n'
-printf '$ %s' "$_CMD"
-read -r _CONFIRMED
-_CONFIRMED="${_CONFIRMED:-$_CMD}"
-if [ -n "$_CONFIRMED" ]; then
-    ksh -c "$_CONFIRMED"
-fi
-printf '\\n[Press Enter to close]'
-read -r _DONE
+""" + _BANNER + r"""_TMP=$(mktemp)
+cat << EOF > "$_TMP"
+[ -n "$ENV" ] && [ -f "$ENV" ] && . "$ENV"
+print -s "\$_CMD"
+rm -f "$_TMP"
+EOF
+printf 'Press \033[1mUp Arrow\033[0m to view and edit the command.\n\n'
+export _CMD
+ENV="$_TMP" exec ksh -i
 """
 
-# Generic POSIX sh / dash / csh / others: just display and do a plain read
+# Generic POSIX sh / dash / csh / others: secure interactive initialization via ENV
 _GENERIC_SCRIPT = """\
 #!/bin/sh
 _CMD={quoted}
 """ + _BANNER + """\
-printf 'Copy-paste or retype the command, then press Enter (Ctrl-C to cancel):\\n\\n'
-printf '$ '
-read -r _CONFIRMED
-_CONFIRMED="${{_CONFIRMED:-$_CMD}}"
-if [ -n "$_CONFIRMED" ]; then
-    _TMP=$(mktemp)
-    echo "$_CONFIRMED" > "$_TMP"
-    echo "rm -f '$_TMP'" >> "$_TMP"
-    ENV="$_TMP" exec sh -i
-fi
-exec sh -i
+_TMP=$(mktemp)
+cat << EOF > "$_TMP"
+[ -n "$ENV" ] && [ -f "$ENV" ] && . "$ENV"
+rm -f "$_TMP"
+EOF
+printf 'Copy-paste the command above.\\n\\n'
+ENV="$_TMP" exec sh -i
 """
 
 _FAMILY_SCRIPTS: dict[str, str] = {

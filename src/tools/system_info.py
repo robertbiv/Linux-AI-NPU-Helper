@@ -35,31 +35,11 @@ from pathlib import Path
 from typing import Any
 
 from src.tools._base import SearchResult, ToolResult
+from src.tools._utils import read_sys_file, run_command
 
 logger = logging.getLogger(__name__)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
-
-
-def _read(path: str, default: str = "") -> str:
-    """Read a single-line file from /proc or /sys, stripping whitespace."""
-    try:
-        return Path(path).read_text(errors="replace").strip()
-    except OSError:
-        return default
-
-
-def _run_cmd(cmd: list[str], timeout: int = 6) -> str:
-    """Run a command and return stdout, or empty string on failure."""
-    import shutil
-    import subprocess
-    if not shutil.which(cmd[0]):
-        return ""
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        return r.stdout.strip()
-    except Exception:  # noqa: BLE001
-        return ""
 
 
 def _fmt_seconds(total: float) -> str:
@@ -91,12 +71,12 @@ def _query_time() -> str:
 
 
 def _query_uptime() -> str:
-    raw = _read("/proc/uptime")
+    raw = read_sys_file("/proc/uptime")
     if raw:
         seconds = float(raw.split()[0])
         return f"System uptime: {_fmt_seconds(seconds)}"
     # fallback
-    out = _run_cmd(["uptime", "-p"])
+    out = run_command(["uptime", "-p"])
     return out or "Uptime information unavailable."
 
 
@@ -110,19 +90,19 @@ def _query_battery() -> str:
     upower_devices: list[str] | None = None
 
     for ps_dir in sorted(ps_root.iterdir()):
-        ps_type = _read(str(ps_dir / "type")).lower()
+        ps_type = read_sys_file(str(ps_dir / "type")).lower()
         if ps_type != "battery":
             continue
 
         # Fetch upower dump lazily upon finding the first battery
         if upower_devices is None:
-            upower_dump = _run_cmd(["upower", "--dump"])
+            upower_dump = run_command(["upower", "--dump"])
             upower_devices = upower_dump.split("Device: ") if upower_dump else []
 
         name = ps_dir.name
-        capacity = _read(str(ps_dir / "capacity"))
-        status = _read(str(ps_dir / "status"))        # Charging / Discharging / Full
-        technology = _read(str(ps_dir / "technology"))
+        capacity = read_sys_file(str(ps_dir / "capacity"))
+        status = read_sys_file(str(ps_dir / "status"))  # Charging / Discharging / Full
+        technology = read_sys_file(str(ps_dir / "technology"))
 
         line = f"{name}: "
         if capacity:
@@ -152,7 +132,7 @@ def _query_battery() -> str:
 
     if not lines:
         # Fallback to acpi
-        out = _run_cmd(["acpi", "-b"])
+        out = run_command(["acpi", "-b"])
         return out or "Battery information unavailable."
     return "\n".join(lines)
 
@@ -165,17 +145,18 @@ def _query_battery_health() -> str:
 
     lines: list[str] = []
     for ps_dir in sorted(ps_root.iterdir()):
-        ps_type = _read(str(ps_dir / "type")).lower()
+        ps_type = read_sys_file(str(ps_dir / "type")).lower()
         if ps_type != "battery":
             continue
 
         name = ps_dir.name
-        full = _read(str(ps_dir / "charge_full")) or _read(str(ps_dir / "energy_full"))
-        design = (
-            _read(str(ps_dir / "charge_full_design"))
-            or _read(str(ps_dir / "energy_full_design"))
+        full = read_sys_file(str(ps_dir / "charge_full")) or read_sys_file(
+            str(ps_dir / "energy_full")
         )
-        cycle_count = _read(str(ps_dir / "cycle_count"))
+        design = read_sys_file(str(ps_dir / "charge_full_design")) or read_sys_file(
+            str(ps_dir / "energy_full_design")
+        )
+        cycle_count = read_sys_file(str(ps_dir / "cycle_count"))
 
         if full and design:
             try:
@@ -197,25 +178,33 @@ def _query_gpu() -> str:
     lines: list[str] = []
 
     # NVIDIA via nvidia-smi
-    nvidia = _run_cmd(["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
-                       "--format=csv,noheader"])
+    nvidia = run_command(
+        [
+            "nvidia-smi",
+            "--query-gpu=name,memory.total,driver_version",
+            "--format=csv,noheader",
+        ]
+    )
     if nvidia:
         for row in nvidia.splitlines():
             lines.append(f"NVIDIA: {row.strip()}")
 
     # AMD via rocm-smi
-    rocm = _run_cmd(["rocm-smi", "--showproductname"])
+    rocm = run_command(["rocm-smi", "--showproductname"])
     if rocm:
         for row in rocm.splitlines():
             if row.strip() and not row.startswith("="):
                 lines.append(f"AMD: {row.strip()}")
 
     # Generic via lspci (covers Intel iGPU, AMD dGPU without rocm, etc.)
-    lspci = _run_cmd(["lspci"])
+    lspci = run_command(["lspci"])
     if lspci:
         for row in lspci.splitlines():
             low = row.lower()
-            if any(k in low for k in ("vga compatible", "3d controller", "display controller")):
+            if any(
+                k in low
+                for k in ("vga compatible", "3d controller", "display controller")
+            ):
                 # Remove PCI address prefix
                 parts = row.split(":", 2)
                 desc = parts[-1].strip() if len(parts) >= 2 else row.strip()
@@ -228,12 +217,16 @@ def _query_gpu() -> str:
             cards = []
             with os.scandir("/sys/class/drm") as it:
                 for entry in it:
-                    if entry.name.startswith("card") and len(entry.name) == 5 and entry.is_dir():
+                    if (
+                        entry.name.startswith("card")
+                        and len(entry.name) == 5
+                        and entry.is_dir()
+                    ):
                         cards.append(entry.name)
 
             for card in sorted(cards):
-                vendor = _read(f"/sys/class/drm/{card}/device/vendor")
-                device = _read(f"/sys/class/drm/{card}/device/device")
+                vendor = read_sys_file(f"/sys/class/drm/{card}/device/vendor")
+                device = read_sys_file(f"/sys/class/drm/{card}/device/device")
                 if vendor or device:
                     lines.append(f"{card}: vendor={vendor} device={device}")
         except OSError:
@@ -244,9 +237,9 @@ def _query_gpu() -> str:
 
 def _query_cpu() -> str:
     """CPU info from /proc/cpuinfo and /sys."""
-    cpuinfo = _read("/proc/cpuinfo")
+    cpuinfo = read_sys_file("/proc/cpuinfo")
     if not cpuinfo:
-        return _run_cmd(["lscpu"]) or "CPU information unavailable."
+        return run_command(["lscpu"]) or "CPU information unavailable."
 
     model = ""
     physical_ids: set[str] = set()
@@ -289,9 +282,9 @@ def _query_cpu() -> str:
 
 def _query_memory() -> str:
     """Memory info from /proc/meminfo."""
-    meminfo = _read("/proc/meminfo")
+    meminfo = read_sys_file("/proc/meminfo")
     if not meminfo:
-        return _run_cmd(["free", "-h"]) or "Memory information unavailable."
+        return run_command(["free", "-h"]) or "Memory information unavailable."
 
     fields: dict[str, int] = {}
     for line in meminfo.splitlines():
@@ -308,11 +301,11 @@ def _query_memory() -> str:
             return f"{kb / 1024:.0f} MiB"
         return f"{kb} KiB"
 
-    total     = fields.get("MemTotal", 0)
+    total = fields.get("MemTotal", 0)
     available = fields.get("MemAvailable", 0)
-    used      = total - available
+    used = total - available
     swap_total = fields.get("SwapTotal", 0)
-    swap_free  = fields.get("SwapFree", 0)
+    swap_free = fields.get("SwapFree", 0)
 
     lines = [
         f"RAM   total={kb_to_human(total)}  used={kb_to_human(used)}  "
@@ -328,10 +321,21 @@ def _query_memory() -> str:
 
 def _query_disk() -> str:
     """Disk usage from df."""
-    out = _run_cmd(["df", "-h", "--output=source,size,used,avail,pcent,target",
-                    "-x", "tmpfs", "-x", "devtmpfs", "-x", "squashfs"])
+    out = run_command(
+        [
+            "df",
+            "-h",
+            "--output=source,size,used,avail,pcent,target",
+            "-x",
+            "tmpfs",
+            "-x",
+            "devtmpfs",
+            "-x",
+            "squashfs",
+        ]
+    )
     if not out:
-        out = _run_cmd(["df", "-h"])
+        out = run_command(["df", "-h"])
     return out or "Disk information unavailable."
 
 
@@ -339,6 +343,7 @@ def _query_os() -> str:
     """OS info from os_detector."""
     try:
         from src.os_detector import detect
+
         info = detect()
         parts = [f"Distribution : {info.pretty_name or info.name}"]
         if info.kernel:
@@ -363,7 +368,7 @@ def _query_network() -> str:
     lines: list[str] = []
 
     # Try `ip -brief addr` first — clean tabular output
-    out = _run_cmd(["ip", "-brief", "addr"])
+    out = run_command(["ip", "-brief", "addr"])
     if out:
         for line in out.splitlines():
             parts = line.split()
@@ -375,23 +380,23 @@ def _query_network() -> str:
         return "\n".join(lines) if lines else "No network interfaces found."
 
     # Fallback: /proc/net/if_inet6 for IPv6 + /proc/net/fib_trie for IPv4
-    out2 = _run_cmd(["ifconfig"])
+    out2 = run_command(["ifconfig"])
     return out2 or "Network information unavailable."
 
 
 # ── Query dispatcher ──────────────────────────────────────────────────────────
 
 _QUERIES: dict[str, Any] = {
-    "time":           _query_time,
-    "uptime":         _query_uptime,
-    "battery":        _query_battery,
+    "time": _query_time,
+    "uptime": _query_uptime,
+    "battery": _query_battery,
     "battery_health": _query_battery_health,
-    "gpu":            _query_gpu,
-    "cpu":            _query_cpu,
-    "memory":         _query_memory,
-    "disk":           _query_disk,
-    "os":             _query_os,
-    "network":        _query_network,
+    "gpu": _query_gpu,
+    "cpu": _query_cpu,
+    "memory": _query_memory,
+    "disk": _query_disk,
+    "os": _query_os,
+    "network": _query_network,
 }
 
 
@@ -431,7 +436,8 @@ class SystemInfoTool:
                 "enum": list(_QUERIES) + ["all"],
                 "description": (
                     "What to query. One of: "
-                    + ", ".join(list(_QUERIES) + ["all"]) + "."
+                    + ", ".join(list(_QUERIES) + ["all"])
+                    + "."
                 ),
             },
         },

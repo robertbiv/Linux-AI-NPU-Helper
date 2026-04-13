@@ -112,7 +112,7 @@ class TestRunCommand:
         import subprocess
 
         ex = CommandExecutor(_SAFETY)
-        with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("ls", 120)):
+        with patch.object(ex, "_execute_pipeline", side_effect=subprocess.TimeoutExpired("ls", 120)):
             result = ex.run_command("ls")
         assert result.returncode == -1
         assert "timed out" in result.stderr.lower()
