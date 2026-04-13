@@ -55,11 +55,59 @@ _TERMINALS: list[tuple[str, str]] = [
 
 @lru_cache(maxsize=1)
 def _find_terminal() -> tuple[str, str] | None:
-    import shutil
+    import sys
+
+    path_env = os.environ.get("PATH", None)
+    if path_env is None:
+        try:
+            path_env = os.confstr("CS_PATH")
+        except (AttributeError, ValueError):
+            path_env = os.defpath
+
+    if not path_env:
+        return None
+
+    path_dirs = path_env.split(os.pathsep)
+    if sys.platform == "win32":
+        path_dirs.insert(0, os.curdir)
+        pathext_source = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH")
+        pathext = [ext.upper() for ext in pathext_source.split(os.pathsep) if ext]
+    else:
+        pathext = []
+
+    dir_contents = {}
+    for p in path_dirs:
+        dir_p = p if p else os.curdir
+        normdir = os.path.normcase(dir_p)
+        if normdir not in dir_contents:
+            try:
+                if sys.platform == "win32":
+                    dir_contents[normdir] = {f.upper() for f in os.listdir(dir_p)}
+                else:
+                    dir_contents[normdir] = set(os.listdir(dir_p))
+            except OSError:
+                dir_contents[normdir] = set()
+
     for exe, style in _TERMINALS:
-        path = shutil.which(exe)
-        if path:
-            return path, style
+        exe_upper = exe.upper() if sys.platform == "win32" else exe
+
+        if sys.platform == "win32":
+            files = [exe_upper + ext for ext in pathext]
+            if any(exe_upper.endswith(ext) for ext in pathext):
+                files.insert(0, exe_upper)
+        else:
+            files = [exe]
+
+        for p in path_dirs:
+            dir_p = p if p else os.curdir
+            normdir = os.path.normcase(dir_p)
+            entries = dir_contents.get(normdir, set())
+
+            for thefile in files:
+                if thefile in entries:
+                    full = os.path.join(p, exe if sys.platform != "win32" or thefile == exe_upper else thefile)
+                    if os.access(full, os.X_OK) and not os.path.isdir(full):
+                        return full, style
     return None
 
 
