@@ -12,20 +12,9 @@ from pathlib import Path
 from typing import Any
 
 from src.tools._base import SearchResult, Tool, ToolResult
+from src.tools._utils import run_command
 
 logger = logging.getLogger(__name__)
-
-
-def _run(cmd: list[str], timeout: int = 15) -> str:
-    import shutil
-    import subprocess
-    if not shutil.which(cmd[0]):
-        return ""
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        return r.stdout.strip()
-    except Exception:  # noqa: BLE001
-        return ""
 
 
 def _scan_desktop(query: str = "") -> list[dict]:
@@ -37,35 +26,43 @@ def _scan_desktop(query: str = "") -> list[dict]:
     for hit in _load_desktop_cache():
         if q and q not in hit["name"].lower() and q not in hit["comment"].lower():
             continue
-        results.append({
-            "source": "desktop",
-            "name": hit["name"],
-            "comment": hit["comment"],
-            "file": hit["file"]
-        })
+        results.append(
+            {
+                "source": "desktop",
+                "name": hit["name"],
+                "comment": hit["comment"],
+                "file": hit["file"],
+            }
+        )
     return results
 
 
 def _scan_flatpak(query: str = "") -> list[dict]:
-    out = _run(["flatpak", "list", "--app",
-                "--columns=application,name,version"])
+    out = run_command(
+        ["flatpak", "list", "--app", "--columns=application,name,version"]
+    )
     results: list[dict] = []
     for line in out.splitlines():
         parts = line.split("\t")
         if len(parts) < 2:
             continue
         app_id = parts[0].strip()
-        name   = parts[1].strip() if len(parts) > 1 else app_id
+        name = parts[1].strip() if len(parts) > 1 else app_id
         version = parts[2].strip() if len(parts) > 2 else ""
-        if query and query.lower() not in name.lower() and query.lower() not in app_id.lower():
+        if (
+            query
+            and query.lower() not in name.lower()
+            and query.lower() not in app_id.lower()
+        ):
             continue
-        results.append({"source": "flatpak", "name": name,
-                        "id": app_id, "version": version})
+        results.append(
+            {"source": "flatpak", "name": name, "id": app_id, "version": version}
+        )
     return results
 
 
 def _scan_snap(query: str = "") -> list[dict]:
-    out = _run(["snap", "list"])
+    out = run_command(["snap", "list"])
     results: list[dict] = []
     for line in out.splitlines()[1:]:
         parts = line.split()
@@ -80,7 +77,7 @@ def _scan_snap(query: str = "") -> list[dict]:
 
 
 def _scan_packages(query: str = "") -> list[dict]:
-    out = _run(["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Status}\n"])
+    out = run_command(["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Status}\n"])
     if out:
         results: list[dict] = []
         for line in out.splitlines():
@@ -91,14 +88,19 @@ def _scan_packages(query: str = "") -> list[dict]:
                 continue
             results.append({"source": "deb", "name": parts[0], "version": parts[1]})
         return results
-    out = _run(["rpm", "-qa", "--qf", "%{NAME}\t%{VERSION}\n"])
+    out = run_command(["rpm", "-qa", "--qf", "%{NAME}\t%{VERSION}\n"])
     results = []
     for line in out.splitlines():
         parts = line.split("\t")
         if query and query.lower() not in parts[0].lower():
             continue
-        results.append({"source": "rpm", "name": parts[0],
-                        "version": parts[1] if len(parts) > 1 else ""})
+        results.append(
+            {
+                "source": "rpm",
+                "name": parts[0],
+                "version": parts[1] if len(parts) > 1 else "",
+            }
+        )
     return results
 
 
@@ -117,8 +119,9 @@ def _scan_path(query: str = "") -> list[dict]:
                     continue
                 if entry.is_file() and os.access(entry, os.X_OK):
                     seen.add(entry.name)
-                    results.append({"source": "path", "name": entry.name,
-                                    "path": str(entry)})
+                    results.append(
+                        {"source": "path", "name": entry.name, "path": str(entry)}
+                    )
         except PermissionError:
             continue
     return results[:200]
@@ -142,9 +145,10 @@ class InstalledAppsTool(Tool):
             },
             "sources": {
                 "type": "array",
-                "items": {"type": "string",
-                          "enum": ["desktop", "flatpak", "snap",
-                                   "packages", "path", "all"]},
+                "items": {
+                    "type": "string",
+                    "enum": ["desktop", "flatpak", "snap", "packages", "path", "all"],
+                },
                 "description": "Sources to scan. Default: ['desktop','flatpak','snap'].",
             },
         },
@@ -158,15 +162,23 @@ class InstalledAppsTool(Tool):
             sources = ["desktop", "flatpak", "snap", "packages", "path"]
 
         all_hits: list[dict] = []
-        if "desktop"  in sources: all_hits.extend(_scan_desktop(query))
-        if "flatpak"  in sources: all_hits.extend(_scan_flatpak(query))
-        if "snap"     in sources: all_hits.extend(_scan_snap(query))
-        if "packages" in sources: all_hits.extend(_scan_packages(query))
-        if "path"     in sources: all_hits.extend(_scan_path(query))
+        if "desktop" in sources:
+            all_hits.extend(_scan_desktop(query))
+        if "flatpak" in sources:
+            all_hits.extend(_scan_flatpak(query))
+        if "snap" in sources:
+            all_hits.extend(_scan_snap(query))
+        if "packages" in sources:
+            all_hits.extend(_scan_packages(query))
+        if "path" in sources:
+            all_hits.extend(_scan_path(query))
 
         if not all_hits:
-            msg = (f"No apps found matching '{query}'." if query
-                   else "No installed apps found.")
+            msg = (
+                f"No apps found matching '{query}'."
+                if query
+                else "No installed apps found."
+            )
             return ToolResult(tool_name=self.name, error=msg)
 
         results = [
@@ -174,11 +186,12 @@ class InstalledAppsTool(Tool):
                 path=r.get("file") or r.get("path") or r.get("source", ""),
                 snippet=(
                     f"[{r['source']}] {r['name']}"
-                    + (f" {r.get('version','')}" if r.get("version") else "")
+                    + (f" {r.get('version', '')}" if r.get("version") else "")
                     + (f" — {r['comment']}" if r.get("comment") else "")
                 ),
             )
             for r in all_hits[:100]
         ]
-        return ToolResult(tool_name=self.name, results=results,
-                          truncated=len(all_hits) > 100)
+        return ToolResult(
+            tool_name=self.name, results=results, truncated=len(all_hits) > 100
+        )
