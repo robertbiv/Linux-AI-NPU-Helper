@@ -5,7 +5,8 @@ import json
 from unittest.mock import MagicMock, patch, call
 import pytest
 
-from src.ai_assistant import AIAssistant, ExternalNetworkBlockedError
+from src.ai_assistant import AIAssistant
+from src.security import ExternalNetworkBlockedError
 
 
 # ── Config helpers ─────────────────────────────────────────────────────────────
