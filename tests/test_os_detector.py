@@ -24,18 +24,9 @@ class TestDetectInit:
         with patch("src.os_detector.Path") as mock_path, patch(
             "src.os_detector.shutil.which", return_value=None
         ):
-            def path_mock(path_str):
-                mock_obj = MagicMock()
-                if path_str == "/proc/1/exe":
-                    mock_obj.resolve.side_effect = OSError
-                else:
-                    mock_obj.exists.return_value = False
-                return mock_obj
-
-            mock_path.side_effect = path_mock
-
-            result = _detect_init()
-            assert result == "unknown"
+            mock_path.return_value.resolve.side_effect = OSError
+            mock_path.return_value.exists.return_value = False
+            assert _detect_init() == "unknown"
 
 
 # ── _detect_package_manager ───────────────────────────────────────────────────
