@@ -29,7 +29,6 @@ import os
 import shlex
 import stat
 import tempfile
-from functools import lru_cache
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -53,7 +52,6 @@ _TERMINALS: list[tuple[str, str]] = [
 ]
 
 
-@lru_cache(maxsize=1)
 def _find_terminal() -> tuple[str, str] | None:
     import shutil
     for exe, style in _TERMINALS:
