@@ -140,8 +140,7 @@ read -r -e -p '$ ' -i "$_CMD" _CONFIRMED
 if [ -n "$_CONFIRMED" ]; then
     bash -c "$_CONFIRMED"
 fi
-printf '\\n\\033[2m[Press Enter to close]\\033[0m'
-read -r _DONE
+exec bash -i
 """
 
 # zsh: vared — ZLE variable editor that accepts an initial value
@@ -198,12 +197,14 @@ _CMD={quoted}
 printf 'Copy-paste or retype the command, then press Enter (Ctrl-C to cancel):\\n\\n'
 printf '$ '
 read -r _CONFIRMED
-_CONFIRMED="${_CONFIRMED:-$_CMD}"
+_CONFIRMED="${{_CONFIRMED:-$_CMD}}"
 if [ -n "$_CONFIRMED" ]; then
-    sh -c "$_CONFIRMED"
+    _TMP=$(mktemp)
+    echo "$_CONFIRMED" > "$_TMP"
+    echo "rm -f '$_TMP'" >> "$_TMP"
+    ENV="$_TMP" exec sh -i
 fi
-printf '\\n[Press Enter to close]'
-read -r _DONE
+exec sh -i
 """
 
 _FAMILY_SCRIPTS: dict[str, str] = {
