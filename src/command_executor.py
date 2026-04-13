@@ -220,7 +220,7 @@ class CommandExecutor:
                 in_file = tokens[i + 1]
                 i += 1
             elif t in ("&&", "||", ";"):
-                 raise ValueError(f"Shell operator '{t}' is not supported for security reasons.")
+                raise ValueError(f"Shell operator '{t}' is not supported for security reasons.")
             else:
                 current_cmd.append(t)
             i += 1
@@ -249,7 +249,7 @@ class CommandExecutor:
 
                 if stdin_f:
                     if not is_first:
-                         raise ValueError("Input redirection '<' is only supported for the first command in a pipeline.")
+                        raise ValueError("Input redirection '<' is only supported for the first command in a pipeline.")
                     f = open(stdin_f, "r")  # noqa: SIM115
                     opened_files.append(f)
                     stdin_dest = f
