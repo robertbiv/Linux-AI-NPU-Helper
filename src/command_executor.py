@@ -25,6 +25,7 @@ from __future__ import annotations
 import logging
 import re
 import subprocess
+from dataclasses import dataclass
 from typing import Callable
 
 logger = logging.getLogger(__name__)
@@ -204,29 +205,16 @@ class CommandExecutor:
 
 # ── Result dataclass ──────────────────────────────────────────────────────────
 
+@dataclass(slots=True)
 class CommandResult:
     """Outcome of a single command execution attempt."""
 
-    __slots__ = (
-        "command", "approved", "blocked",
-        "returncode", "stdout", "stderr",
-    )
-
-    def __init__(
-        self,
-        command: str,
-        approved: bool,
-        blocked: bool,
-        returncode: int,
-        stdout: str,
-        stderr: str,
-    ) -> None:
-        self.command = command
-        self.approved = approved
-        self.blocked = blocked
-        self.returncode = returncode
-        self.stdout = stdout
-        self.stderr = stderr
+    command: str
+    approved: bool
+    blocked: bool
+    returncode: int
+    stdout: str
+    stderr: str
 
     @property
     def succeeded(self) -> bool:

@@ -54,7 +54,6 @@ def _html_to_text(html: str) -> str:
     Strips all tags, decodes entities, and collapses whitespace so the AI
     receives clean prose rather than raw markup.
     """
-    import html as html_module
     from html.parser import HTMLParser
 
     class _Collector(HTMLParser):

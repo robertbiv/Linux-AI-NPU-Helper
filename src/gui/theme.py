@@ -422,7 +422,7 @@ def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
         If PyQt5 is not installed.
     """
     try:
-        from PyQt5.QtGui import QColor, QPalette, QFont
+        from PyQt5.QtGui import QColor, QPalette
         from PyQt5.QtWidgets import QStyleFactory
     except ImportError as exc:
         raise ImportError(

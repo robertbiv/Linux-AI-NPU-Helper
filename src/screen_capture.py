@@ -55,7 +55,6 @@ def _capture_mss(monitor: int, jpeg_quality: int) -> bytes:
     """Capture using the *mss* library."""
     try:
         import mss  # type: ignore[import]
-        import mss.tools  # type: ignore[import]
     except ImportError as exc:
         raise RuntimeError(
             "mss is not installed.  Install it with: pip install mss"

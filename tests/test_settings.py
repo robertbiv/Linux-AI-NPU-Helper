@@ -158,6 +158,14 @@ class TestSettingsManager:
         sm.add_listener(lambda k, v: (_ for _ in ()).throw(RuntimeError("boom")))
         sm.set("backend", "openai", save=False)  # should not raise
 
+    def test_listener_error_logs_warning(self, tmp_path, caplog):
+        import logging
+        sm = SettingsManager(path=None)
+        sm.add_listener(lambda k, v: (_ for _ in ()).throw(RuntimeError("boom")))
+        with caplog.at_level(logging.WARNING):
+            sm.set("backend", "openai", save=False)
+        assert "Settings listener raised an error: boom" in caplog.text
+
     def test_to_config(self, tmp_path):
         sm = SettingsManager(path=None)
         sm.set("backend", "openai", save=False)

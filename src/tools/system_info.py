@@ -106,10 +106,17 @@ def _query_battery() -> str:
         return "No power supply information found (may be a desktop system)."
 
     lines: list[str] = []
+    upower_devices: list[str] | None = None
+
     for ps_dir in sorted(ps_root.iterdir()):
         ps_type = _read(str(ps_dir / "type")).lower()
         if ps_type != "battery":
             continue
+
+        # Fetch upower dump lazily upon finding the first battery
+        if upower_devices is None:
+            upower_dump = _run_cmd(["upower", "--dump"])
+            upower_devices = upower_dump.split("Device: ") if upower_dump else []
 
         name = ps_dir.name
         capacity = _read(str(ps_dir / "capacity"))
@@ -125,12 +132,18 @@ def _query_battery() -> str:
             line += f" [{technology}]"
 
         # Time remaining from upower if available
-        upower_out = _run_cmd(["upower", "-i", f"/org/freedesktop/UPower/devices/battery_{name}"])
         eta = ""
-        for l in upower_out.splitlines():
-            if "time to" in l.lower():
-                eta = l.strip()
+        device_path = f"/org/freedesktop/UPower/devices/battery_{name}"
+        for device_block in upower_devices:
+            # Ensure exact path match (up to newline or exact end of string)
+            block_lines = device_block.splitlines()
+            if block_lines and block_lines[0].strip() == device_path:
+                for l in block_lines[1:]:
+                    if "time to" in l.lower():
+                        eta = l.strip()
+                        break
                 break
+
         if eta:
             line += f"  {eta}"
 
