@@ -137,6 +137,13 @@ class TestSecureWrite:
         secure_write(p, "nested")
         assert p.read_text() == "nested"
 
+    def test_cleanup_unlink_oserror(self, tmp_path):
+        p = tmp_path / "fail.txt"
+        with patch.object(Path, "replace", side_effect=OSError("Mock replace error")), \
+             patch.object(Path, "unlink", side_effect=OSError("Mock unlink error")):
+            with pytest.raises(OSError, match="Mock replace error"):
+                secure_write(p, "data")
+
 
 # ── check_path_permissions ────────────────────────────────────────────────────
 
