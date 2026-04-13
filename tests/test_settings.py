@@ -168,7 +168,8 @@ class TestSettingsManager:
         sm.add_listener(faulty_listener)
         sm.set("backend", "openai", save=False)  # should not raise
 
-    def test_listener_error_logs_warning(self, tmp_path, mocker):
+    def test_listener_error_logs_warning(self, tmp_path, mocker, caplog):
+        import logging
         sm = SettingsManager(path=None)
 
         def faulty_listener(k, v):

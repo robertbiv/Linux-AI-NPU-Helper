@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import logging
 import os
+import functools
 import shlex
 import stat
 import tempfile
@@ -52,6 +53,7 @@ _TERMINALS: list[tuple[str, str]] = [
 ]
 
 
+@functools.lru_cache(maxsize=1)
 def _find_terminal() -> tuple[str, str] | None:
     import shutil
 
