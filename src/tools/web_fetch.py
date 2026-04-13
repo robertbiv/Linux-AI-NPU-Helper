@@ -57,9 +57,7 @@ def _html_to_text(html: str) -> str:
     from html.parser import HTMLParser
 
     class _Collector(HTMLParser):
-        _SKIP_TAGS = frozenset(
-            {"script", "style", "head", "noscript", "svg", "math"}
-        )
+        _SKIP_TAGS = frozenset({"script", "style", "head", "noscript", "svg", "math"})
 
         def __init__(self) -> None:
             super().__init__(convert_charrefs=True)
@@ -69,8 +67,19 @@ def _html_to_text(html: str) -> str:
         def handle_starttag(self, tag: str, attrs: list) -> None:
             if tag.lower() in self._SKIP_TAGS:
                 self._skip_depth += 1
-            elif tag.lower() in ("br", "p", "div", "li", "tr", "h1",
-                                  "h2", "h3", "h4", "h5", "h6"):
+            elif tag.lower() in (
+                "br",
+                "p",
+                "div",
+                "li",
+                "tr",
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+            ):
                 self._parts.append("\n")
 
         def handle_endtag(self, tag: str) -> None:
@@ -180,18 +189,11 @@ class WebFetchTool(Tool):
         self._connect_timeout = connect_timeout
         self._read_timeout = read_timeout
 
-    def run(self, args: dict[str, Any]) -> ToolResult:  # noqa: C901
-        url: str = args.get("url", "").strip()
-        if not url:
-            return ToolResult(tool_name=self.name, error="'url' is required.")
-
-        max_chars = min(
-            int(args.get("max_chars", self._max_chars)), _FETCH_ABSOLUTE_MAX
-        )
-
-        # ── URL validation ────────────────────────────────────────────────────
+    def _validate_url(self, url: str) -> ToolResult | None:
+        """Validate URL to ensure it is safe and allowed."""
         try:
             from urllib.parse import urlparse
+
             parsed = urlparse(url)
         except Exception as exc:  # noqa: BLE001
             return ToolResult(tool_name=self.name, error=f"Invalid URL: {exc}")
@@ -238,7 +240,25 @@ class WebFetchTool(Tool):
                 error=f"Domain {host!r} is blocked by configuration.",
             )
 
-        # ── HTTP request ──────────────────────────────────────────────────────
+        return None
+
+    def run(self, args: dict[str, Any]) -> ToolResult:
+        url: str = args.get("url", "").strip()
+        if not url:
+            return ToolResult(tool_name=self.name, error="'url' is required.")
+
+        max_chars = min(
+            int(args.get("max_chars", self._max_chars)), _FETCH_ABSOLUTE_MAX
+        )
+
+        validation_result = self._validate_url(url)
+        if validation_result:
+            return validation_result
+
+        return self._execute_request(url, max_chars)
+
+    def _execute_request(self, url: str, max_chars: int) -> ToolResult:
+        """Execute the HTTP request and return the result."""
         try:
             import requests as _requests  # lazy import
         except ImportError:
