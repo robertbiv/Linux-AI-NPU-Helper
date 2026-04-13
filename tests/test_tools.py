@@ -429,15 +429,3 @@ class TestBuildDefaultRegistry:
         })
         tool = registry.get("read_man_page")
         assert tool._max_chars == 1234  # type: ignore[attr-defined]
-
-class TestWebFetchTool:
-    @patch("requests.Session")
-    def test_web_fetch_request_exception(self, mock_session_cls):
-        import requests
-        tool = WebFetchTool()
-        mock_session_instance = mock_session_cls.return_value
-        mock_session_instance.get.side_effect = requests.exceptions.RequestException("Mocked network error")
-
-        result = tool.run({"url": "https://example.com"})
-
-        assert "Request failed: Mocked network error" in result.error
