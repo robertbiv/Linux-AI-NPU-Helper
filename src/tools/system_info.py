@@ -29,6 +29,7 @@ importing this module is free.
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -223,13 +224,20 @@ def _query_gpu() -> str:
 
     # /sys DRM cards as last resort
     if not lines:
-        for card in sorted(Path("/sys/class/drm").glob("card?")) :
-            vendor_path = card / "device" / "vendor"
-            device_path = card / "device" / "device"
-            vendor = _read(str(vendor_path))
-            device = _read(str(device_path))
-            if vendor or device:
-                lines.append(f"{card.name}: vendor={vendor} device={device}")
+        try:
+            cards = []
+            with os.scandir("/sys/class/drm") as it:
+                for entry in it:
+                    if entry.name.startswith("card") and len(entry.name) == 5 and entry.is_dir():
+                        cards.append(entry.name)
+
+            for card in sorted(cards):
+                vendor = _read(f"/sys/class/drm/{card}/device/vendor")
+                device = _read(f"/sys/class/drm/{card}/device/device")
+                if vendor or device:
+                    lines.append(f"{card}: vendor={vendor} device={device}")
+        except OSError:
+            pass
 
     return "\n".join(lines) if lines else "GPU information unavailable."
 

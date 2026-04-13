@@ -60,7 +60,13 @@ def _all_pids() -> list[int]:
             if p.name.isdigit() and (p / "stat").exists()]
 
 
+_top_cpu_cache: dict[int, int] | None = None
+_top_cpu_time: float | None = None
+
+
 def _top_cpu(n: int = 10) -> list[dict]:
+    global _top_cpu_cache, _top_cpu_time
+
     clk = os.sysconf("SC_CLK_TCK")
     pids = _all_pids()
 
@@ -71,15 +77,29 @@ def _top_cpu(n: int = 10) -> list[dict]:
         except (IndexError, ValueError):
             return 0
 
-    snap1 = {pid: _jiffies(pid) for pid in pids}
-    time.sleep(0.4)
-    snap2 = {pid: _jiffies(pid) for pid in pids}
+    current_snap = {pid: _jiffies(pid) for pid in pids}
+    current_time = time.time()
+
+    if _top_cpu_cache is None or _top_cpu_time is None or (current_time - _top_cpu_time) > 2.0:
+        _top_cpu_cache = current_snap
+        time.sleep(0.4)
+        _top_cpu_time = current_time
+
+        current_snap = {pid: _jiffies(pid) for pid in pids}
+        current_time = time.time()
+
+    time_diff = current_time - _top_cpu_time
+
+    if time_diff < 0.1:
+        time.sleep(0.4 - time_diff)
+        current_snap = {pid: _jiffies(pid) for pid in pids}
+        current_time = time.time()
+        time_diff = current_time - _top_cpu_time
 
     results = []
-    for pid in snap1:
-        if pid not in snap2:
-            continue
-        pct = (snap2[pid] - snap1[pid]) / clk / 0.4 * 100
+    for pid, jiffies in current_snap.items():
+        prev_jiffies = _top_cpu_cache.get(pid, 0)
+        pct = (jiffies - prev_jiffies) / clk / time_diff * 100
         if pct < 0.1:
             continue
         results.append({
@@ -88,6 +108,10 @@ def _top_cpu(n: int = 10) -> list[dict]:
             "cpu_pct": round(pct, 1),
             "mem_mb": round(_proc_mem_kb(pid) / 1024, 1),
         })
+
+    _top_cpu_cache = current_snap
+    _top_cpu_time = current_time
+
     results.sort(key=lambda x: x["cpu_pct"], reverse=True)
     return results[:n]
 

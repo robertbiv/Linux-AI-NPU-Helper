@@ -2,9 +2,7 @@ name: Docs & Tests
 
 on:
   push:
-    branches: [main, master, "copilot/**"]
-  pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

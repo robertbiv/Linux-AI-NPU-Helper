@@ -29,7 +29,6 @@ import os
 import shlex
 import stat
 import tempfile
-from functools import lru_cache
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -53,61 +52,17 @@ _TERMINALS: list[tuple[str, str]] = [
 ]
 
 
-@lru_cache(maxsize=1)
 def _find_terminal() -> tuple[str, str] | None:
-    import sys
+    import shutil
 
-    path_env = os.environ.get("PATH", None)
-    if path_env is None:
-        try:
-            path_env = os.confstr("CS_PATH")
-        except (AttributeError, ValueError):
-            path_env = os.defpath
-
-    if not path_env:
-        return None
-
-    path_dirs = path_env.split(os.pathsep)
-    if sys.platform == "win32":
-        path_dirs.insert(0, os.curdir)
-        pathext_source = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH")
-        pathext = [ext.upper() for ext in pathext_source.split(os.pathsep) if ext]
-    else:
-        pathext = []
-
-    dir_contents = {}
-    for p in path_dirs:
-        dir_p = p if p else os.curdir
-        normdir = os.path.normcase(dir_p)
-        if normdir not in dir_contents:
-            try:
-                if sys.platform == "win32":
-                    dir_contents[normdir] = {f.upper() for f in os.listdir(dir_p)}
-                else:
-                    dir_contents[normdir] = set(os.listdir(dir_p))
-            except OSError:
-                dir_contents[normdir] = set()
-
+    # We use a simple loop with shutil.which instead of optimizing stat()
+    # calls via os.listdir caching. Profiling shows that reading massive
+    # directories like /usr/bin into memory is significantly slower than
+    # executing a few redundant stat() calls for the specific terminals.
     for exe, style in _TERMINALS:
-        exe_upper = exe.upper() if sys.platform == "win32" else exe
-
-        if sys.platform == "win32":
-            files = [exe_upper + ext for ext in pathext]
-            if any(exe_upper.endswith(ext) for ext in pathext):
-                files.insert(0, exe_upper)
-        else:
-            files = [exe]
-
-        for p in path_dirs:
-            dir_p = p if p else os.curdir
-            normdir = os.path.normcase(dir_p)
-            entries = dir_contents.get(normdir, set())
-
-            for thefile in files:
-                if thefile in entries:
-                    full = os.path.join(p, exe if sys.platform != "win32" or thefile == exe_upper else thefile)
-                    if os.access(full, os.X_OK) and not os.path.isdir(full):
-                        return full, style
+        path = shutil.which(exe)
+        if path:
+            return path, style
     return None
 
 
@@ -140,10 +95,9 @@ _CMD={quoted}
 printf 'Edit if needed, then press \\033[1mEnter\\033[0m to run  (Ctrl-C to cancel):\\n\\n'
 read -r -e -p '$ ' -i "$_CMD" _CONFIRMED
 if [ -n "$_CONFIRMED" ]; then
-    eval "$_CONFIRMED"
+    bash -c "$_CONFIRMED"
 fi
-printf '\\n\\033[2m[Press Enter to close]\\033[0m'
-read -r _DONE
+exec bash -i
 """
 
 # zsh: vared — ZLE variable editor that accepts an initial value
@@ -154,7 +108,7 @@ _CMD={quoted}
 printf 'Edit if needed, then press \\e[1mEnter\\e[0m to run  (Ctrl-C to cancel):\\n\\n'
 vared -p '$ ' -c _CMD
 if [ -n "$_CMD" ]; then
-    eval "$_CMD"
+    zsh -c "$_CMD"
 fi
 printf '\\n\\e[2m[Press Enter to close]\\e[0m'
 read -r _DONE
@@ -186,7 +140,7 @@ printf '$ %s' "$_CMD"
 read -r _CONFIRMED
 _CONFIRMED="${_CONFIRMED:-$_CMD}"
 if [ -n "$_CONFIRMED" ]; then
-    eval "$_CONFIRMED"
+    ksh -c "$_CONFIRMED"
 fi
 printf '\\n[Press Enter to close]'
 read -r _DONE
@@ -200,12 +154,14 @@ _CMD={quoted}
 printf 'Copy-paste or retype the command, then press Enter (Ctrl-C to cancel):\\n\\n'
 printf '$ '
 read -r _CONFIRMED
-_CONFIRMED="${_CONFIRMED:-$_CMD}"
+_CONFIRMED="${{_CONFIRMED:-$_CMD}}"
 if [ -n "$_CONFIRMED" ]; then
-    sh -c "$_CONFIRMED"
+    _TMP=$(mktemp)
+    echo "$_CONFIRMED" > "$_TMP"
+    echo "rm -f '$_TMP'" >> "$_TMP"
+    ENV="$_TMP" exec sh -i
 fi
-printf '\\n[Press Enter to close]'
-read -r _DONE
+exec sh -i
 """
 
 _FAMILY_SCRIPTS: dict[str, str] = {
