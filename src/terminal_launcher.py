@@ -209,9 +209,11 @@ def open_with_command(command: str) -> tuple[bool, str]:
         shell_info = detect_shell()
         shell_family = shell_info.family
         shell_path   = shell_info.path
+        shell_name   = shell_info.name
     except Exception:  # noqa: BLE001
         shell_family = "sh"
         shell_path   = "/bin/sh"
+        shell_name   = "sh"
 
     quoted = shlex.quote(command)
     script_body, _runner = _pick_script(shell_family, quoted)
@@ -237,7 +239,7 @@ def open_with_command(command: str) -> tuple[bool, str]:
             start_new_session=True,
         )
         _schedule_delete(script_path, delay=5.0)
-        return True, f"Opened terminal ({shell_info.name}) with command: {command}"
+        return True, f"Opened terminal ({shell_name}) with command: {command}"
 
     except Exception as exc:  # noqa: BLE001
         logger.error("terminal_launcher error: %s", exc)
