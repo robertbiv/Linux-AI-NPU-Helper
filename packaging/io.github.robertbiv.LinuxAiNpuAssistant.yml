@@ -1,0 +1,48 @@
+app-id: io.github.robertbiv.LinuxAiNpuAssistant
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: start-assistant
+
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=all
+  - --share=network
+  - --filesystem=host
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.Flatpak
+
+build-options:
+  env:
+    PYTHONPATH: /app/lib/python3.12/site-packages:/app/src
+
+modules:
+  - name: python-dependencies
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+    build-commands:
+      - pip3 install --prefix=/app -r requirements.txt --break-system-packages
+    sources:
+      - type: file
+        path: ../requirements.txt
+
+  - name: linux-ai-npu-assistant
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/src
+      - cp -r src /app/
+      - |
+        cat << 'WRAPPER' > /app/bin/start-assistant
+        #!/bin/sh
+        export PYTHONPATH=/app:$PYTHONPATH
+        exec python3 -m src "$@"
+        WRAPPER
+      - chmod +x /app/bin/start-assistant
+    sources:
+      - type: dir
+        path: ../src
+        dest: src
