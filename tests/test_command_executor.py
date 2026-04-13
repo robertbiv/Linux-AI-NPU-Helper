@@ -1,8 +1,9 @@
 """Tests for src/command_executor.py."""
+
 from __future__ import annotations
 import pytest
 from unittest.mock import patch, MagicMock
-from src.command_executor import CommandExecutor, CommandResult
+from src.command_executor import CommandExecutor, CommandResult, CommandOutput
 
 
 _SAFETY = {
@@ -109,6 +110,7 @@ class TestRunCommand:
 
     def test_timeout(self):
         import subprocess
+
         ex = CommandExecutor(_SAFETY)
         with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("ls", 120)):
             result = ex.run_command("ls")
@@ -116,20 +118,36 @@ class TestRunCommand:
         assert "timed out" in result.stderr.lower()
 
     def test_succeeded_property(self):
-        r = CommandResult("ls", approved=True, blocked=False, returncode=0, stdout="", stderr="")
+        r = CommandResult(
+            "ls",
+            approved=True,
+            blocked=False,
+            output=CommandOutput(returncode=0, stdout="", stderr=""),
+        )
         assert r.succeeded is True
 
     def test_not_succeeded_when_blocked(self):
-        r = CommandResult("rm -rf /", approved=False, blocked=True, returncode=-1, stdout="", stderr="")
+        r = CommandResult(
+            "rm -rf /",
+            approved=False,
+            blocked=True,
+            output=CommandOutput(returncode=-1, stdout="", stderr=""),
+        )
         assert r.succeeded is False
 
 
 class TestProcessResponse:
     def test_processes_all_commands(self):
-        ex     = CommandExecutor(_SAFETY)
+        ex = CommandExecutor(_SAFETY)
         called = []
-        with patch.object(ex, "run_command", side_effect=lambda cmd: called.append(cmd) or
-                CommandResult(cmd, True, False, 0, "", "")):
+        with patch.object(
+            ex,
+            "run_command",
+            side_effect=lambda cmd: (
+                called.append(cmd)
+                or CommandResult(cmd, True, False, CommandOutput(0, "", ""))
+            ),
+        ):
             ex.process_response("```bash\nls\npwd\n```")
         assert "ls" in called
         assert "pwd" in called

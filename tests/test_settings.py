@@ -153,15 +153,28 @@ class TestSettingsManager:
         sm.set("backend", "openai", save=False)
         assert calls == []
 
+    def test_remove_listener_not_found(self, tmp_path):
+        sm = SettingsManager(path=None)
+        fn = lambda k, v: None
+        # Removing an unregistered listener shouldn't raise ValueError
+        sm.remove_listener(fn)
+
     def test_listener_error_does_not_propagate(self, tmp_path):
         sm = SettingsManager(path=None)
-        sm.add_listener(lambda k, v: (_ for _ in ()).throw(RuntimeError("boom")))
+
+        def faulty_listener(k, v):
+            raise RuntimeError("boom")
+
+        sm.add_listener(faulty_listener)
         sm.set("backend", "openai", save=False)  # should not raise
 
-    def test_listener_error_logs_warning(self, tmp_path, caplog):
-        import logging
+    def test_listener_error_logs_warning(self, tmp_path, mocker):
         sm = SettingsManager(path=None)
-        sm.add_listener(lambda k, v: (_ for _ in ()).throw(RuntimeError("boom")))
+
+        def faulty_listener(k, v):
+            raise RuntimeError("boom")
+
+        sm.add_listener(faulty_listener)
         with caplog.at_level(logging.WARNING):
             sm.set("backend", "openai", save=False)
         assert "Settings listener raised an error: boom" in caplog.text
