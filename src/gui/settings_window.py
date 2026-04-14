@@ -382,11 +382,11 @@ if _HAS_QT:
             self._fields.extend(sec_fields)
             self._fields.extend(app_fields)
 
-            self._tabs.addTab(backend_widget,    "AI Backend")
-            self._tabs.addTab(model_widget,      "Models")
-            self._tabs.addTab(tools_widget,      "Tools")
+            self._tabs.addTab(backend_widget,    "API Integration")
+            self._tabs.addTab(model_widget,      "Neural Models")
+            self._tabs.addTab(tools_widget,      "Autonomous Tools")
             self._tabs.addTab(security_widget,   "Security")
-            self._tabs.addTab(appearance_widget, "Appearance")
+            self._tabs.addTab(appearance_widget, "Visual Core")
 
 
 def open_settings(manager: Any, parent: object = None) -> None:
