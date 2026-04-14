@@ -257,7 +257,7 @@ class ConversationHistory:
         max_messages: int = _DEFAULT_MAX_MESSAGES,
         persist_path: Path | str | None = _DEFAULT_HISTORY_FILE,
         system_prompt: str = "",
-        encrypt: bool | None = None,          # None → auto-detect
+        encrypt: bool = False,            # opt-in; set True or call set_password()
         encryption_key: bytes | None = None,  # pre-supplied key (tests / custom setup)
     ) -> None:
         self._max = max_messages
@@ -266,10 +266,9 @@ class ConversationHistory:
         self._lock = threading.Lock()
 
         # ── Encryption setup ────────────────────────────────────────────────
-        # Auto-detect: enable if cryptography is importable and not disabled.
-        if encrypt is None:
-            encrypt = _fernet_available()
-        self._encrypt = encrypt and _fernet_available()
+        # Encryption is opt-in.  Pass encrypt=True or call set_password() to
+        # enable it.  The cryptography package must be installed.
+        self._encrypt = bool(encrypt) and _fernet_available()
 
         if self._encrypt:
             # Derive paths

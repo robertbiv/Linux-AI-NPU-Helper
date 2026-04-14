@@ -338,6 +338,9 @@ if _HAS_QT:
             # Apply NPU dark stylesheet globally
             self.setStyleSheet(T.STYLESHEET)
 
+            # Set taskbar / launcher icon on all DEs that support it
+            self._setup_taskbar_icon()
+
             # Central stacked widget: index 0 = compact, 1 = full
             self._central = QStackedWidget()
             self.setCentralWidget(self._central)
@@ -371,8 +374,12 @@ if _HAS_QT:
             self._current_mode = MODE_COMPACT
             self._central.setCurrentIndex(0)
 
+            # FramelessWindowHint keeps the panel borderless; WindowStaysOnTopHint
+            # keeps it above other windows.  Qt.Tool is intentionally NOT set here:
+            # it would hide the window from the taskbar, but DEs that support
+            # taskbar icons (GNOME, KDE, XFCE, etc.) should be able to show it.
             self.setWindowFlags(
-                Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool
+                Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
             )
             self.setFixedSize(420, 680)
             self._position_compact()
@@ -428,6 +435,57 @@ if _HAS_QT:
                 event.accept()
 
         # ── Private helpers ───────────────────────────────────────────────────
+
+        def _setup_taskbar_icon(self) -> None:
+            """Build a programmatic app icon and register it with the DE.
+
+            Uses a 64×64 dark-navy rounded square with the "✦" Neural Monolith
+            glyph rendered in the application's accent green.  Sets both the
+            QApplication-wide icon (picked up by all DEs via _NET_WM_ICON on
+            X11 and xdg-toplevel-icon on Wayland) and the per-window icon.
+
+            Also calls ``QApplication.setDesktopFileName`` so GNOME Shell and
+            KDE Plasma can match the window to the Flatpak .desktop entry and
+            display the correct launcher icon in the dock/taskbar.
+            """
+            try:
+                from PyQt5.QtGui import QColor, QFont, QIcon, QPainter, QPixmap  # noqa: PLC0415
+
+                px = QPixmap(64, 64)
+                px.fill(QColor(0, 0, 0, 0))  # transparent background
+
+                painter = QPainter(px)
+                painter.setRenderHint(QPainter.Antialiasing)
+
+                # Dark navy rounded-rect background
+                painter.setBrush(QColor("#1a1c28"))
+                painter.setPen(QColor("#2a2c3a"))
+                painter.drawRoundedRect(2, 2, 60, 60, 12, 12)
+
+                # Accent glyph
+                painter.setPen(QColor("#00d4aa"))
+                f = QFont()
+                f.setPointSize(28)
+                f.setBold(True)
+                painter.setFont(f)
+                from PyQt5.QtCore import Qt as _Qt  # noqa: PLC0415
+                painter.drawText(px.rect(), _Qt.AlignCenter, "✦")
+                painter.end()
+
+                icon = QIcon(px)
+                QApplication.setWindowIcon(icon)
+                self.setWindowIcon(icon)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Could not set taskbar icon: %s", exc)
+
+            # Wayland / GNOME Shell — link the window to the .desktop file so
+            # the correct launcher icon appears in the dock/taskbar.
+            try:
+                QApplication.setDesktopFileName(
+                    "io.github.robertbiv.LinuxAiNpuAssistant"
+                )
+            except AttributeError:
+                pass  # Qt < 5.7
 
         def _position_compact(self) -> None:
             """Place the compact window in the bottom-right of the screen."""

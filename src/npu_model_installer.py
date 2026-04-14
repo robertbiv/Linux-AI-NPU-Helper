@@ -159,13 +159,46 @@ class ModelCatalogEntry:
 
     @property
     def npu_fit_label(self) -> str:
-        """Short display label for the NPU fit score."""
+        """Short display label for the static NPU fit score."""
         return {
             "excellent":       "✅ Excellent",
             "good":            "✅ Good",
             "fair":            "⚠ Fair",
             "not_recommended": "⛔ Not recommended",
         }.get(self.npu_fit, self.npu_fit)
+
+    def hardware_adjusted_npu_fit(self, hw: "Any | None" = None) -> str:
+        """Return the NPU fit adjusted for the detected host hardware.
+
+        Parameters
+        ----------
+        hw:
+            A :class:`~src.npu_benchmark.HardwareCapabilities` instance.
+            When ``None`` the hardware is probed automatically via
+            :func:`~src.npu_benchmark.probe_hardware`.
+
+        Returns
+        -------
+        str
+            One of ``"excellent"``, ``"good"``, ``"fair"``,
+            ``"not_recommended"``.
+        """
+        try:
+            from src.npu_benchmark import adjust_npu_fit, probe_hardware  # noqa: PLC0415
+            capabilities = hw if hw is not None else probe_hardware()
+            return adjust_npu_fit(self.npu_fit, capabilities)
+        except Exception:  # noqa: BLE001
+            return self.npu_fit
+
+    def hardware_adjusted_label(self, hw: "Any | None" = None) -> str:
+        """Return the display label for the hardware-adjusted fit score."""
+        fit = self.hardware_adjusted_npu_fit(hw)
+        return {
+            "excellent":       "✅ Excellent",
+            "good":            "✅ Good",
+            "fair":            "⚠ Fair",
+            "not_recommended": "⛔ Not recommended",
+        }.get(fit, fit)
 
 
 # ── Curated NPU model catalog ─────────────────────────────────────────────────

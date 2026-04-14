@@ -367,6 +367,9 @@ if _HAS_QT:
             self._settings = settings_manager
             self._model_name = model_name
             self._is_streaming = False
+            self._last_screenshot: bytes | None = None
+            # Optional override capture function (injected by tests or main app)
+            self._screenshot_fn: "Any | None" = None
 
             layout = QVBoxLayout(self)
             layout.setContentsMargins(0, 0, 0, 0)
@@ -548,5 +551,68 @@ if _HAS_QT:
             if not text or self._is_streaming:
                 return
             self._input.clear()
+
+            # Take screenshot BEFORE the user bubble appears so the capture
+            # shows what was on screen when the question was asked.
+            auto_screen = (
+                self._settings.get("ui.auto_send_screen", False)
+                if self._settings is not None
+                else False
+            )
+            if auto_screen:
+                self._last_screenshot = self._take_screenshot()
+            else:
+                self._last_screenshot = None
+
             self.append_user_message(text)
             self.message_submitted.emit(text)
+
+        # ── Screenshot helpers ────────────────────────────────────────────────
+
+        def set_screenshot_fn(self, fn: "Any | None") -> None:
+            """Inject a custom screenshot callable (for testing or custom UI).
+
+            Parameters
+            ----------
+            fn:
+                ``Callable[[], bytes | None]`` — called instead of the default
+                opacity-trick capture when ``ui.auto_send_screen`` is True.
+                Pass ``None`` to restore the default behaviour.
+            """
+            self._screenshot_fn = fn
+
+        def _take_screenshot(self) -> bytes | None:
+            """Capture the screen using the opacity-fade technique.
+
+            The application window's opacity is set to 0 (transparent) before
+            the capture so it does not appear in the screenshot, then restored
+            to 1 immediately.  This avoids any visible flicker because the
+            window is never hidden — it is simply transparent for one frame.
+
+            Returns raw JPEG bytes, or ``None`` on failure.
+            """
+            if self._screenshot_fn is not None:
+                try:
+                    return self._screenshot_fn()
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug("Custom screenshot fn failed: %s", exc)
+                    return None
+
+            try:
+                from PyQt5.QtWidgets import QApplication  # noqa: PLC0415
+                win = self.window()
+                win.setWindowOpacity(0.0)
+                QApplication.processEvents()
+
+                from src.tools.screenshot_tool import ScreenshotTool  # noqa: PLC0415
+                data = ScreenshotTool._capture(monitor=0, quality=75)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Screenshot failed: %s", exc)
+                data = None
+            finally:
+                try:
+                    win.setWindowOpacity(1.0)
+                    QApplication.processEvents()
+                except Exception:  # noqa: BLE001
+                    pass
+            return data

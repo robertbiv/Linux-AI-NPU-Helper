@@ -26,6 +26,7 @@ Usage
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -121,8 +122,232 @@ if _HAS_QT:
 
     # ── Tab builders ──────────────────────────────────────────────────────────
 
+    def _history_tab(history: "Any | None") -> QWidget:
+        """Build the Chat History tab (encryption, password, export, import)."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setAlignment(Qt.AlignTop)
+
+        # ── Encryption group ───────────────────────────────────────────────
+        enc_grp = QGroupBox("History Encryption")
+        enc_layout = QVBoxLayout(enc_grp)
+
+        enc_status = QLabel()
+        if history is None:
+            enc_status.setText("History object not available.")
+        elif getattr(history, "is_encrypted", False):
+            enc_status.setText("🔒 History is encrypted (Fernet AES-128).")
+        else:
+            enc_status.setText("🔓 History is stored as plain JSON.")
+        enc_layout.addWidget(enc_status)
+
+        # Password section
+        pw_grp = QGroupBox("Set / Change Password")
+        pw_form = QVBoxLayout(pw_grp)
+
+        pw_row1 = QHBoxLayout()
+        pw_label = QLabel("Password:")
+        pw_label.setFixedWidth(90)
+        pw_input = QLineEdit()
+        pw_input.setEchoMode(QLineEdit.Password)
+        pw_input.setPlaceholderText("Leave blank to use auto-generated key")
+        pw_row1.addWidget(pw_label)
+        pw_row1.addWidget(pw_input)
+        pw_form.addLayout(pw_row1)
+
+        pw_row2 = QHBoxLayout()
+        pw_confirm_label = QLabel("Confirm:")
+        pw_confirm_label.setFixedWidth(90)
+        pw_confirm = QLineEdit()
+        pw_confirm.setEchoMode(QLineEdit.Password)
+        pw_row2.addWidget(pw_confirm_label)
+        pw_row2.addWidget(pw_confirm)
+        pw_form.addLayout(pw_row2)
+
+        pw_status = QLabel("")
+        pw_form.addWidget(pw_status)
+
+        set_pw_btn = QPushButton("Set Password")
+        set_pw_btn.setToolTip(
+            "Enable encryption and protect history with this password"
+        )
+
+        def _on_set_password() -> None:
+            if history is None:
+                pw_status.setText("⚠ History unavailable.")
+                return
+            p1 = pw_input.text()
+            p2 = pw_confirm.text()
+            if p1 != p2:
+                pw_status.setText("⚠ Passwords do not match.")
+                return
+            try:
+                history.set_password(p1)
+                pw_input.clear()
+                pw_confirm.clear()
+                enc_status.setText("🔒 History is encrypted (Fernet AES-128).")
+                pw_status.setText("✅ Password set and history re-encrypted.")
+            except Exception as exc:  # noqa: BLE001
+                pw_status.setText(f"⚠ {exc}")
+
+        set_pw_btn.clicked.connect(_on_set_password)
+        pw_form.addWidget(set_pw_btn)
+        enc_layout.addWidget(pw_grp)
+        layout.addWidget(enc_grp)
+
+        # ── Export / Import group ──────────────────────────────────────────
+        io_grp = QGroupBox("Export & Import")
+        io_layout = QVBoxLayout(io_grp)
+        io_status = QLabel("")
+        io_layout.addWidget(io_status)
+
+        def _on_export() -> None:
+            if history is None:
+                io_status.setText("⚠ History unavailable.")
+                return
+            from PyQt5.QtWidgets import QFileDialog  # noqa: PLC0415
+            path, _ = QFileDialog.getSaveFileName(
+                widget, "Export History",
+                str(Path.home() / "history_export.json"),
+                "JSON files (*.json);;All files (*)",
+            )
+            if not path:
+                return
+            try:
+                from pathlib import Path as P  # noqa: PLC0415
+                history.export_plaintext(P(path))
+                io_status.setText(f"✅ Exported to {path}")
+            except Exception as exc:  # noqa: BLE001
+                io_status.setText(f"⚠ Export failed: {exc}")
+
+        export_btn = QPushButton("📤 Export unencrypted JSON…")
+        export_btn.setToolTip(
+            "Save the full conversation history as plain JSON (no encryption)"
+        )
+        export_btn.clicked.connect(_on_export)
+        io_layout.addWidget(export_btn)
+
+        def _on_import() -> None:
+            if history is None:
+                io_status.setText("⚠ History unavailable.")
+                return
+            from PyQt5.QtWidgets import QFileDialog, QInputDialog  # noqa: PLC0415
+            path, _ = QFileDialog.getOpenFileName(
+                widget, "Import History",
+                str(Path.home()),
+                "JSON / Encrypted (*.json *.enc);;All files (*)",
+            )
+            if not path:
+                return
+            # Detect if encrypted
+            raw = ""
+            try:
+                with open(path, encoding="utf-8", errors="replace") as fh:
+                    raw = fh.read(128)
+            except OSError:
+                pass
+            looks_enc = raw.strip() and not (
+                raw.strip().startswith("[") or raw.strip().startswith("{")
+            )
+            password: str | None = None
+            if looks_enc:
+                pw, ok = QInputDialog.getText(
+                    widget, "Password Required",
+                    "Enter the password for the encrypted history file:",
+                    QLineEdit.Password,
+                )
+                if not ok:
+                    return
+                password = pw
+
+            # Ask merge or replace
+            from PyQt5.QtWidgets import QMessageBox  # noqa: PLC0415
+            choice = QMessageBox.question(
+                widget, "Import History",
+                "Merge with existing history?\n\n"
+                "Yes = merge (keep current + import)\n"
+                "No  = replace (overwrite with import)",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            merge = choice == QMessageBox.Yes
+
+            try:
+                from pathlib import Path as P  # noqa: PLC0415
+                count = history.import_history(P(path), password=password, merge=merge)
+                io_status.setText(f"✅ Imported {count} messages.")
+            except Exception as exc:  # noqa: BLE001
+                io_status.setText(f"⚠ Import failed: {exc}")
+
+        import_btn = QPushButton("📥 Import history…")
+        import_btn.setToolTip(
+            "Import a previously exported JSON or encrypted history file"
+        )
+        import_btn.clicked.connect(_on_import)
+        io_layout.addWidget(import_btn)
+
+        layout.addWidget(io_grp)
+        layout.addStretch()
+        return widget
+
+    def _updates_tab() -> QWidget:
+        """Build the Updates tab (Flatpak-only: managed by system package manager)."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setAlignment(Qt.AlignTop)
+
+        grp = QGroupBox("Application Updates")
+        grp_layout = QVBoxLayout(grp)
+
+        # Current version
+        try:
+            from src.gui.full_window import APP_VERSION  # noqa: PLC0415
+        except Exception:  # noqa: BLE001
+            APP_VERSION = "unknown"  # type: ignore[assignment]
+
+        ver_lbl = QLabel(f"Current version: <b>{APP_VERSION}</b>")
+        grp_layout.addWidget(ver_lbl)
+
+        info_lbl = QLabel(
+            "This application is distributed exclusively as a <b>Flatpak</b>.<br>"
+            "Updates are managed automatically by your system package manager:<br>"
+            "<ul>"
+            "<li><b>GNOME Software</b> — opens automatically with available updates</li>"
+            "<li><b>KDE Discover</b> — checks for updates in the background</li>"
+            "<li><b>Command line</b> — run <tt>flatpak update</tt> in a terminal</li>"
+            "</ul>"
+            "No manual update step is needed inside this application."
+        )
+        info_lbl.setWordWrap(True)
+        info_lbl.setOpenExternalLinks(False)
+        grp_layout.addWidget(info_lbl)
+
+        # Link to release notes
+        notes_btn = QPushButton("🌐 View release notes on GitHub")
+        notes_btn.setToolTip(
+            "Opens the GitHub Releases page in your default browser"
+        )
+
+        def _open_releases() -> None:
+            import subprocess  # noqa: PLC0415
+            url = "https://github.com/robertbiv/Linux-AI-NPU-Assistant/releases"
+            try:
+                subprocess.Popen(["xdg-open", url])  # noqa: S603, S607
+            except Exception:  # noqa: BLE001
+                try:
+                    import webbrowser  # noqa: PLC0415
+                    webbrowser.open(url)
+                except Exception:  # noqa: BLE001
+                    pass
+
+        notes_btn.clicked.connect(_open_releases)
+        grp_layout.addWidget(notes_btn)
+
+        layout.addWidget(grp)
+        layout.addStretch()
+        return widget
+
     def _backend_tab(manager: Any) -> tuple[QWidget, list[_Field]]:
-        """Build the AI Backend settings tab."""
         fields: list[_Field] = []
         widget = QWidget()
         layout = QVBoxLayout(widget)
@@ -326,9 +551,10 @@ if _HAS_QT:
             Optional parent widget.
         """
 
-        def __init__(self, manager: Any, parent: QWidget | None = None) -> None:
+        def __init__(self, manager: Any, parent: QWidget | None = None, history: "Any | None" = None) -> None:
             super().__init__(parent)
             self._manager = manager
+            self._history = history
             self._fields: list[_Field] = []
 
             self.setWindowTitle("Linux AI NPU Assistant — Settings")
@@ -387,9 +613,11 @@ if _HAS_QT:
             self._tabs.addTab(tools_widget,      "Tools")
             self._tabs.addTab(security_widget,   "Security")
             self._tabs.addTab(appearance_widget, "Appearance")
+            self._tabs.addTab(_history_tab(self._history), "History")
+            self._tabs.addTab(_updates_tab(),    "Updates")
 
 
-def open_settings(manager: Any, parent: object = None) -> None:
+def open_settings(manager: Any, parent: object = None, history: "Any | None" = None) -> None:
     """Open the settings dialog (convenience function).
 
     Parameters
@@ -398,6 +626,9 @@ def open_settings(manager: Any, parent: object = None) -> None:
         The application :class:`~src.settings.SettingsManager`.
     parent:
         Optional parent widget.
+    history:
+        Optional :class:`~src.conversation.ConversationHistory` — enables
+        the History tab controls (encryption, password, export, import).
 
     Raises
     ------
@@ -405,5 +636,5 @@ def open_settings(manager: Any, parent: object = None) -> None:
         If PyQt5 is not installed.
     """
     _require_qt()
-    win = SettingsWindow(manager, parent=parent)
+    win = SettingsWindow(manager, parent=parent, history=history)
     win.exec_()
