@@ -26,6 +26,7 @@ modules:
         - --share=network
     build-commands:
       - pip3 install --prefix=/app -r requirements.txt --break-system-packages
+      - pip3 install --prefix=/app PyQt5>=5.15.0 --break-system-packages
     sources:
       - type: file
         path: ../requirements.txt
@@ -39,7 +40,7 @@ modules:
         cat << 'WRAPPER' > /app/bin/start-assistant
         #!/bin/sh
         export PYTHONPATH=/app:$PYTHONPATH
-        exec python3 -m src "$@"
+        exec python3 -m src.main "$@"
         WRAPPER
       - chmod +x /app/bin/start-assistant
     sources:
