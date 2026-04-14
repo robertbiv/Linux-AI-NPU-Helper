@@ -225,6 +225,7 @@ if _HAS_QT:
 
             test_btns = QHBoxLayout()
             self._run_tests_btn = QPushButton("▶ Run Tests")
+            self._run_tests_btn.setToolTip("Run internal test suite")
             self._run_tests_btn.clicked.connect(self._run_tests)
             test_btns.addWidget(self._run_tests_btn)
             self._test_summary = QLabel("")
@@ -242,10 +243,12 @@ if _HAS_QT:
             btn_row = QHBoxLayout()
 
             refresh_btn = QPushButton("🔄 Refresh now")
+            refresh_btn.setToolTip("Fetch the latest diagnostic report")
             refresh_btn.clicked.connect(self.refresh)
             btn_row.addWidget(refresh_btn)
 
             copy_btn = QPushButton("📋 Copy JSON report")
+            copy_btn.setToolTip("Copy the raw JSON report to clipboard")
             copy_btn.clicked.connect(self._copy_report)
             btn_row.addWidget(copy_btn)
 
