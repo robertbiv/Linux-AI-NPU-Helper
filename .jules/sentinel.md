@@ -1,0 +1,4 @@
+## 2024-10-27 - TOCTOU Vulnerability in Secure File Creation
+**Vulnerability:** A Time-of-Check to Time-of-Use (TOCTOU) race condition existed in `src/security.py`'s `secure_write` function where sensitive configuration files were temporarily created with default (world-readable) permissions before being strictly locked down with `chmod`.
+**Learning:** Python's `Path.write_text` does not natively enforce restrictive file permissions atomically during file creation, allowing an attacker to read sensitive data such as API keys during the brief window between file creation and the `chmod` operation.
+**Prevention:** Always use lower-level POSIX file I/O functions (`os.open`) with `os.O_CREAT | os.O_WRONLY | os.O_TRUNC` and explicit strict permissions (`mode`) passed directly to atomically create files with the correct permissions from the outset.
