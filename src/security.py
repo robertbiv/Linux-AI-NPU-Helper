@@ -157,10 +157,18 @@ def secure_write(path: str | Path, data: str, mode: int = 0o600) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_suffix(".tmp")
     try:
-        tmp.write_text(data, encoding="utf-8")
-        # Restrict permissions before the rename so there is no window in which
-        # the file exists at its final path with open permissions.
+        # Remove any existing .tmp file to prevent hijacking and permission retention
+        if tmp.exists():
+            tmp.unlink()
+
+        # Create file with restrictive permissions atomically to avoid TOCTOU vulnerability
+        fd = os.open(tmp, os.O_CREAT | os.O_EXCL | os.O_WRONLY, mode)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(data)
+
+        # Defense-in-depth: explicitly enforce permissions in case umask or OS ignores `mode`
         tmp.chmod(mode)
+
         tmp.replace(p)
     except OSError:
         # Clean up the temp file if anything went wrong
