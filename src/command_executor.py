@@ -269,8 +269,7 @@ class CommandExecutor:
                 # Use a temporary file for stderr of all processes to prevent pipe deadlocks
                 # and allow us to gather all errors at the end.
                 fd, stderr_path = tempfile.mkstemp(prefix="ai_cmd_stderr_")
-                stderr_f = open(stderr_path, "w+")  # noqa: SIM115
-                os.close(fd)
+                stderr_f = os.fdopen(fd, "w+")
                 opened_files.append(stderr_f)
 
                 try:
