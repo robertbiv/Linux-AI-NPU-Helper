@@ -1,8 +1,9 @@
 """Extensive tests for src/ai_assistant.py."""
+
 from __future__ import annotations
 
 import json
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 import pytest
 
 from src.ai_assistant import AIAssistant
@@ -10,6 +11,7 @@ from src.security import ExternalNetworkBlockedError
 
 
 # ── Config helpers ─────────────────────────────────────────────────────────────
+
 
 def _make_config(
     backend="ollama",
@@ -22,17 +24,21 @@ def _make_config(
 ):
     cfg = MagicMock()
     cfg.backend = backend
-    cfg.ollama  = {"base_url": "http://localhost:11434", "model": ollama_model, "timeout": 5}
-    cfg.openai  = {
+    cfg.ollama = {
+        "base_url": "http://localhost:11434",
+        "model": ollama_model,
+        "timeout": 5,
+    }
+    cfg.openai = {
         "base_url": "http://localhost:1234/v1",
         "api_key": "sk-test",
         "model": openai_model,
         "timeout": 5,
     }
-    cfg.npu     = {"model_path": npu_model}
+    cfg.npu = {"model_path": npu_model}
     cfg.network = {"allow_external": allow_external}
     cfg.resources = {"stream_response": stream}
-    cfg.get     = MagicMock(return_value={"rate_limit_per_minute": rate_limit})
+    cfg.get = MagicMock(return_value={"rate_limit_per_minute": rate_limit})
     return cfg
 
 
@@ -44,6 +50,7 @@ def _make_history(messages=None):
 
 
 # ── Initialisation ────────────────────────────────────────────────────────────
+
 
 class TestInit:
     def test_creates_rate_limiter(self):
@@ -70,6 +77,7 @@ class TestInit:
 
 
 # ── System prompt ─────────────────────────────────────────────────────────────
+
 
 class TestBuildSystemPrompt:
     def test_basic_prompt_not_empty(self):
@@ -109,6 +117,7 @@ class TestBuildSystemPrompt:
 
 # ── ask() dispatch ────────────────────────────────────────────────────────────
 
+
 class TestAskDispatch:
     def test_unknown_backend_raises(self):
         cfg = _make_config(backend="invalid")
@@ -144,9 +153,11 @@ class TestAskDispatch:
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
 
+
 class TestRateLimit:
     def test_rate_limit_exceeded_raises(self):
         from src.security import RateLimitExceededError
+
         cfg = _make_config(rate_limit=1)
         assistant = AIAssistant(cfg)
         # Force the rate limiter to raise
@@ -158,6 +169,7 @@ class TestRateLimit:
 
 
 # ── Ollama backend ────────────────────────────────────────────────────────────
+
 
 class TestAskOllama:
     def _fake_stream_resp(self, chunks: list[str]) -> MagicMock:
@@ -212,6 +224,7 @@ class TestAskOllama:
 
     def test_screenshot_included_as_image(self):
         import base64
+
         cfg = _make_config(backend="ollama", stream=False)
         assistant = AIAssistant(cfg)
         resp = self._fake_nonstream_resp("yes")
@@ -235,7 +248,11 @@ class TestAskOllama:
 
     def test_external_url_blocked(self):
         cfg = _make_config(backend="ollama", allow_external=False)
-        cfg.ollama = {"base_url": "https://api.openai.com", "model": "gpt-4", "timeout": 5}
+        cfg.ollama = {
+            "base_url": "https://api.openai.com",
+            "model": "gpt-4",
+            "timeout": 5,
+        }
         assistant = AIAssistant(cfg)
         with pytest.raises(ExternalNetworkBlockedError):
             list(assistant.ask("hi"))
@@ -292,13 +309,11 @@ class TestAskOllama:
 
 # ── OpenAI-compatible backend ─────────────────────────────────────────────────
 
+
 class TestAskOpenAI:
     def _fake_stream_resp(self, deltas: list[str]) -> MagicMock:
         lines = [
-            (
-                b"data: "
-                + json.dumps({"choices": [{"delta": {"content": d}}]}).encode()
-            )
+            (b"data: " + json.dumps({"choices": [{"delta": {"content": d}}]}).encode())
             for d in deltas
         ]
         lines.append(b"data: [DONE]")
@@ -311,9 +326,7 @@ class TestAskOpenAI:
 
     def _fake_nonstream_resp(self, content: str) -> MagicMock:
         resp = MagicMock()
-        resp.json.return_value = {
-            "choices": [{"message": {"content": content}}]
-        }
+        resp.json.return_value = {"choices": [{"message": {"content": content}}]}
         resp.raise_for_status = MagicMock()
         resp.__enter__ = lambda s: s
         resp.__exit__ = MagicMock(return_value=False)
@@ -398,14 +411,31 @@ class TestAskOpenAI:
 
 # ── NPU backend ───────────────────────────────────────────────────────────────
 
+
 class TestAskNPU:
-    def test_no_npu_manager_raises(self):
+    @patch("src.ai_assistant.probe_hardware")
+    def test_no_npu_detected_raises(self, mock_probe):
+        mock_probe.return_value.npu_available = False
+        cfg = _make_config(backend="npu")
+        npu = MagicMock()
+        assistant = AIAssistant(cfg, npu_manager=npu)
+        with pytest.raises(
+            RuntimeError,
+            match="No NPU detected. GPU support is coming soon, but right now it is NPU only.",
+        ):
+            list(assistant.ask("hello"))
+
+    @patch("src.ai_assistant.probe_hardware")
+    def test_no_npu_manager_raises(self, mock_probe):
+        mock_probe.return_value.npu_available = True
         cfg = _make_config(backend="npu")
         assistant = AIAssistant(cfg, npu_manager=None)
         with pytest.raises(RuntimeError, match="NPUManager"):
             list(assistant.ask("hello"))
 
-    def test_no_numpy_raises(self):
+    @patch("src.ai_assistant.probe_hardware")
+    def test_no_numpy_raises(self, mock_probe):
+        mock_probe.return_value.npu_available = True
         cfg = _make_config(backend="npu")
         npu = MagicMock()
         assistant = AIAssistant(cfg, npu_manager=npu)
@@ -413,18 +443,24 @@ class TestAskNPU:
             with pytest.raises((RuntimeError, ImportError)):
                 list(assistant.ask("hello"))
 
-    def test_npu_inference_called(self):
+    @patch("src.ai_assistant.probe_hardware")
+    def test_npu_inference_called(self, mock_probe):
+        mock_probe.return_value.npu_available = True
         numpy = pytest.importorskip("numpy")
         cfg = _make_config(backend="npu")
         npu = MagicMock()
-        result_array = numpy.array([72, 101, 108, 108, 111], dtype=numpy.uint8)  # "Hello"
+        result_array = numpy.array(
+            [72, 101, 108, 108, 111], dtype=numpy.uint8
+        )  # "Hello"
         npu.run_inference.return_value = [result_array]
         assistant = AIAssistant(cfg, npu_manager=npu)
         tokens = list(assistant.ask("test prompt"))
         npu.run_inference.assert_called_once()
         assert "".join(tokens)  # Non-empty output
 
-    def test_npu_empty_output_yields_empty_string(self):
+    @patch("src.ai_assistant.probe_hardware")
+    def test_npu_empty_output_yields_empty_string(self, mock_probe):
+        mock_probe.return_value.npu_available = True
         pytest.importorskip("numpy")
         cfg = _make_config(backend="npu")
         npu = MagicMock()
@@ -435,6 +471,7 @@ class TestAskNPU:
 
 
 # ── Response sanitisation ─────────────────────────────────────────────────────
+
 
 class TestSanitisation:
     def test_control_chars_stripped_from_ollama(self):
