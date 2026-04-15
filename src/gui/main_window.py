@@ -153,6 +153,7 @@ if _HAS_QT:
             # More (⋮)
             more_btn = QToolButton()
             more_btn.setText("⋮")
+            more_btn.setToolTip("More options")
             more_btn.setFixedSize(30, 30)
             more_btn.setStyleSheet(
                 f"QToolButton {{"
