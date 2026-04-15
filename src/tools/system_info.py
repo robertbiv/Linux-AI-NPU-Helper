@@ -89,46 +89,51 @@ def _query_battery() -> str:
     lines: list[str] = []
     upower_devices: list[str] | None = None
 
-    for ps_dir in sorted(ps_root.iterdir()):
-        ps_type = read_sys_file(str(ps_dir / "type")).lower()
-        if ps_type != "battery":
-            continue
+    try:
+        with os.scandir(ps_root) as it:
+            for ps_dir in sorted(it, key=lambda e: e.name):
+                ps_type = read_sys_file(f"{ps_dir.path}/type").lower()
+                if ps_type != "battery":
+                    continue
 
-        # Fetch upower dump lazily upon finding the first battery
-        if upower_devices is None:
-            upower_dump = run_command(["upower", "--dump"])
-            upower_devices = upower_dump.split("Device: ") if upower_dump else []
+                # Fetch upower dump lazily upon finding the first battery
+                if upower_devices is None:
+                    upower_dump = run_command(["upower", "--dump"])
+                    upower_devices = upower_dump.split("Device: ") if upower_dump else []
 
-        name = ps_dir.name
-        capacity = read_sys_file(str(ps_dir / "capacity"))
-        status = read_sys_file(str(ps_dir / "status"))  # Charging / Discharging / Full
-        technology = read_sys_file(str(ps_dir / "technology"))
+                name = ps_dir.name
+                capacity = read_sys_file(f"{ps_dir.path}/capacity")
+                status = read_sys_file(f"{ps_dir.path}/status")  # Charging / Discharging / Full
+                technology = read_sys_file(f"{ps_dir.path}/technology")
 
-        line = f"{name}: "
-        if capacity:
-            line += f"{capacity}% "
-        if status:
-            line += f"({status})"
-        if technology:
-            line += f" [{technology}]"
+                line = f"{name}: "
+                if capacity:
+                    line += f"{capacity}% "
+                if status:
+                    line += f"({status})"
+                if technology:
+                    line += f" [{technology}]"
 
-        # Time remaining from upower if available
-        eta = ""
-        device_path = f"/org/freedesktop/UPower/devices/battery_{name}"
-        for device_block in upower_devices:
-            # Ensure exact path match (up to newline or exact end of string)
-            block_lines = device_block.splitlines()
-            if block_lines and block_lines[0].strip() == device_path:
-                for line_str in block_lines[1:]:
-                    if "time to" in line_str.lower():
-                        eta = line_str.strip()
-                        break
-                break
+                # Time remaining from upower if available
+                eta = ""
+                device_path = f"/org/freedesktop/UPower/devices/battery_{name}"
+                if upower_devices:
+                    for device_block in upower_devices:
+                        # Ensure exact path match (up to newline or exact end of string)
+                        block_lines = device_block.splitlines()
+                        if block_lines and block_lines[0].strip() == device_path:
+                            for line_str in block_lines[1:]:
+                                if "time to" in line_str.lower():
+                                    eta = line_str.strip()
+                                    break
+                            break
 
-        if eta:
-            line += f"  {eta}"
+                if eta:
+                    line += f"  {eta}"
 
-        lines.append(line)
+                lines.append(line)
+    except OSError:
+        pass
 
     if not lines:
         # Fallback to acpi
@@ -144,31 +149,35 @@ def _query_battery_health() -> str:
         return "No power supply information found."
 
     lines: list[str] = []
-    for ps_dir in sorted(ps_root.iterdir()):
-        ps_type = read_sys_file(str(ps_dir / "type")).lower()
-        if ps_type != "battery":
-            continue
+    try:
+        with os.scandir(ps_root) as it:
+            for ps_dir in sorted(it, key=lambda e: e.name):
+                ps_type = read_sys_file(f"{ps_dir.path}/type").lower()
+                if ps_type != "battery":
+                    continue
 
-        name = ps_dir.name
-        full = read_sys_file(str(ps_dir / "charge_full")) or read_sys_file(
-            str(ps_dir / "energy_full")
-        )
-        design = read_sys_file(str(ps_dir / "charge_full_design")) or read_sys_file(
-            str(ps_dir / "energy_full_design")
-        )
-        cycle_count = read_sys_file(str(ps_dir / "cycle_count"))
+                name = ps_dir.name
+                full = read_sys_file(f"{ps_dir.path}/charge_full") or read_sys_file(
+                    f"{ps_dir.path}/energy_full"
+                )
+                design = read_sys_file(f"{ps_dir.path}/charge_full_design") or read_sys_file(
+                    f"{ps_dir.path}/energy_full_design"
+                )
+                cycle_count = read_sys_file(f"{ps_dir.path}/cycle_count")
 
-        if full and design:
-            try:
-                health_pct = round(int(full) / int(design) * 100, 1)
-                line = f"{name}: {health_pct}% health"
-                if cycle_count and cycle_count != "0":
-                    line += f"  ({cycle_count} charge cycles)"
-                lines.append(line)
-            except (ValueError, ZeroDivisionError):
-                lines.append(f"{name}: health data unreadable.")
-        else:
-            lines.append(f"{name}: charge capacity data unavailable.")
+                if full and design:
+                    try:
+                        health_pct = round(int(full) / int(design) * 100, 1)
+                        line = f"{name}: {health_pct}% health"
+                        if cycle_count and cycle_count != "0":
+                            line += f"  ({cycle_count} charge cycles)"
+                        lines.append(line)
+                    except (ValueError, ZeroDivisionError):
+                        lines.append(f"{name}: health data unreadable.")
+                else:
+                    lines.append(f"{name}: charge capacity data unavailable.")
+    except OSError:
+        pass
 
     return "\n".join(lines) if lines else "Battery health information unavailable."
 

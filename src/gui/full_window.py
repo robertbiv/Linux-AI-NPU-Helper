@@ -334,6 +334,7 @@ if _HAS_QT:
             # Notification icon
             notif = QToolButton()
             notif.setText("🔔")
+            notif.setToolTip("Notifications")
             notif.setStyleSheet(
                 f"QToolButton {{ background: transparent; border: none; font-size: 16px; }}"
             )

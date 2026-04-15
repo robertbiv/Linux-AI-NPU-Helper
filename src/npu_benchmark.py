@@ -202,15 +202,19 @@ def _gpu_model_from_sys() -> str:
     drm = Path("/sys/class/drm")
     if not drm.exists():
         return ""
-    for d in sorted(drm.iterdir()):
-        if not d.name.startswith("card") or not d.name[-1].isdigit():
-            continue
-        label = _read_sys(str(d / "device" / "label"))
-        if label:
-            return label
-        product = _read_sys(str(d / "device" / "product_name"))
-        if product:
-            return product
+    try:
+        with os.scandir(drm) as it:
+            for d in sorted(it, key=lambda e: e.name):
+                if not d.name.startswith("card") or not d.name[-1].isdigit():
+                    continue
+                label = _read_sys(f"{d.path}/device/label")
+                if label:
+                    return label
+                product = _read_sys(f"{d.path}/device/product_name")
+                if product:
+                    return product
+    except OSError:
+        pass
     return ""
 
 

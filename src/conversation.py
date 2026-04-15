@@ -497,7 +497,8 @@ class ConversationHistory:
         text = json.dumps(data, indent=2, ensure_ascii=False)
         out = Path(export_path)
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(text, encoding="utf-8")
+        from src.security import secure_write
+        secure_write(out, text)
         logger.info(
             "Exported %d messages (plaintext) → %s", len(data), out
         )

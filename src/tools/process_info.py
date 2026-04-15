@@ -153,16 +153,19 @@ def _fmt_table(procs: list[dict], sort_key: str) -> str:
 def _battery_rate() -> str:
     ps_root = Path("/sys/class/power_supply")
     lines: list[str] = []
-    if ps_root.exists():
-        for ps in sorted(ps_root.iterdir()):
-            if read_sys_file(str(ps / "type")).lower() != "battery":
-                continue
-            pwr = read_sys_file(str(ps / "power_now"))
-            if pwr:
-                try:
-                    lines.append(f"{ps.name}: {int(pwr) / 1_000_000:.2f} W")
-                except ValueError:
-                    pass
+    try:
+        with os.scandir(ps_root) as it:
+            for ps in sorted(it, key=lambda e: e.name):
+                if read_sys_file(f"{ps.path}/type").lower() != "battery":
+                    continue
+                pwr = read_sys_file(f"{ps.path}/power_now")
+                if pwr:
+                    try:
+                        lines.append(f"{ps.name}: {int(pwr) / 1_000_000:.2f} W")
+                    except ValueError:
+                        pass
+    except OSError:
+        pass
     if not lines:
         out = run_command(
             ["upower", "-i", "/org/freedesktop/UPower/devices/battery_BAT0"]

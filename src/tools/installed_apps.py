@@ -112,16 +112,17 @@ def _scan_path(query: str = "") -> list[dict]:
         if not p.is_dir():
             continue
         try:
-            for entry in p.iterdir():
-                if entry.name in seen:
-                    continue
-                if q and q not in entry.name.lower():
-                    continue
-                if entry.is_file() and os.access(entry, os.X_OK):
-                    seen.add(entry.name)
-                    results.append(
-                        {"source": "path", "name": entry.name, "path": str(entry)}
-                    )
+            with os.scandir(p) as it:
+                for entry in it:
+                    if entry.name in seen:
+                        continue
+                    if q and q not in entry.name.lower():
+                        continue
+                    if entry.is_file() and os.access(entry.path, os.X_OK):
+                        seen.add(entry.name)
+                        results.append(
+                            {"source": "path", "name": entry.name, "path": entry.path}
+                        )
         except PermissionError:
             continue
     return results[:200]
