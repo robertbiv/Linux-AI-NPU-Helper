@@ -12,5 +12,6 @@ mkdocs>=1.6.1
 mkdocs-material>=9.6.0
 mkdocstrings[python]>=1.0.0
 
-# Optional GUI (not required for tests or docs)
-# PyQt5>=5.15.0
+# Required for GUI and tests
+PyQt5>=5.15.0
+cryptography>=41.0.0
