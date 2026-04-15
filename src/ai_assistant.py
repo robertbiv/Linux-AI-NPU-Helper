@@ -36,6 +36,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Generator, Iterator
 
+from src.npu_benchmark import probe_hardware
 from src.security import (
     RateLimiter,
     assert_local_url,
@@ -402,6 +403,11 @@ class AIAssistant:
         The model is loaded, queried, and **immediately unloaded** so NPU
         memory is reclaimed right away (handled by NPUManager.run_inference).
         """
+        if not probe_hardware().npu_available:
+            raise RuntimeError(
+                "No NPU detected. GPU support is coming soon, but right now it is NPU only."
+            )
+
         if self._npu_manager is None:
             raise RuntimeError("NPU backend selected but no NPUManager was provided.")
 
