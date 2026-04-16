@@ -109,6 +109,15 @@ _DEFAULTS: dict[str, Any] = {
         # Auto send screen
         "auto_send_screen": True,
     },
+    # ── Appearance (GUI settings dialog compatibility) ──────────────────────
+    "appearance": {
+        "position": "center",
+        "width": 700,
+        "opacity": 0.92,
+        "font_size": 12,
+        "always_on_top": True,
+        "theme": "neural_dark",
+    },
     # ── Safety ────────────────────────────────────────────────────────────────
     "safety": {
         # Always require explicit confirmation before executing any shell command
@@ -125,6 +134,8 @@ _DEFAULTS: dict[str, Any] = {
     "tools": {
         # Root directory used as the default for file/content searches
         "search_path": "~",
+        # Max results used by some tool UIs.
+        "max_results": 50,
         # Paths the SearchInFilesTool will NEVER read from (security/privacy)
         "blocked_paths": [
             "~/.ssh",

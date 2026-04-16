@@ -529,10 +529,13 @@ def get_npu_suggestions() -> list[ModelCatalogEntry]:
 
 # ── Install paths ─────────────────────────────────────────────────────────────
 
-#: Root directory for all installed models (user-local)
-MODELS_ROOT: Path = (
-    Path.home() / ".local" / "share" / "linux-ai-npu-assistant" / "models"
-)
+#: Root directory for all installed models.
+#:
+#: Respects XDG_DATA_HOME when available (Flatpak wrapper sets this to /var/data),
+#: so model files stay inside the sandbox and do not clutter the host home.
+_XDG_DATA_HOME = os.environ.get("XDG_DATA_HOME")
+_DATA_ROOT = Path(_XDG_DATA_HOME).expanduser() if _XDG_DATA_HOME else (Path.home() / ".local" / "share")
+MODELS_ROOT: Path = _DATA_ROOT / "linux-ai-npu-assistant" / "models"
 
 #: Minimum ONNX file size for the default model
 _MIN_ONNX_SIZE_BYTES: int = get_default_entry().min_size_bytes

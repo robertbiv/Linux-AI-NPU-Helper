@@ -223,6 +223,7 @@ if _HAS_QT:
                 f"  background-color: #4375d6;"
                 f"}}"
             )
+            update_btn.clicked.connect(lambda: self.page_selected.emit(PAGE_PREFERENCES))
             layout.addWidget(update_btn)
 
             # ── Status bar ────────────────────────────────────────────────
@@ -413,16 +414,21 @@ if _HAS_QT:
         """
 
         collapse_requested = pyqtSignal()
+        model_activated = pyqtSignal(str)
 
         def __init__(
             self,
             settings_manager: Any = None,
             ai_assistant: Any = None,
+            chat_widget: QWidget | None = None,
+            status_widget: QWidget | None = None,
             parent: QWidget | None = None,
         ) -> None:
             super().__init__(parent)
             self._sm = settings_manager
             self._ai = ai_assistant
+            self._shared_chat_widget = chat_widget
+            self._shared_status_widget = status_widget
             self._setup_ui()
 
         def _setup_ui(self) -> None:
@@ -459,17 +465,20 @@ if _HAS_QT:
             from src.gui.chat_widget import ChatWidget
             from src.gui.status_widget import StatusWidget
             from src.gui.npu_settings_widget import NPUSettingsWidget
+            from src.gui.model_manager import ModelManagerWidget
 
-            chat = ChatWidget(self._sm)
+            chat = self._shared_chat_widget or ChatWidget(self._sm)
             self._chat_widget = chat
             self._add_page(PAGE_CHAT, chat)
 
-            status = StatusWidget()
+            status = self._shared_status_widget or StatusWidget()
             self._status_widget = status
             self._add_page(PAGE_NPU_PERF, status)
 
-            settings = NPUSettingsWidget(self._sm)
-            self._add_page(PAGE_NEURAL_MODELS, settings)
+            model_manager = ModelManagerWidget(self._sm)
+            model_manager.model_activated.connect(self.model_activated)
+            self._model_manager_widget = model_manager
+            self._add_page(PAGE_NEURAL_MODELS, model_manager)
 
             logs = _placeholder_page(
                 "System Logs",

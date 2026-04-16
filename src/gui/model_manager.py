@@ -689,6 +689,16 @@ if _HAS_QT:
             self.model_activated.emit(path)
             logger.info("NPU model set to %r (key=%r)", path, entry.key)
 
+        def closeEvent(self, event) -> None:  # noqa: ANN001
+            for thread in list(self._dl_threads.values()) + list(self._rm_threads.values()):
+                if thread.isRunning():
+                    thread.requestInterruption()
+                    thread.quit()
+                    thread.wait(1500)
+            self._dl_threads.clear()
+            self._rm_threads.clear()
+            super().closeEvent(event)
+
     # ── Backend model list ────────────────────────────────────────────────────
 
     class _BackendModelPanel(QWidget):
@@ -703,7 +713,7 @@ if _HAS_QT:
             self._models: list[Any] = []
             self._build_ui()
             self._build_selector()
-            self.refresh()
+            self._set_status("Click Refresh to load backend models.")
 
         def _build_selector(self) -> None:
             try:
@@ -1040,6 +1050,15 @@ if _HAS_QT:
             self._status.setStyleSheet(f"color: {colour};")
             self._status.setText(msg)
 
+        def closeEvent(self, event) -> None:  # noqa: ANN001
+            for attr in ("_thread", "_import_copy_thread", "_dl_url_thread"):
+                t = getattr(self, attr, None)
+                if t is not None and t.isRunning():
+                    t.requestInterruption()
+                    t.quit()
+                    t.wait(1500)
+            super().closeEvent(event)
+
     # ── Public composite widget ───────────────────────────────────────────────
 
     class ModelManagerWidget(QWidget):
@@ -1052,6 +1071,8 @@ if _HAS_QT:
         parent:
             Optional parent widget.
         """
+
+        model_activated = pyqtSignal(str)
 
         def __init__(self, manager: Any, parent: QWidget | None = None) -> None:
             super().__init__(parent)
@@ -1066,6 +1087,7 @@ if _HAS_QT:
 
             # Tab 1 — NPU catalog
             self._catalog = NPUCatalogWidget(self._manager)
+            self._catalog.model_activated.connect(self.model_activated)
             tabs.addTab(self._catalog, "🤖 NPU Catalog")
 
             # Tab 2 — Backend models

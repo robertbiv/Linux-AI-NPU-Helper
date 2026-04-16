@@ -10,7 +10,6 @@ finish-args:
   - --socket=wayland
   - --device=all
   - --share=network
-  - --filesystem=host
   - --talk-name=org.freedesktop.Notifications
   - --talk-name=org.freedesktop.Flatpak
 
@@ -40,6 +39,10 @@ modules:
         cat << 'WRAPPER' > /app/bin/start-assistant
         #!/bin/sh
         export PYTHONPATH=/app:$PYTHONPATH
+        # Keep all app data/config/cache inside Flatpak sandbox storage.
+        export XDG_DATA_HOME="${XDG_DATA_HOME:-/var/data}"
+        export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-/var/config}"
+        export XDG_CACHE_HOME="${XDG_CACHE_HOME:-/var/cache}"
         exec python3 -m src.main "$@"
         WRAPPER
       - chmod +x /app/bin/start-assistant

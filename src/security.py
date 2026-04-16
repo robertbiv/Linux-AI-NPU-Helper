@@ -22,6 +22,7 @@ import ipaddress
 import logging
 import os
 import re
+import socket
 import stat
 import threading
 import time
@@ -46,20 +47,49 @@ class RateLimitExceededError(RuntimeError):
 # ── URL guard ─────────────────────────────────────────────────────────────────
 
 def is_local_url(url: str) -> bool:
-    """Return *True* if *url* resolves to a loopback or RFC-1918 private address.
+    """Return *True* if *url* resolves to loopback or private-network addresses.
 
-    Only bare IP addresses and the hostname ``localhost``/``::1`` are accepted
-    as local.  Any hostname that is not a bare IP (e.g. ``my-server.lan``) is
-    treated as potentially external and rejected when external traffic is off.
+    Accepts:
+    - IP literals (loopback/RFC1918/private)
+    - ``localhost``/``::1``
+    - Hostnames that DNS-resolve only to local/private addresses
+
+    Rejects:
+    - Hostnames that cannot be resolved
+    - Hostnames resolving to any public IP
     """
     host = urlparse(url).hostname or ""
     if host in ("localhost", "::1"):
         return True
+
+    # Direct IP literal
     try:
         addr = ipaddress.ip_address(host)
         return addr.is_loopback or addr.is_private
     except ValueError:
+        pass
+
+    # Hostname: allow only if every resolved address is local/private.
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
         return False
+
+    resolved_any = False
+    for info in infos:
+        sockaddr = info[4]
+        if not sockaddr:
+            continue
+        ip_str = sockaddr[0]
+        try:
+            ip = ipaddress.ip_address(ip_str)
+        except ValueError:
+            return False
+        resolved_any = True
+        if not (ip.is_loopback or ip.is_private):
+            return False
+
+    return resolved_any
 
 
 def assert_local_url(url: str, allow_external: bool) -> None:

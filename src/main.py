@@ -13,7 +13,10 @@ import argparse
 import logging
 import sys
 
+from src.ai_assistant import AIAssistant
+from src.conversation import ConversationHistory
 from src.gui.main_window import MODE_COMPACT, MODE_FULL, open_main_window
+from src.npu_manager import NPUManager
 from src.settings import SettingsManager
 
 
@@ -43,10 +46,17 @@ def main(argv: list[str] | None = None) -> int:
 
     app = QApplication(sys.argv)
     settings_manager = SettingsManager()
+    cfg = settings_manager.to_config()
+    history = ConversationHistory(encrypt=True)
+    ai_assistant = AIAssistant(
+        cfg,
+        npu_manager=NPUManager(cfg.npu, cfg.resources),
+    )
 
     window = open_main_window(
         settings_manager=settings_manager,
-        ai_assistant=None,
+        ai_assistant=ai_assistant,
+        conversation_history=history,
         start_mode=args.start_mode,
     )
     if window is None:

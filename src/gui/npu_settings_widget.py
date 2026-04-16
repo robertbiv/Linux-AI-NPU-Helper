@@ -415,6 +415,8 @@ if _HAS_QT:
         ) -> None:
             super().__init__(parent)
             self._sm = settings_manager
+            self._theme_cards: dict[str, _ThemeCard] = {}
+            self._tool_toggles: dict[str, _TriStateToggle] = {}
             self._setup_ui()
             self._load_settings()
 
@@ -466,6 +468,7 @@ if _HAS_QT:
                 badge_color=T.GREEN,
                 is_primary=True,
             )
+            self._model_llama.selected.connect(self._on_model_selected)
             na_layout.addWidget(self._model_llama)
 
             self._model_mistral = _ModelCard(
@@ -477,6 +480,7 @@ if _HAS_QT:
                 badge_color=T.BLUE,
                 is_primary=False,
             )
+            self._model_mistral.selected.connect(self._on_model_selected)
             na_layout.addWidget(self._model_mistral)
             layout.addWidget(na_card)
 
@@ -540,12 +544,36 @@ if _HAS_QT:
             self._fs_toggle = self._tool_row(
                 at_layout, "⊞ FILE SYSTEM ACCESS", "Auto"
             )
+            self._tool_toggles["file_tools"] = self._fs_toggle
             self._web_toggle = self._tool_row(
                 at_layout, "⊕ WEB RETRIEVAL", "Auto"
             )
+            self._tool_toggles["web_fetch"] = self._web_toggle
             self._kern_toggle = self._tool_row(
                 at_layout, "⊡ KERNEL TERMINAL", "Off"
             )
+            self._tool_toggles["system_control"] = self._kern_toggle
+            self._sysinfo_toggle = self._tool_row(
+                at_layout, "◉ SYSTEM INFO", "Auto"
+            )
+            self._tool_toggles["system_info"] = self._sysinfo_toggle
+            self._app_toggle = self._tool_row(
+                at_layout, "◈ APP CONTROL", "Ask"
+            )
+            self._tool_toggles["app"] = self._app_toggle
+            self._websearch_toggle = self._tool_row(
+                at_layout, "◎ WEB SEARCH", "Ask"
+            )
+            self._tool_toggles["web_search"] = self._websearch_toggle
+            self._man_toggle = self._tool_row(
+                at_layout, "☰ MAN PAGE READER", "Auto"
+            )
+            self._tool_toggles["man_reader"] = self._man_toggle
+
+            for tool_name, toggle in self._tool_toggles.items():
+                toggle.value_changed.connect(
+                    lambda value, name=tool_name: self._on_tool_permission_changed(name, value)
+                )
             layout.addWidget(at_card)
 
             # ── Thermal Thresholds ─────────────────────────────────────────
@@ -623,13 +651,35 @@ if _HAS_QT:
             themes_row.setSpacing(10)
             dark_card = _ThemeCard("neural_dark", "Neural Dark", dark=True, active=True)
             dark_card.selected.connect(lambda tid: self._on_theme_selected(tid))
+            self._theme_cards["neural_dark"] = dark_card
             themes_row.addWidget(dark_card)
 
             light_card = _ThemeCard("pristine_light", "Pristine Light", dark=False, active=False)
             light_card.selected.connect(lambda tid: self._on_theme_selected(tid))
+            self._theme_cards["pristine_light"] = light_card
             themes_row.addWidget(light_card)
             themes_row.addStretch()
             vc_layout.addLayout(themes_row)
+
+            opacity_row = QHBoxLayout()
+            opacity_lbl = QLabel("Overlay Opacity")
+            opacity_lbl.setStyleSheet(
+                f"color: {T.TEXT_SECONDARY}; font-size: 12px; background: transparent;"
+            )
+            opacity_row.addWidget(opacity_lbl)
+            opacity_row.addStretch()
+            self._opacity_value_lbl = QLabel("92%")
+            self._opacity_value_lbl.setStyleSheet(
+                f"color: {T.TEXT_PRIMARY}; font-size: 12px; font-weight: bold; background: transparent;"
+            )
+            opacity_row.addWidget(self._opacity_value_lbl)
+            vc_layout.addLayout(opacity_row)
+
+            self._opacity_slider = QSlider(Qt.Horizontal)
+            self._opacity_slider.setRange(35, 100)
+            self._opacity_slider.setValue(92)
+            self._opacity_slider.valueChanged.connect(self._on_opacity_changed)
+            vc_layout.addWidget(self._opacity_slider)
             layout.addWidget(vc_card)
 
             # ── Precision Instrument Mode ──────────────────────────────────
@@ -654,10 +704,10 @@ if _HAS_QT:
             pi_row.addLayout(pi_text)
             pi_row.addStretch()
 
-            pi_btn = QPushButton("ADVANCED\nTUNING")
-            pi_btn.setToolTip("Advanced NPU performance tuning")
-            pi_btn.setFixedSize(90, 48)
-            pi_btn.setStyleSheet(
+            self._pi_btn = QPushButton("ADVANCED\nTUNING")
+            self._pi_btn.setToolTip("Advanced NPU performance tuning")
+            self._pi_btn.setFixedSize(90, 48)
+            self._pi_btn.setStyleSheet(
                 f"QPushButton {{"
                 f"  background-color: {T.BG_CARD2};"
                 f"  color: {T.TEXT_SECONDARY};"
@@ -672,7 +722,8 @@ if _HAS_QT:
                 f"  color: {T.TEXT_PRIMARY};"
                 f"}}"
             )
-            pi_row.addWidget(pi_btn)
+            self._pi_btn.clicked.connect(self._on_advanced_tuning)
+            pi_row.addWidget(self._pi_btn)
             pi_layout.addLayout(pi_row)
             layout.addWidget(pi_card)
 
@@ -709,6 +760,16 @@ if _HAS_QT:
                 return
             auto_send = self._sm.get("ui.auto_send_screen", True)
             self._capture_toggle.setChecked(bool(auto_send))
+            opacity = float(self._sm.get("appearance.opacity", self._sm.get("ui.opacity", 0.92)))
+            pct = int(max(35, min(100, opacity * 100)))
+            self._opacity_slider.setValue(pct)
+            self._opacity_value_lbl.setText(f"{pct}%")
+
+            theme_id = self._sm.get("appearance.theme", "neural_dark")
+            self._set_theme_active(theme_id)
+
+            for tool_name, toggle in self._tool_toggles.items():
+                toggle.set_value(self._tool_mode_from_settings(tool_name))
 
         def _on_capture_toggled(self, checked: bool) -> None:
             if self._sm:
@@ -731,4 +792,80 @@ if _HAS_QT:
         def _on_theme_selected(self, theme_id: str) -> None:
             if self._sm:
                 self._sm.set("appearance.theme", theme_id, save=True)
+            self._set_theme_active(theme_id)
             logger.info("Theme selected: %s", theme_id)
+
+        def _set_theme_active(self, theme_id: str) -> None:
+            for tid, card in self._theme_cards.items():
+                border = T.GREEN if tid == theme_id else T.BORDER
+                card.setStyleSheet(
+                    card.styleSheet().replace(f"border: 2px solid {T.GREEN};", f"border: 2px solid {border};")
+                    .replace(f"border: 2px solid {T.BORDER};", f"border: 2px solid {border};")
+                )
+
+        def _on_opacity_changed(self, value: int) -> None:
+            self._opacity_value_lbl.setText(f"{value}%")
+            if self._sm:
+                self._sm.set("appearance.opacity", round(value / 100.0, 2), save=True)
+                self._sm.set("ui.opacity", round(value / 100.0, 2), save=True)
+
+        def _on_model_selected(self, model_id: str) -> None:
+            if self._sm is None:
+                return
+            self._sm.set("backend", "ollama", save=True)
+            if model_id == "mistral-7b-instruct":
+                self._sm.set("ollama.model", "mistral:7b-instruct", save=True)
+            else:
+                self._sm.set("ollama.model", "llama3.2:3b-instruct-q4_K_M", save=True)
+
+        def _tool_mode_from_settings(self, tool_name: str) -> str:
+            if self._sm is None:
+                return "Ask"
+            enabled = True
+            if tool_name in {"web_fetch", "system_control", "app", "system_info", "man_reader"}:
+                enabled = bool(self._sm.get(f"tools.{tool_name}.enabled", True))
+            disallowed = set(self._sm.get("tools.disallowed", []))
+            if tool_name in disallowed:
+                enabled = False
+            requires_approval = set(self._sm.get("tools.requires_approval", []))
+            if not enabled:
+                return "Off"
+            if tool_name in requires_approval:
+                return "Ask"
+            return "Auto"
+
+        def _on_tool_permission_changed(self, tool_name: str, mode: str) -> None:
+            if self._sm is None:
+                return
+            requires_approval = set(self._sm.get("tools.requires_approval", []))
+            disallowed = set(self._sm.get("tools.disallowed", []))
+
+            if tool_name in {"web_fetch", "system_control", "app", "system_info", "man_reader"}:
+                self._sm.set(f"tools.{tool_name}.enabled", mode != "Off", save=True)
+
+            if mode == "Off":
+                disallowed.add(tool_name)
+            else:
+                disallowed.discard(tool_name)
+            self._sm.set("tools.disallowed", sorted(disallowed), save=True)
+
+            if mode == "Ask":
+                requires_approval.add(tool_name)
+            else:
+                requires_approval.discard(tool_name)
+            self._sm.set("tools.requires_approval", sorted(requires_approval), save=True)
+
+        def _on_advanced_tuning(self) -> None:
+            if self._sm is None:
+                return
+            try:
+                from PyQt5.QtWidgets import QApplication
+                if QApplication.platformName() == "offscreen":
+                    return
+            except Exception:  # noqa: BLE001
+                return
+            try:
+                from src.gui.settings_window import open_settings
+                open_settings(self._sm, parent=self.window())
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Could not open advanced settings: %s", exc)

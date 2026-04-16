@@ -371,6 +371,8 @@ if _HAS_QT:
             self._model_name = model_name
             self._is_streaming = False
             self._last_screenshot: bytes | None = None
+            self._streaming_chunks: list[str] = []
+            self._streaming_bubble: _MessageBubble | None = None
             # Optional override capture function (injected by tests or main app)
             self._screenshot_fn: "Any | None" = None
 
@@ -489,11 +491,17 @@ if _HAS_QT:
 
         def set_status(self, text: str, online: bool = True) -> None:
             """Update the status pill text and colour."""
-            self._status_pill.deleteLater()
-            new_pill = _StatusPill(text, online)
-            # Re-insert — find the pill_row index
-            # Easiest approach: recreate pill row contents
-            self._status_pill = new_pill
+            if hasattr(self._status_pill, "layout"):
+                lay = self._status_pill.layout()
+                if lay and lay.count() >= 2:
+                    dot = lay.itemAt(0).widget()
+                    lbl = lay.itemAt(1).widget()
+                    if isinstance(dot, QLabel):
+                        dot.setStyleSheet(
+                            f"color: {T.GREEN if online else T.RED}; font-size: 14px; background: transparent;"
+                        )
+                    if isinstance(lbl, QLabel):
+                        lbl.setText(text)
 
         def append_user_message(self, text: str) -> None:
             """Add a user chat bubble to the conversation."""
@@ -521,26 +529,46 @@ if _HAS_QT:
 
             If no assistant bubble exists yet a new one is created.
             """
-            layout = self._msg_layout
-            count = layout.count()
-            # Find last _MessageBubble with role == "assistant"
-            for i in range(count - 1, -1, -1):
-                item = layout.itemAt(i)
-                if item and isinstance(item.widget(), _MessageBubble):
-                    bubble = item.widget()
-                    if bubble._role == "assistant":
-                        # Accumulate in bubble — simplest approach: rebuild
-                        # For streaming we keep a separate accumulator
-                        break
-            else:
-                self.append_assistant_message(token)
+            self._streaming_chunks.append(token)
+            text = "".join(self._streaming_chunks)
+
+            if self._streaming_bubble is None:
+                self._streaming_bubble = _MessageBubble(
+                    text,
+                    role="assistant",
+                    model_name=self._model_name,
+                    parent=self._msg_container,
+                )
+                self._insert_bubble(self._streaming_bubble)
                 return
+
+            idx = self._msg_layout.indexOf(self._streaming_bubble)
+            if idx < 0:
+                self._streaming_bubble = None
+                self.append_assistant_token(token)
+                return
+
+            self._streaming_bubble.deleteLater()
+            self._streaming_bubble = _MessageBubble(
+                text,
+                role="assistant",
+                model_name=self._model_name,
+                parent=self._msg_container,
+            )
+            self._msg_layout.insertWidget(idx, self._streaming_bubble)
+            QTimer.singleShot(0, self._scroll_to_bottom)
 
         def set_streaming(self, streaming: bool) -> None:
             """Enable / disable the send button during streaming."""
             self._is_streaming = streaming
             self._send_btn.setEnabled(not streaming)
             self._send_btn.setText("⏹" if streaming else "↑")
+            if streaming:
+                self._streaming_chunks = []
+                self._streaming_bubble = None
+            else:
+                self._streaming_chunks = []
+                self._streaming_bubble = None
 
         def clear_conversation(self) -> None:
             """Remove all message bubbles."""

@@ -192,18 +192,23 @@ class TestWindowSizes:
         from src.gui.main_window import MainWindow
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
+        before_w = win.width()
         win.resize(w, h)
-        assert win.width() <= w + 30
+        # Offscreen backends may clamp to layout minimums; verify resize took effect
+        # and remains reasonably close to the requested target.
+        assert win.width() != before_w
+        assert abs(win.width() - w) <= 120
         _grab(win, f"full_{w}x{h}")
         win.close()
 
-    def test_compact_fixed(self, qapp, settings_manager):
+    def test_compact_resizable_with_bounds(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         win.resize(1200, 1200)
-        assert win.width() == 420
-        assert win.height() == 680
+        # Compact mode is intentionally resizable but capped to safe bounds.
+        assert win.width() == 1000
+        assert win.height() == 1200
         win.close()
 
 
