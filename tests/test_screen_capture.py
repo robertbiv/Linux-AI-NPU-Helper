@@ -3,6 +3,17 @@ from unittest.mock import patch, MagicMock
 from src.screen_capture import capture, _capture_mss, _capture_scrot, capture_region, image_to_base64, load_image_as_jpeg
 import io
 
+import sys
+
+# Mock deferred imports so that they don't try to load actual native libraries
+# and fail when running headless in CI
+pil_mock = MagicMock()
+pil_image_mock = MagicMock()
+pil_mock.Image = pil_image_mock
+sys.modules["PIL"] = pil_mock
+sys.modules["PIL.Image"] = pil_image_mock
+sys.modules["mss"] = MagicMock()
+
 @patch("src.screen_capture._capture_scrot")
 def test_capture_scrot(mock_scrot):
     capture(method="scrot", jpeg_quality=90)
