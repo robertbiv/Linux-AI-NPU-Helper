@@ -372,21 +372,29 @@ if _HAS_QT:
 
             # Stacked pages
             self._stack = QStackedWidget()
+            self._stack.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self._stack.setMinimumHeight(0)
             layout.addWidget(self._stack, stretch=1)
 
             # Chat page
             from src.gui.chat_widget import ChatWidget
             self._chat = ChatWidget(self._sm)
+            self._chat.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self._chat.setMinimumHeight(0)
             self._chat_idx = self._stack.addWidget(self._chat)
 
             # Status page
             from src.gui.status_widget import StatusWidget
             self._status = StatusWidget()
+            self._status.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self._status.setMinimumHeight(0)
             self._status_idx = self._stack.addWidget(self._status)
 
             # Settings page
             from src.gui.npu_settings_widget import NPUSettingsWidget
             self._settings_page = NPUSettingsWidget(self._sm)
+            self._settings_page.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self._settings_page.setMinimumHeight(0)
             self._settings_idx = self._stack.addWidget(self._settings_page)
 
             self._stack.setCurrentIndex(self._chat_idx)
@@ -591,35 +599,56 @@ if _HAS_QT:
             self._compact_menu = menu
             menu.popup(pos)
 
-        def _show_backend_menu(self) -> None:
+        def _show_model_menu(self) -> None:
             if QApplication.platformName() == "offscreen":
                 return
 
             menu = QMenu(self)
-            act_npu = menu.addAction("Use NPU (recommended)")
-            act_ollama = menu.addAction("Use Ollama / existing local engine")
-            act_openai = menu.addAction("Use OpenAI-compatible local engine")
+            model_options: list[str] = []
+
+            if self._sm is not None:
+                backend = self._sm.get("backend", "npu")
+                if backend == "npu":
+                    model_options.append("auto")
+                    current = str(self._sm.get("npu.model_path", "")).strip()
+                    if current and current != "auto":
+                        model_options.append(current)
+                elif backend == "openai":
+                    current = str(self._sm.get("openai.model", "local-model")).strip()
+                    if current:
+                        model_options.append(current)
+                else:
+                    current = str(self._sm.get("ollama.model", "llava")).strip()
+                    if current:
+                        model_options.append(current)
+
+                # Try to fetch available models from the active backend for a real dropdown.
+                try:
+                    from src.model_selector import ModelSelector
+                    selector = ModelSelector(self._sm.to_config())
+                    fetched = selector.list_models(timeout=2).result(timeout=2)
+                    for m in fetched:
+                        if m.name not in model_options:
+                            model_options.append(m.name)
+                except Exception:  # noqa: BLE001
+                    pass
+
+            if not model_options:
+                model_options = ["auto"]
+
+            current_backend = self._sm.get("backend", "npu") if self._sm is not None else "npu"
+            for model_name in model_options:
+                label = "Default NPU model" if current_backend == "npu" and model_name == "auto" else model_name
+                action = menu.addAction(label)
+                action.triggered.connect(lambda checked=False, m=model_name: self._set_active_model(m))
+
             menu.addSeparator()
             act_settings = menu.addAction("Open backend settings…")
-
-            act_npu.triggered.connect(lambda: self._set_backend("npu"))
-            act_ollama.triggered.connect(lambda: self._set_backend("ollama"))
-            act_openai.triggered.connect(lambda: self._set_backend("openai"))
             act_settings.triggered.connect(self._open_advanced_settings)
 
             pos = QCursor.pos()
             self._model_menu = menu
             menu.popup(pos)
-
-        def _set_backend(self, backend: str) -> None:
-            if self._sm is None:
-                return
-            self._sm.set("backend", backend, save=True)
-            if backend == "npu":
-                if not self._sm.get("npu.model_path", ""):
-                    self._sm.set("npu.model_path", "auto", save=True)
-                self._sm.set("npu.auto_install_default_model", True, save=True)
-            self._sync_model_badge()
 
         def _open_advanced_settings(self) -> None:
             if QApplication.platformName() == "offscreen":
@@ -631,7 +660,7 @@ if _HAS_QT:
                 QMessageBox.warning(self, "Settings", f"Could not open settings window: {exc}")
 
         def _prompt_select_model(self) -> None:
-            self._show_backend_menu()
+            self._show_model_menu()
 
         def _set_active_model(self, model_name: str) -> None:
             if self._sm is None:

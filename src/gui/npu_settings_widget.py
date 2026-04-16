@@ -37,6 +37,7 @@ try:
     from PyQt5.QtWidgets import (
         QButtonGroup,
         QCheckBox,
+        QDialog,
         QFrame,
         QHBoxLayout,
         QLabel,
@@ -482,6 +483,12 @@ if _HAS_QT:
             )
             self._model_mistral.selected.connect(self._on_model_selected)
             na_layout.addWidget(self._model_mistral)
+
+            model_mgr_btn = QPushButton("OPEN MODEL MANAGER")
+            model_mgr_btn.setToolTip("Select, import, and delete local models")
+            model_mgr_btn.setFixedHeight(34)
+            model_mgr_btn.clicked.connect(self._open_model_manager)
+            na_layout.addWidget(model_mgr_btn)
             layout.addWidget(na_card)
 
             # ── Contextual Capture ─────────────────────────────────────────
@@ -764,6 +771,27 @@ if _HAS_QT:
             self._sm.set("backend", "npu", save=True)
             self._sm.set("npu.auto_install_default_model", True, save=True)
             self._sm.set("npu.model_path", "auto", save=True)
+
+        def _open_model_manager(self) -> None:
+            if self._sm is None:
+                return
+            try:
+                from PyQt5.QtWidgets import QApplication
+                if QApplication.platformName() == "offscreen":
+                    return
+            except Exception:  # noqa: BLE001
+                return
+            try:
+                from src.gui.model_manager import ModelManagerWidget
+                dlg = QDialog(self)
+                dlg.setWindowTitle("Model Manager")
+                dlg.setMinimumSize(900, 620)
+                lay = QVBoxLayout(dlg)
+                lay.setContentsMargins(10, 10, 10, 10)
+                lay.addWidget(ModelManagerWidget(self._sm, parent=dlg))
+                dlg.exec_()
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Could not open model manager: %s", exc)
 
         def _tool_mode_from_settings(self, tool_name: str) -> str:
             if self._sm is None:
