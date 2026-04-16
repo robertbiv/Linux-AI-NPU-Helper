@@ -82,10 +82,11 @@ if _HAS_QT:
     # ── Compact header ────────────────────────────────────────────────────────
 
     class _CompactHeader(QFrame):
-        """Top bar shown in compact (overlay) mode."""
+        """Top bar shown in compact (overlay) mode with drag support."""
 
         expand_clicked  = pyqtSignal()
         more_clicked    = pyqtSignal()
+        minimize_clicked = pyqtSignal()
 
         def __init__(self, model_name: str = "Llama-3-NPU-8B", parent: QWidget | None = None) -> None:
             super().__init__(parent)
@@ -97,12 +98,13 @@ if _HAS_QT:
                 f"  border-bottom: 1px solid {T.BORDER};"
                 f"}}"
             )
+            self._drag_pos = None
 
             layout = QHBoxLayout(self)
             layout.setContentsMargins(12, 0, 12, 0)
             layout.setSpacing(8)
 
-            # App icon + name
+            # App icon + name (draggable area)
             icon_lbl = QLabel("✦")
             icon_lbl.setFixedSize(32, 32)
             icon_lbl.setAlignment(Qt.AlignCenter)
@@ -124,7 +126,7 @@ if _HAS_QT:
 
             layout.addSpacing(4)
 
-            # Model selector badge
+            # Model selector badge (draggable area)
             self._model_badge = QLabel(f"MODEL:  {model_name}  ▾")
             self._model_badge.setStyleSheet(
                 f"color: {T.GREEN}; background: {T.BG_CARD2};"
@@ -135,9 +137,26 @@ if _HAS_QT:
 
             layout.addStretch()
 
+            # Minimize button (_)
+            minimize_btn = QToolButton()
+            minimize_btn.setFocusPolicy(Qt.NoFocus)
+            minimize_btn.setText("−")
+            minimize_btn.setToolTip("Minimize")
+            minimize_btn.setFixedSize(30, 30)
+            minimize_btn.setStyleSheet(
+                f"QToolButton {{"
+                f"  background: {T.BG_CARD2}; border: 1px solid {T.BORDER};"
+                f"  border-radius: 6px; color: {T.TEXT_SECONDARY}; font-size: 18px;"
+                f"}}"
+                f"QToolButton:hover {{ color: {T.YELLOW}; border-color: {T.YELLOW}; }}"
+                f"QToolButton:pressed {{ background: {T.BG_HOVER}; }}"
+            )
+            minimize_btn.clicked.connect(self.minimize_clicked)
+            layout.addWidget(minimize_btn)
+
             # Expand button (⤢)
             expand_btn = QToolButton()
-            expand_btn.setFocusPolicy(Qt.StrongFocus)
+            expand_btn.setFocusPolicy(Qt.NoFocus)
             expand_btn.setText("⤢")
             expand_btn.setToolTip("Switch to full desktop mode")
             expand_btn.setFixedSize(30, 30)
@@ -147,15 +166,14 @@ if _HAS_QT:
                 f"  border-radius: 6px; color: {T.TEXT_SECONDARY}; font-size: 16px;"
                 f"}}"
                 f"QToolButton:hover {{ color: {T.GREEN}; border-color: {T.GREEN}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
+                f"QToolButton:pressed {{ background: {T.BG_HOVER}; }}"
             )
             expand_btn.clicked.connect(self.expand_clicked)
             layout.addWidget(expand_btn)
 
             # More (⋮)
             more_btn = QToolButton()
-            more_btn.setFocusPolicy(Qt.StrongFocus)
+            more_btn.setFocusPolicy(Qt.NoFocus)
             more_btn.setText("⋮")
             more_btn.setToolTip("More options")
             more_btn.setFixedSize(30, 30)
@@ -165,14 +183,25 @@ if _HAS_QT:
                 f"  color: {T.TEXT_SECONDARY}; font-size: 20px;"
                 f"}}"
                 f"QToolButton:hover {{ color: {T.TEXT_PRIMARY}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
+                f"QToolButton:pressed {{ background: {T.BG_HOVER}; border-radius: 4px; }}"
             )
             more_btn.clicked.connect(self.more_clicked)
             layout.addWidget(more_btn)
 
         def set_model_name(self, name: str) -> None:
             self._model_badge.setText(f"MODEL:  {name}  ▾")
+
+        def mousePressEvent(self, event) -> None:  # noqa: ANN001
+            """Start drag when clicking on non-button area of header."""
+            if event.button() == Qt.LeftButton:
+                self._drag_pos = event.globalPos() - self.window().frameGeometry().topLeft()
+                event.accept()
+
+        def mouseMoveEvent(self, event) -> None:  # noqa: ANN001
+            """Drag window when moving mouse in header."""
+            if event.buttons() == Qt.LeftButton and self._drag_pos is not None:
+                self.window().move(event.globalPos() - self._drag_pos)
+                event.accept()
 
     # ── Bottom tab bar (compact mode) ─────────────────────────────────────────
 
@@ -206,6 +235,7 @@ if _HAS_QT:
             for icon, label, tab_id in self._TABS:
                 btn = QPushButton(f"{icon}\n{label}")
                 btn.setCheckable(True)
+                btn.setFocusPolicy(Qt.NoFocus)
                 btn.setObjectName("navBtn")
                 btn.setStyleSheet(
                     f"QPushButton {{"
@@ -217,6 +247,7 @@ if _HAS_QT:
                     f"  color: {T.BLUE}; border-top: 2px solid {T.BLUE};"
                     f"}}"
                     f"QPushButton:hover {{ color: {T.TEXT_SECONDARY}; }}"
+                    f"QPushButton:pressed {{ background: {T.BG_HOVER}; }}"
                 )
                 btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 btn.clicked.connect(lambda _, tid=tab_id: self._on_tab(tid))
@@ -339,6 +370,7 @@ if _HAS_QT:
             self._sm = settings_manager
             self._ai = ai_assistant
             self._current_mode: str = ""
+            self._was_maximized = False
 
             self.setWindowTitle(APP_NAME)
 
@@ -366,6 +398,9 @@ if _HAS_QT:
             self._full_widget.collapse_requested.connect(self.show_compact)
             self._central.addWidget(self._full_widget)  # index 1
 
+            # Connect header minimize button
+            self._compact_widget._header.minimize_clicked.connect(self._on_minimize)
+
             # Initial mode
             if start_mode == MODE_FULL:
                 self.show_full()
@@ -381,16 +416,16 @@ if _HAS_QT:
             self._current_mode = MODE_COMPACT
             self._central.setCurrentIndex(0)
 
-            # FramelessWindowHint keeps the panel borderless; WindowStaysOnTopHint
-            # keeps it above other windows.  Qt.Tool is intentionally NOT set here:
-            # it would hide the window from the taskbar, but DEs that support
-            # taskbar icons (GNOME, KDE, XFCE, etc.) should be able to show it.
+            # Use Window | FramelessWindowHint | WindowStaysOnTopHint
+            # This allows proper window behavior while staying on top
             self.setWindowFlags(
-                Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+                Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
             )
             self.setFixedSize(420, 680)
             self._position_compact()
             self.show()
+            # Process events to ensure window properties are applied
+            QApplication.processEvents()
             logger.debug("Switched to compact mode")
 
         def show_full(self) -> None:
@@ -400,7 +435,7 @@ if _HAS_QT:
             self._current_mode = MODE_FULL
             self._central.setCurrentIndex(1)
 
-            # Restore normal window flags
+            # Restore normal window flags with proper decorations for minimize/maximize/close
             self.setWindowFlags(Qt.Window)
             self.setMinimumSize(900, 620)
             self.setMaximumSize(16777215, 16777215)  # Qt's QWIDGETSIZE_MAX
@@ -409,7 +444,14 @@ if _HAS_QT:
             self.resize(1100, 760)
             self._center_window()
             self.show()
+            # Process events to ensure window properties are applied
+            QApplication.processEvents()
             logger.debug("Switched to full mode")
+
+        def _on_minimize(self) -> None:
+            """Handle minimize button click in compact mode."""
+            if self._current_mode == MODE_COMPACT:
+                self.showMinimized()
 
         # ── Convenience access ────────────────────────────────────────────────
 
@@ -424,22 +466,6 @@ if _HAS_QT:
         def set_model_name(self, name: str) -> None:
             """Update the model name shown in the compact header."""
             self._compact_widget.set_model_name(name)
-
-        # ── Compact drag support ──────────────────────────────────────────────
-
-        def mousePressEvent(self, event) -> None:  # noqa: ANN001
-            if self._current_mode == MODE_COMPACT and event.button() == Qt.LeftButton:
-                self._drag_pos = event.globalPos() - self.frameGeometry().topLeft()
-                event.accept()
-
-        def mouseMoveEvent(self, event) -> None:  # noqa: ANN001
-            if (
-                self._current_mode == MODE_COMPACT
-                and event.buttons() == Qt.LeftButton
-                and hasattr(self, "_drag_pos")
-            ):
-                self.move(event.globalPos() - self._drag_pos)
-                event.accept()
 
         # ── Private helpers ───────────────────────────────────────────────────
 

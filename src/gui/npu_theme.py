@@ -35,6 +35,7 @@ GREEN_DIM   = "#1e4a28"   # dark-green tinted background
 BLUE        = "#3b7eff"   # secondary accent — interactive
 BLUE_DIM    = "#1a2a50"   # dark-blue tinted background
 RED         = "#e05252"   # error / alert
+YELLOW      = "#d4a936"   # warning / minimize accent
 
 TEXT_PRIMARY   = "#e8eaf0"   # main readable text
 TEXT_SECONDARY = "#8b90a2"   # captions, timestamps, metadata

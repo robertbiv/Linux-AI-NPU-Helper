@@ -79,6 +79,7 @@ if _HAS_QT:
             super().__init__(parent)
             self._page_id = page_id
             self.setCheckable(True)
+            self.setFocusPolicy(Qt.NoFocus)
             self.setText(f"  {icon}   {label}")
             self.setFixedHeight(44)
             self.setStyleSheet(
@@ -100,6 +101,9 @@ if _HAS_QT:
                 f"  background-color: {T.BG_CARD2};"
                 f"  color: {T.TEXT_PRIMARY};"
                 f"  border-left: 3px solid {T.BLUE};"
+                f"}}"
+                f"QPushButton:pressed {{"
+                f"  background-color: {T.BG_HOVER};"
                 f"}}"
             )
 
@@ -198,6 +202,7 @@ if _HAS_QT:
 
             # ── Check updates button ──────────────────────────────────────
             update_btn = QPushButton("CHECK UPDATES")
+            update_btn.setFocusPolicy(Qt.NoFocus)
             update_btn.setToolTip("Check for and install application updates")
             update_btn.setFixedHeight(36)
             update_btn.setStyleSheet(
@@ -213,6 +218,9 @@ if _HAS_QT:
                 f"}}"
                 f"QPushButton:hover {{"
                 f"  background-color: #5590ff;"
+                f"}}"
+                f"QPushButton:pressed {{"
+                f"  background-color: #4375d6;"
                 f"}}"
             )
             layout.addWidget(update_btn)
@@ -289,6 +297,7 @@ if _HAS_QT:
             for i, crumb in enumerate(self._BREADCRUMBS):
                 btn = QPushButton(crumb)
                 btn.setCheckable(True)
+                btn.setFocusPolicy(Qt.NoFocus)
                 is_active = i == 1  # OVERVIEW active by default
                 btn.setChecked(is_active)
                 btn.setFixedHeight(50)
@@ -303,6 +312,7 @@ if _HAS_QT:
                     f"}}"
                     + (f"QPushButton:checked {{ border-bottom: 2px solid {T.GREEN}; color: {T.TEXT_PRIMARY}; }}" if is_active else
                        f"QPushButton:hover {{ color: {T.TEXT_PRIMARY}; }}")
+                    + f"QPushButton:pressed {{ background: {T.BG_HOVER}; }}"
                 )
                 layout.addWidget(btn)
                 self._tab_buttons.append(btn)
@@ -334,17 +344,19 @@ if _HAS_QT:
 
             # Notification icon
             notif = QToolButton()
-            notif.setFocusPolicy(Qt.StrongFocus)
+            notif.setFocusPolicy(Qt.NoFocus)
             notif.setText("🔔")
             notif.setToolTip("Notifications")
             notif.setStyleSheet(
                 f"QToolButton {{ background: transparent; border: 1px solid transparent; border-radius: 4px; font-size: 16px; }}"
+                f"QToolButton:hover {{ background: {T.BG_HOVER}; }}"
+                f"QToolButton:pressed {{ background: {T.BG_CARD2}; }}"
             )
             layout.addWidget(notif)
 
             # Collapse / shrink button
             collapse_btn = QToolButton()
-            collapse_btn.setFocusPolicy(Qt.StrongFocus)
+            collapse_btn.setFocusPolicy(Qt.NoFocus)
             collapse_btn.setText("⤡")
             collapse_btn.setToolTip("Switch to compact mode")
             collapse_btn.setFixedSize(30, 30)
@@ -354,8 +366,7 @@ if _HAS_QT:
                 f"  border-radius: 6px; color: {T.TEXT_SECONDARY}; font-size: 16px;"
                 f"}}"
                 f"QToolButton:hover {{ color: {T.TEXT_PRIMARY}; border-color: {T.GREEN}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
+                f"QToolButton:pressed {{ background: {T.BG_HOVER}; }}"
             )
             collapse_btn.clicked.connect(self.collapse_clicked)
             layout.addSpacing(6)

@@ -418,7 +418,7 @@ if _HAS_QT:
             row.setSpacing(8)
 
             attach_btn = QToolButton()
-            attach_btn.setFocusPolicy(Qt.StrongFocus)
+            attach_btn.setFocusPolicy(Qt.NoFocus)
             attach_btn.setText("⚇")
             attach_btn.setToolTip("Attach file")
             attach_btn.setFixedSize(36, 36)
@@ -428,8 +428,7 @@ if _HAS_QT:
                 f"  color: {T.TEXT_SECONDARY}; font-size: 18px;"
                 f"}}"
                 f"QToolButton:hover {{ color: {T.TEXT_PRIMARY}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
-                f"QToolButton:focus {{ border-color: {T.BLUE}; }}"
+                f"QToolButton:pressed {{ background: {T.BG_HOVER}; }}"
             )
             row.addWidget(attach_btn)
 
@@ -455,6 +454,17 @@ if _HAS_QT:
             self._send_btn.setObjectName("sendBtn")
             self._send_btn.setFixedSize(38, 38)
             self._send_btn.setToolTip("Send message (Enter)")
+            self._send_btn.setFocusPolicy(Qt.NoFocus)
+            self._send_btn.setStyleSheet(
+                f"QPushButton#sendBtn {{"
+                f"  background: {T.BLUE}; color: #ffffff;"
+                f"  border: 1px solid {T.BORDER}; border-radius: 6px;"
+                f"  font-size: 18px; font-weight: bold;"
+                f"}}"
+                f"QPushButton#sendBtn:hover {{ background: #70c0ff; }}"
+                f"QPushButton#sendBtn:pressed {{ background: #4a7fb8; }}"
+                f"QPushButton#sendBtn:disabled {{ background: {T.BG_CARD2}; color: {T.TEXT_MUTED}; }}"
+            )
             self._send_btn.clicked.connect(self._on_send)
             row.addWidget(self._send_btn)
 
