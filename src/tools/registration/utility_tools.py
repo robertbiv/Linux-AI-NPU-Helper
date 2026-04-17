@@ -213,3 +213,46 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
             factory=ClipboardTool,
             unload_after_use=clip_unload,
         )
+
+    from src.tools.format_converter import FormatConverterTool
+    from src.tools.qrcode_tool import QRCodeTool
+    from src.tools.string_case_tool import StringCaseTool
+
+    format_cfg = cfg.get("format_converter", {})
+    format_enabled = bool(format_cfg.get("enabled", True))
+    format_unload = bool(format_cfg.get("unload_after_use", global_unload))
+
+    qrcode_cfg = cfg.get("qrcode", {})
+    qrcode_enabled = bool(qrcode_cfg.get("enabled", True))
+    qrcode_unload = bool(qrcode_cfg.get("unload_after_use", global_unload))
+
+    string_case_cfg = cfg.get("string_case", {})
+    string_case_enabled = bool(string_case_cfg.get("enabled", True))
+    string_case_unload = bool(string_case_cfg.get("unload_after_use", global_unload))
+
+    if format_enabled:
+        registry.register_lazy(
+            name=FormatConverterTool.name,
+            description=FormatConverterTool.description,
+            schema=FormatConverterTool.parameters_schema,
+            factory=FormatConverterTool,
+            unload_after_use=format_unload,
+        )
+
+    if qrcode_enabled:
+        registry.register_lazy(
+            name=QRCodeTool.name,
+            description=QRCodeTool.description,
+            schema=QRCodeTool.parameters_schema,
+            factory=QRCodeTool,
+            unload_after_use=qrcode_unload,
+        )
+
+    if string_case_enabled:
+        registry.register_lazy(
+            name=StringCaseTool.name,
+            description=StringCaseTool.description,
+            schema=StringCaseTool.parameters_schema,
+            factory=StringCaseTool,
+            unload_after_use=string_case_unload,
+        )
