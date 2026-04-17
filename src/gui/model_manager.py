@@ -280,6 +280,7 @@ if _HAS_QT:
 
             # TOS summary
             summary_box = QTextEdit()
+            summary_box.setAccessibleName('Terms of Use Summary')
             summary_box.setReadOnly(True)
             summary_box.setPlainText(
                 self._entry.tos_summary

@@ -242,6 +242,7 @@ if _HAS_QT:
             test_layout.addLayout(test_btns)
 
             self._test_output = QPlainTextEdit()
+            self._test_output.setAccessibleName('Test Output Log')
             self._test_output.setReadOnly(True)
             self._test_output.setFont(QFont("Monospace", 9))
             test_layout.addWidget(self._test_output)

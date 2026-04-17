@@ -437,6 +437,7 @@ if _HAS_QT:
             row.addWidget(attach_btn)
 
             self._input = QPlainTextEdit()
+            self._input.setAccessibleName('Chat Input')
             self._input.setPlaceholderText("Message Neural Assistant…")
             self._input.setFixedHeight(42)
             self._input.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

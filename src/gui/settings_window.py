@@ -538,6 +538,7 @@ if _HAS_QT:
         form.addRow("Width:", width_spin)
 
         opacity_spin = QDoubleSpinBox()
+        opacity_spin.setAccessibleName('Window Opacity')
         opacity_spin.setRange(0.3, 1.0)
         opacity_spin.setSingleStep(0.05)
         opacity_spin.setDecimals(2)
