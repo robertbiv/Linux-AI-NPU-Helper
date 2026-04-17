@@ -102,6 +102,7 @@ if _HAS_QT:
 
     def _status_item(text: str, status: str) -> QTableWidgetItem:
         item   = QTableWidgetItem(text)
+        item.setData(Qt.AccessibleTextRole, text)
         colour = _STATUS_COLOURS.get(status.lower(), "#95a5a6")
         item.setForeground(QColor(colour))
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
@@ -117,9 +118,15 @@ if _HAS_QT:
         table.setAlternatingRowColors(True)
 
         for i, (label, status, detail) in enumerate(rows):
-            table.setItem(i, 0, QTableWidgetItem(label))
+            item_label = QTableWidgetItem(label)
+            item_label.setData(Qt.AccessibleTextRole, label)
+            table.setItem(i, 0, item_label)
+
             table.setItem(i, 1, _status_item(status.upper(), status))
-            table.setItem(i, 2, QTableWidgetItem(detail))
+
+            item_detail = QTableWidgetItem(detail)
+            item_detail.setData(Qt.AccessibleTextRole, detail)
+            table.setItem(i, 2, item_detail)
 
         table.resizeColumnsToContents()
         return table

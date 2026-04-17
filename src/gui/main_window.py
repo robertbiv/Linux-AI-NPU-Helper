@@ -207,6 +207,7 @@ if _HAS_QT:
             self._buttons: dict[str, QPushButton] = {}
             for icon, label, tab_id in self._TABS:
                 btn = QPushButton(f"{icon}\n{label}")
+                btn.setAccessibleName(label)
                 btn.setCheckable(True)
                 btn.setObjectName("navBtn")
                 btn.setStyleSheet(

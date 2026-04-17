@@ -817,6 +817,7 @@ if _HAS_QT:
             label = f"{badge} {model.name}{size_str}"
             item = QListWidgetItem(label)
             item.setData(Qt.UserRole, model)
+            item.setData(Qt.AccessibleTextRole, label)
             item.setToolTip(warning or "NPU compatible")
             item.setForeground(QColor(colour))
             self._list.addItem(item)
