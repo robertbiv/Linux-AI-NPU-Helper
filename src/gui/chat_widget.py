@@ -21,6 +21,7 @@ Usage
 
 from __future__ import annotations
 
+import html
 import logging
 import re
 from datetime import datetime
@@ -286,7 +287,7 @@ if _HAS_QT:
         def _text_to_html(text: str) -> str:
             """Convert plain text with backtick inline code to HTML spans."""
             # Escape HTML special chars first
-            text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            text = html.escape(text)
             # Inline code: `value`
             text = re.sub(
                 r"`([^`]+)`",
