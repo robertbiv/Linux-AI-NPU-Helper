@@ -337,8 +337,9 @@ if _HAS_QT:
             notif.setFocusPolicy(Qt.StrongFocus)
             notif.setText("🔔")
             notif.setToolTip("Notifications")
+            notif.setAccessibleName("Notifications")
             notif.setStyleSheet(
-                f"QToolButton {{ background: transparent; border: 1px solid transparent; border-radius: 4px; font-size: 16px; }}"
+                "QToolButton { background: transparent; border: 1px solid transparent; border-radius: 4px; font-size: 16px; }"
             )
             layout.addWidget(notif)
 
@@ -347,6 +348,7 @@ if _HAS_QT:
             collapse_btn.setFocusPolicy(Qt.StrongFocus)
             collapse_btn.setText("⤡")
             collapse_btn.setToolTip("Switch to compact mode")
+            collapse_btn.setAccessibleName("Switch to compact mode")
             collapse_btn.setFixedSize(30, 30)
             collapse_btn.setStyleSheet(
                 f"QToolButton {{"

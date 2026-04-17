@@ -140,6 +140,7 @@ if _HAS_QT:
             expand_btn.setFocusPolicy(Qt.StrongFocus)
             expand_btn.setText("⤢")
             expand_btn.setToolTip("Switch to full desktop mode")
+            expand_btn.setAccessibleName("Switch to full desktop mode")
             expand_btn.setFixedSize(30, 30)
             expand_btn.setStyleSheet(
                 f"QToolButton {{"
@@ -158,6 +159,7 @@ if _HAS_QT:
             more_btn.setFocusPolicy(Qt.StrongFocus)
             more_btn.setText("⋮")
             more_btn.setToolTip("More options")
+            more_btn.setAccessibleName("More options")
             more_btn.setFixedSize(30, 30)
             more_btn.setStyleSheet(
                 f"QToolButton {{"

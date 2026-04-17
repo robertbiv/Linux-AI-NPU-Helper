@@ -185,6 +185,7 @@ if _HAS_QT:
                 btn.setFocusPolicy(Qt.StrongFocus)
                 btn.setText(icon)
                 btn.setToolTip(tip)
+                btn.setAccessibleName(tip)
                 btn.setStyleSheet(
                     f"QToolButton {{"
                     f"  background: transparent; border: 1px solid transparent; border-radius: 4px;"
@@ -421,6 +422,7 @@ if _HAS_QT:
             attach_btn.setFocusPolicy(Qt.StrongFocus)
             attach_btn.setText("⚇")
             attach_btn.setToolTip("Attach file")
+            attach_btn.setAccessibleName("Attach file")
             attach_btn.setFixedSize(36, 36)
             attach_btn.setStyleSheet(
                 f"QToolButton {{"
@@ -455,6 +457,7 @@ if _HAS_QT:
             self._send_btn.setObjectName("sendBtn")
             self._send_btn.setFixedSize(38, 38)
             self._send_btn.setToolTip("Send message (Enter)")
+            self._send_btn.setAccessibleName("Send message")
             self._send_btn.clicked.connect(self._on_send)
             row.addWidget(self._send_btn)
 
