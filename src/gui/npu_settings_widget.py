@@ -126,6 +126,7 @@ if _HAS_QT:
             for i, option in enumerate(self._OPTIONS):
                 btn = QPushButton(option)
                 btn.setToolTip(f"Switch to {option} mode")
+                btn.setAccessibleName(f"Switch to {option} mode")
                 btn.setCheckable(True)
                 btn.setFixedHeight(30)
 
@@ -656,6 +657,7 @@ if _HAS_QT:
 
             pi_btn = QPushButton("ADVANCED\nTUNING")
             pi_btn.setToolTip("Advanced NPU performance tuning")
+            pi_btn.setAccessibleName("Advanced NPU performance tuning")
             pi_btn.setFixedSize(90, 48)
             pi_btn.setStyleSheet(
                 f"QPushButton {{"

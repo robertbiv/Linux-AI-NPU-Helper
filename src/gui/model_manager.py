@@ -292,6 +292,7 @@ if _HAS_QT:
             if self._entry.tos_url:
                 btn_read = QPushButton("🌐 Read full terms online…")
                 btn_read.setToolTip("Read full terms and conditions online")
+                btn_read.setAccessibleName("Read full terms and conditions online")
                 btn_read.clicked.connect(lambda: webbrowser.open(self._entry.tos_url))
                 layout.addWidget(btn_read)
 
@@ -425,16 +426,19 @@ if _HAS_QT:
 
             self._btn_download = QPushButton("⬇ Download")
             self._btn_download.setToolTip("Download this model to your computer")
+            self._btn_download.setAccessibleName("Download this model to your computer")
             self._btn_download.clicked.connect(self._on_download)
             btn_row.addWidget(self._btn_download)
 
             self._btn_remove = QPushButton("🗑 Remove")
             self._btn_remove.setToolTip("Delete the installed model files from disk")
+            self._btn_remove.setAccessibleName("Delete the installed model files from disk")
             self._btn_remove.clicked.connect(self._on_remove)
             btn_row.addWidget(self._btn_remove)
 
             self._btn_use = QPushButton("✔ Use")
             self._btn_use.setToolTip("Set this model as the active NPU model")
+            self._btn_use.setAccessibleName("Set this model as the active NPU model")
             self._btn_use.clicked.connect(self._on_use)
             btn_row.addWidget(self._btn_use)
 
@@ -736,16 +740,21 @@ if _HAS_QT:
 
             self._btn_refresh = QPushButton("🔄 Refresh")
             self._btn_refresh.setToolTip("Fetch the model list from the backend")
+            self._btn_refresh.setAccessibleName("Fetch the model list from the backend")
             self._btn_refresh.clicked.connect(self.refresh)
             btn_row.addWidget(self._btn_refresh)
 
             self._btn_browse = QPushButton("📂 Browse ONNX…")
             self._btn_browse.setToolTip("Open a file dialog to add an ONNX model file")
+            self._btn_browse.setAccessibleName("Open a file dialog to add an ONNX model file")
             self._btn_browse.clicked.connect(self._browse_onnx)
             btn_row.addWidget(self._btn_browse)
 
             self._btn_download_url = QPushButton("🔗 Download URL…")
             self._btn_download_url.setToolTip(
+                "Download an ONNX or GGUF model directly from a URL"
+            )
+            self._btn_download_url.setAccessibleName(
                 "Download an ONNX or GGUF model directly from a URL"
             )
             self._btn_download_url.clicked.connect(self._download_from_url)
@@ -758,6 +767,7 @@ if _HAS_QT:
 
             self._btn_delete = QPushButton("🗑 Delete")
             self._btn_delete.setToolTip("Delete the installed model files from disk")
+            self._btn_delete.setAccessibleName("Delete the installed model files from disk")
             self._btn_delete.setEnabled(False)
             self._btn_delete.clicked.connect(self._delete_model)
             btn_row.addWidget(self._btn_delete)

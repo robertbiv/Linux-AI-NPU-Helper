@@ -171,6 +171,9 @@ if _HAS_QT:
         set_pw_btn.setToolTip(
             "Enable encryption and protect history with this password"
         )
+        set_pw_btn.setAccessibleName(
+            "Enable encryption and protect history with this password"
+        )
 
         def _on_set_password() -> None:
             if history is None:
@@ -222,6 +225,9 @@ if _HAS_QT:
 
         export_btn = QPushButton("📤 Export unencrypted JSON…")
         export_btn.setToolTip(
+            "Save the full conversation history as plain JSON (no encryption)"
+        )
+        export_btn.setAccessibleName(
             "Save the full conversation history as plain JSON (no encryption)"
         )
         export_btn.clicked.connect(_on_export)
@@ -283,6 +289,9 @@ if _HAS_QT:
         import_btn.setToolTip(
             "Import a previously exported JSON or encrypted history file"
         )
+        import_btn.setAccessibleName(
+            "Import a previously exported JSON or encrypted history file"
+        )
         import_btn.clicked.connect(_on_import)
         io_layout.addWidget(import_btn)
 
@@ -325,6 +334,9 @@ if _HAS_QT:
         # Link to release notes
         notes_btn = QPushButton("🌐 View release notes on GitHub")
         notes_btn.setToolTip(
+            "Opens the GitHub Releases page in your default browser"
+        )
+        notes_btn.setAccessibleName(
             "Opens the GitHub Releases page in your default browser"
         )
 

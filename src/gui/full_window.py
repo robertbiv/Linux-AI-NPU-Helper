@@ -199,6 +199,7 @@ if _HAS_QT:
             # ── Check updates button ──────────────────────────────────────
             update_btn = QPushButton("CHECK UPDATES")
             update_btn.setToolTip("Check for and install application updates")
+            update_btn.setAccessibleName("Check for and install application updates")
             update_btn.setFixedHeight(36)
             update_btn.setStyleSheet(
                 f"QPushButton {{"
