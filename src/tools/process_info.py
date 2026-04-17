@@ -96,12 +96,20 @@ def _top_cpu(n: int = 10) -> list[dict]:
         current_time = time.time()
         time_diff = current_time - _top_cpu_time
 
-    results = []
+    cpu_list = []
     for pid, jiffies in current_snap.items():
         prev_jiffies = _top_cpu_cache.get(pid, 0)
         pct = (jiffies - prev_jiffies) / clk / time_diff * 100
-        if pct < 0.1:
-            continue
+        if pct >= 0.1:
+            cpu_list.append((pid, pct))
+
+    _top_cpu_cache = current_snap
+    _top_cpu_time = current_time
+
+    cpu_list.sort(key=lambda x: x[1], reverse=True)
+
+    results = []
+    for pid, pct in cpu_list[:n]:
         results.append(
             {
                 "pid": pid,
@@ -111,20 +119,20 @@ def _top_cpu(n: int = 10) -> list[dict]:
                 "mem_mb": round(_proc_mem_kb(pid) / 1024, 1),
             }
         )
-
-    _top_cpu_cache = current_snap
-    _top_cpu_time = current_time
-
-    results.sort(key=lambda x: x["cpu_pct"], reverse=True)
-    return results[:n]
+    return results
 
 
 def _top_mem(n: int = 10) -> list[dict]:
-    results = []
+    mem_list = []
     for pid in _all_pids():
         kb = _proc_mem_kb(pid)
-        if kb < 1024:
-            continue
+        if kb >= 1024:
+            mem_list.append((pid, kb))
+
+    mem_list.sort(key=lambda x: x[1], reverse=True)
+
+    results = []
+    for pid, kb in mem_list[:n]:
         results.append(
             {
                 "pid": pid,
@@ -133,8 +141,7 @@ def _top_mem(n: int = 10) -> list[dict]:
                 "mem_mb": round(kb / 1024, 1),
             }
         )
-    results.sort(key=lambda x: x["mem_mb"], reverse=True)
-    return results[:n]
+    return results
 
 
 def _fmt_table(procs: list[dict], sort_key: str) -> str:
