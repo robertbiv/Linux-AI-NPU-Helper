@@ -12,6 +12,9 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
     from src.tools.json_tool import JSONTool
     from src.tools.url_tool import URLEncoderTool
     from src.tools.text_stats_tool import TextStatsTool
+    from src.tools.regex_tool import RegexTool
+    from src.tools.time_tool import TimeTool
+    from src.tools.subnet_tool import SubnetTool
 
     calc_cfg = cfg.get("calculator", {})
     calc_enabled = bool(calc_cfg.get("enabled", True))
@@ -48,6 +51,18 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
     ts_cfg = cfg.get("text_stats", {})
     ts_enabled = bool(ts_cfg.get("enabled", True))
     ts_unload = bool(ts_cfg.get("unload_after_use", global_unload))
+
+    re_cfg = cfg.get("regex", {})
+    re_enabled = bool(re_cfg.get("enabled", True))
+    re_unload = bool(re_cfg.get("unload_after_use", global_unload))
+
+    time_cfg = cfg.get("time_tool", {})
+    time_enabled = bool(time_cfg.get("enabled", True))
+    time_unload = bool(time_cfg.get("unload_after_use", global_unload))
+
+    sub_cfg = cfg.get("subnet_calc", {})
+    sub_enabled = bool(sub_cfg.get("enabled", True))
+    sub_unload = bool(sub_cfg.get("unload_after_use", global_unload))
 
     if calc_enabled:
         registry.register_lazy(
@@ -119,6 +134,33 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
             schema=TextStatsTool.parameters_schema,
             factory=TextStatsTool,
             unload_after_use=ts_unload,
+        )
+
+    if re_enabled:
+        registry.register_lazy(
+            name=RegexTool.name,
+            description=RegexTool.description,
+            schema=RegexTool.parameters_schema,
+            factory=RegexTool,
+            unload_after_use=re_unload,
+        )
+
+    if time_enabled:
+        registry.register_lazy(
+            name=TimeTool.name,
+            description=TimeTool.description,
+            schema=TimeTool.parameters_schema,
+            factory=TimeTool,
+            unload_after_use=time_unload,
+        )
+
+    if sub_enabled:
+        registry.register_lazy(
+            name=SubnetTool.name,
+            description=SubnetTool.description,
+            schema=SubnetTool.parameters_schema,
+            factory=SubnetTool,
+            unload_after_use=sub_unload,
         )
 
     if clip_enabled:

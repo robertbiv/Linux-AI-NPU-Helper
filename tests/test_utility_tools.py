@@ -155,3 +155,51 @@ def test_newest_tools_registered():
     assert "json_format" in names
     assert "url_encode" in names
     assert "text_stats" in names
+
+from src.tools.regex_tool import RegexTool
+from src.tools.time_tool import TimeTool
+from src.tools.subnet_tool import SubnetTool
+
+def test_regex_tool_search():
+    tool = RegexTool()
+    res = tool.run({"action": "search", "pattern": r"\d+", "text": "foo 123 bar 456"})
+    assert not res.error
+    assert "123" in res.results[0].snippet
+    assert "456" in res.results[0].snippet
+
+def test_regex_tool_replace():
+    tool = RegexTool()
+    res = tool.run({"action": "replace", "pattern": r"foo", "text": "foo bar", "replacement": "baz"})
+    assert not res.error
+    assert "baz bar" in res.results[0].snippet
+
+def test_time_tool_current():
+    tool = TimeTool()
+    res = tool.run({"action": "current", "timezone": "utc"})
+    assert not res.error
+    assert "UTC Time" in res.results[0].snippet
+
+def test_time_tool_convert():
+    tool = TimeTool()
+    res = tool.run({"action": "convert", "timestamp": 1700000000, "timezone": "utc"})
+    assert not res.error
+    assert "2023-11-14" in res.results[0].snippet
+
+def test_subnet_tool_ipv4():
+    tool = SubnetTool()
+    res = tool.run({"network": "192.168.1.0/24"})
+    assert not res.error
+    assert "Total Hosts: 256" in res.results[0].snippet
+
+def test_subnet_tool_ipv6():
+    tool = SubnetTool()
+    res = tool.run({"network": "2001:db8::/32"})
+    assert not res.error
+    assert "Total Hosts" in res.results[0].snippet
+
+def test_more_tools_registered():
+    registry = build_default_registry()
+    names = registry.names()
+    assert "regex" in names
+    assert "time_tool" in names
+    assert "subnet_calc" in names
