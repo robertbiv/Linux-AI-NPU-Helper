@@ -9,6 +9,9 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
     from src.tools.password_tool import PasswordGeneratorTool
     from src.tools.base64_tool import Base64Tool
     from src.tools.uuid_tool import UUIDTool
+    from src.tools.json_tool import JSONTool
+    from src.tools.url_tool import URLEncoderTool
+    from src.tools.text_stats_tool import TextStatsTool
 
     calc_cfg = cfg.get("calculator", {})
     calc_enabled = bool(calc_cfg.get("enabled", True))
@@ -33,6 +36,18 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
     uuid_cfg = cfg.get("generate_uuid", {})
     uuid_enabled = bool(uuid_cfg.get("enabled", True))
     uuid_unload = bool(uuid_cfg.get("unload_after_use", global_unload))
+
+    json_cfg = cfg.get("json_format", {})
+    json_enabled = bool(json_cfg.get("enabled", True))
+    json_unload = bool(json_cfg.get("unload_after_use", global_unload))
+
+    url_cfg = cfg.get("url_encode", {})
+    url_enabled = bool(url_cfg.get("enabled", True))
+    url_unload = bool(url_cfg.get("unload_after_use", global_unload))
+
+    ts_cfg = cfg.get("text_stats", {})
+    ts_enabled = bool(ts_cfg.get("enabled", True))
+    ts_unload = bool(ts_cfg.get("unload_after_use", global_unload))
 
     if calc_enabled:
         registry.register_lazy(
@@ -77,6 +92,33 @@ def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bo
             schema=UUIDTool.parameters_schema,
             factory=UUIDTool,
             unload_after_use=uuid_unload,
+        )
+
+    if json_enabled:
+        registry.register_lazy(
+            name=JSONTool.name,
+            description=JSONTool.description,
+            schema=JSONTool.parameters_schema,
+            factory=JSONTool,
+            unload_after_use=json_unload,
+        )
+
+    if url_enabled:
+        registry.register_lazy(
+            name=URLEncoderTool.name,
+            description=URLEncoderTool.description,
+            schema=URLEncoderTool.parameters_schema,
+            factory=URLEncoderTool,
+            unload_after_use=url_unload,
+        )
+
+    if ts_enabled:
+        registry.register_lazy(
+            name=TextStatsTool.name,
+            description=TextStatsTool.description,
+            schema=TextStatsTool.parameters_schema,
+            factory=TextStatsTool,
+            unload_after_use=ts_unload,
         )
 
     if clip_enabled:
