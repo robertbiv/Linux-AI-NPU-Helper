@@ -45,7 +45,9 @@ def test_hash_tool_unsupported_algo():
 
 @patch("subprocess.run")
 @patch("shutil.which")
-def test_clipboard_tool_fallback_read(mock_which, mock_run):
+def test_clipboard_tool_fallback_read(mock_which, mock_run, monkeypatch):
+    import sys
+    monkeypatch.setitem(sys.modules, 'PyQt5.QtWidgets', None)
     mock_which.return_value = "/usr/bin/xclip"
     mock_proc = MagicMock()
     mock_proc.returncode = 0
@@ -59,7 +61,9 @@ def test_clipboard_tool_fallback_read(mock_which, mock_run):
 
 @patch("subprocess.run")
 @patch("shutil.which")
-def test_clipboard_tool_fallback_write(mock_which, mock_run):
+def test_clipboard_tool_fallback_write(mock_which, mock_run, monkeypatch):
+    import sys
+    monkeypatch.setitem(sys.modules, 'PyQt5.QtWidgets', None)
     mock_which.return_value = "/usr/bin/xclip"
     mock_proc = MagicMock()
     mock_proc.returncode = 0

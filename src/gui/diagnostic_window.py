@@ -196,6 +196,7 @@ if _HAS_QT:
 
             # Tabs
             self._tabs = QTabWidget()
+            self._tabs.setAccessibleName("Diagnostic Tabs")
             layout.addWidget(self._tabs)
 
             # ── Overview tab ──────────────────────────────────────────────

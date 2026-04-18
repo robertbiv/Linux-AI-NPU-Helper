@@ -611,6 +611,7 @@ if _HAS_QT:
 
             # Tabs
             self._tabs = QTabWidget()
+            self._tabs.setAccessibleName("Settings Tabs")
             self._build_tabs()
             main_layout.addWidget(self._tabs)
 

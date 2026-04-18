@@ -1076,6 +1076,7 @@ if _HAS_QT:
             layout.setContentsMargins(0, 0, 0, 0)
 
             tabs = QTabWidget()
+            tabs.setAccessibleName("Model Manager Tabs")
 
             # Tab 1 — NPU catalog
             self._catalog = NPUCatalogWidget(self._manager)

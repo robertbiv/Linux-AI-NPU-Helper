@@ -85,6 +85,12 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
     height: 0;
 }}
 
+/* ── Tabs ───────────────────────────────────────────────────────────────── */
+QTabBar::tab:focus {{
+    border: 1px solid {BLUE};
+    outline: none;
+}}
+
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 QPushButton {{
     background-color: {BG_CARD2};
@@ -100,10 +106,6 @@ QPushButton:hover {{
 }}
 QPushButton:pressed {{
     background-color: {GREEN_DIM};
-}}
-QPushButton:focus, QToolButton:focus {{
-    border-color: {BLUE};
-    outline: none;
 }}
 QPushButton:focus, QToolButton:focus {{
     border-color: {BLUE};
