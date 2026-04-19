@@ -26,6 +26,7 @@ NPU Model Catalog
 
 from __future__ import annotations
 
+import html
 import logging
 import subprocess
 import webbrowser
@@ -525,7 +526,7 @@ if _HAS_QT:
 
         def on_download_error(self, msg: str) -> None:
             self._progress_bar.hide()
-            self._status.setText(f"<span style='color:{_BADGE_FAIL}'>⛔ {msg}</span>")
+            self._status.setText(f"<span style='color:{_BADGE_FAIL}'>⛔ {html.escape(msg)}</span>")
             self._status.setTextFormat(Qt.RichText)
             self.refresh_state()
 
@@ -535,7 +536,7 @@ if _HAS_QT:
 
         def on_remove_error(self, msg: str) -> None:
             self._status.setText(
-                f"<span style='color:{_BADGE_FAIL}'>⛔ Remove failed: {msg}</span>"
+                f"<span style='color:{_BADGE_FAIL}'>⛔ Remove failed: {html.escape(msg)}</span>"
             )
             self._status.setTextFormat(Qt.RichText)
             self.refresh_state()
@@ -1047,7 +1048,7 @@ if _HAS_QT:
         def _set_status(self, msg: str, error: bool = False) -> None:
             colour = "#c0392b" if error else "#27ae60"
             self._status.setStyleSheet(f"color: {colour};")
-            self._status.setText(msg)
+            self._status.setText(html.escape(msg))
 
     # ── Public composite widget ───────────────────────────────────────────────
 

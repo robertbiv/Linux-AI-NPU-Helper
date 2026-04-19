@@ -1,4 +1,4 @@
-## 2024-04-18 - Prevent DoS via Unbounded Exponentiation in AST Calculator
-**Vulnerability:** The CalculatorTool securely parsed math expressions using the `ast` module but mapped `ast.Pow` directly to `operator.pow`. This allowed a Denial of Service (DoS) attack where evaluating an expression like `9**9**9**9` would exhaust CPU and memory resources due to arbitrary-precision integers in Python.
-**Learning:** Even when avoiding `eval()` and using safe AST traversal, operations that scale exponentially (like power or factorial) can still act as DoS vectors if left unbounded.
-**Prevention:** Always wrap potentially expensive mathematical operations mapped in AST evaluators with explicit bounds checks. For example, replacing `operator.pow` with a custom `_safe_pow` that raises a `ValueError` if the exponent exceeds a safe threshold (e.g., 10000).
+## 2025-04-19 - [Fix Cross-Site Scripting (XSS) in PyQt5 Rich Text Widgets]
+**Vulnerability:** A Cross-Site Scripting (XSS) vulnerability was found in the GUI where external exception messages from failed model downloads or removals were directly embedded into UI labels formatted with `Qt.RichText` via `setText(f"<span...>{msg}</span>")`.
+**Learning:** PyQt5's rich text rendering supports a subset of HTML. Unescaped user-controlled content, such as errors from network requests or system operations, can inject HTML/Rich Text formatting into these labels, potentially breaking the layout or executing unintended UI behavior.
+**Prevention:** Always sanitize dynamic string interpolations passed into `QLabel.setText()` with `html.escape(msg)` when combined with `setTextFormat(Qt.RichText)` to ensure robust protection against injection attacks.
