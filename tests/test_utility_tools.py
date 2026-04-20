@@ -259,3 +259,18 @@ def test_calculator_dos():
     res = tool.run({"expression": "9**9**9"})
     assert res.error is not None
     assert "Exponent too large" in res.error
+
+    # math.factorial with extremely large number should not hang
+    res = tool.run({"expression": "math.factorial(1000000)"})
+    assert res.error is not None
+    assert "Argument too large" in res.error
+
+    # math.comb with extremely large number should not hang
+    res = tool.run({"expression": "math.comb(1000000, 500000)"})
+    assert res.error is not None
+    assert "Argument too large" in res.error
+
+    # math.perm with extremely large number should not hang
+    res = tool.run({"expression": "math.perm(1000000, 500000)"})
+    assert res.error is not None
+    assert "Argument too large" in res.error

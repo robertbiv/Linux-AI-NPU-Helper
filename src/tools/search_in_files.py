@@ -13,21 +13,21 @@ from src.tools._base import SearchResult, Tool, ToolResult
 logger = logging.getLogger(__name__)
 
 # grep/rg output line: /path/to/file:42:matching text
-_GREP_LINE_RE = re.compile(r"^(.+?):(\d+):(.*)$")
+_GREP_LINE_RE = re.compile(r"^(.+?):(\d+):(.*)$", re.MULTILINE)
 
 
 def _parse_grep_output(text: str, limit: int) -> list[SearchResult]:
     results: list[SearchResult] = []
-    for line in text.splitlines():
-        m = _GREP_LINE_RE.match(line)
-        if m:
-            results.append(
-                SearchResult(
-                    path=m.group(1),
-                    line_number=int(m.group(2)),
-                    snippet=m.group(3).strip(),
-                )
+    # Performance optimization: Use finditer with MULTILINE instead of splitlines
+    # to avoid creating millions of temporary string objects.
+    for m in _GREP_LINE_RE.finditer(text):
+        results.append(
+            SearchResult(
+                path=m.group(1),
+                line_number=int(m.group(2)),
+                snippet=m.group(3).strip(),
             )
+        )
         if len(results) >= limit:
             break
     return results
