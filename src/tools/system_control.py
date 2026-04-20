@@ -24,45 +24,45 @@ logger = logging.getLogger(__name__)
 _RESOURCE_ACTIONS: dict[str, dict[str, list[list[str]]]] = {
     "audio": {
         "get": [
-            ["wpctl",  "get-volume", "@DEFAULT_AUDIO_SINK@"],
-            ["pactl",  "get-sink-mute", "@DEFAULT_SINK@"],
+            ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"],
+            ["pactl", "get-sink-mute", "@DEFAULT_SINK@"],
             ["amixer", "get", "Master"],
         ],
         "mute": [
-            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SINK@", "1"],
-            ["pactl",  "set-sink-mute", "@DEFAULT_SINK@", "1"],
+            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "1"],
+            ["pactl", "set-sink-mute", "@DEFAULT_SINK@", "1"],
             ["amixer", "sset", "Master", "mute"],
         ],
         "unmute": [
-            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SINK@", "0"],
-            ["pactl",  "set-sink-mute", "@DEFAULT_SINK@", "0"],
+            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "0"],
+            ["pactl", "set-sink-mute", "@DEFAULT_SINK@", "0"],
             ["amixer", "sset", "Master", "unmute"],
         ],
         "toggle": [
-            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],
-            ["pactl",  "set-sink-mute", "@DEFAULT_SINK@", "toggle"],
+            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],
+            ["pactl", "set-sink-mute", "@DEFAULT_SINK@", "toggle"],
             ["amixer", "sset", "Master", "toggle"],
         ],
     },
     "microphone": {
         "get": [
-            ["wpctl",  "get-volume", "@DEFAULT_AUDIO_SOURCE@"],
-            ["pactl",  "get-source-mute", "@DEFAULT_SOURCE@"],
+            ["wpctl", "get-volume", "@DEFAULT_AUDIO_SOURCE@"],
+            ["pactl", "get-source-mute", "@DEFAULT_SOURCE@"],
             ["amixer", "get", "Capture"],
         ],
         "mute": [
-            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SOURCE@", "1"],
-            ["pactl",  "set-source-mute", "@DEFAULT_SOURCE@", "1"],
+            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "1"],
+            ["pactl", "set-source-mute", "@DEFAULT_SOURCE@", "1"],
             ["amixer", "sset", "Capture", "nocap"],
         ],
         "unmute": [
-            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SOURCE@", "0"],
-            ["pactl",  "set-source-mute", "@DEFAULT_SOURCE@", "0"],
+            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "0"],
+            ["pactl", "set-source-mute", "@DEFAULT_SOURCE@", "0"],
             ["amixer", "sset", "Capture", "cap"],
         ],
         "toggle": [
-            ["wpctl",  "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"],
-            ["pactl",  "set-source-mute", "@DEFAULT_SOURCE@", "toggle"],
+            ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"],
+            ["pactl", "set-source-mute", "@DEFAULT_SOURCE@", "toggle"],
             ["amixer", "sset", "Capture", "toggle"],
         ],
     },
@@ -123,12 +123,12 @@ _RESOURCE_ACTIONS: dict[str, dict[str, list[list[str]]]] = {
 
 # Valid actions for each resource
 _VALID_ACTIONS: dict[str, list[str]] = {
-    "audio":       ["get", "mute", "unmute", "toggle"],
-    "microphone":  ["get", "mute", "unmute", "toggle"],
-    "bluetooth":   ["get", "on", "off"],
-    "wifi":        ["get", "on", "off"],
-    "power_mode":  ["get", "performance", "balanced", "power-saver"],
-    "brightness":  ["get", "set"],
+    "audio": ["get", "mute", "unmute", "toggle"],
+    "microphone": ["get", "mute", "unmute", "toggle"],
+    "bluetooth": ["get", "on", "off"],
+    "wifi": ["get", "on", "off"],
+    "power_mode": ["get", "performance", "balanced", "power-saver"],
+    "brightness": ["get", "set"],
 }
 
 
@@ -138,7 +138,7 @@ def _run_first_available(candidates: list[list[str]]) -> "tuple[bool, str]":
     Returns ``(success, output)`` where ``output`` is stdout on success or the
     last error message on failure.
     """
-    import shutil    # lazy
+    import shutil  # lazy
     import subprocess  # lazy
 
     last_err = "No suitable backend found."
@@ -166,8 +166,8 @@ class SystemControlTool(Tool):
     """Control system resources: audio, microphone, Bluetooth, Wi-Fi,
     power mode, and display brightness.
 
-    Backend detection
-    -----------------
+    ## Backend detection
+
     For each resource the tool tries available backends in order:
 
     - **Audio / Microphone**: WirePlumber (``wpctl``) → PulseAudio (``pactl``)
@@ -182,8 +182,8 @@ class SystemControlTool(Tool):
     subprocess imports and ``shutil.which`` checks are deferred to the
     first ``run()`` call so loading this module is free.
 
-    Safety
-    ------
+    ## Safety
+
     This tool is in ``requires_approval`` by default.  The user sees exactly
     which resource and action the AI is requesting before anything changes.
     Read-only ``get`` queries skip approval.
@@ -203,7 +203,8 @@ class SystemControlTool(Tool):
                 "enum": list(_VALID_ACTIONS),
                 "description": (
                     "The system resource to control. One of: "
-                    + ", ".join(f"'{k}'" for k in _VALID_ACTIONS) + "."
+                    + ", ".join(f"'{k}'" for k in _VALID_ACTIONS)
+                    + "."
                 ),
             },
             "action": {
@@ -275,7 +276,9 @@ class SystemControlTool(Tool):
                 ),
             )
 
-        snippet = f"{resource} {action}: {output}" if output else f"{resource} {action}: OK"
+        snippet = (
+            f"{resource} {action}: {output}" if output else f"{resource} {action}: OK"
+        )
         return ToolResult(
             tool_name=self.name,
             results=[SearchResult(path=f"system:{resource}", snippet=snippet)],
@@ -306,10 +309,12 @@ class SystemControlTool(Tool):
             )
         return ToolResult(
             tool_name=self.name,
-            results=[SearchResult(
-                path="system:brightness",
-                snippet=f"Brightness set to {value}.",
-            )],
+            results=[
+                SearchResult(
+                    path="system:brightness",
+                    snippet=f"Brightness set to {value}.",
+                )
+            ],
         )
 
     def schema_text(self) -> str:

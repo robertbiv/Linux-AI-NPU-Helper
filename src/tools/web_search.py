@@ -14,19 +14,19 @@ logger = logging.getLogger(__name__)
 # Built-in engine URL templates (query placeholder: {query})
 _DEFAULT_ENGINES: dict[str, str] = {
     "duckduckgo": "https://duckduckgo.com/?q={query}",
-    "startpage":  "https://www.startpage.com/search?q={query}",
-    "brave":      "https://search.brave.com/search?q={query}",
-    "ecosia":     "https://www.ecosia.org/search?q={query}",
-    "google":     "https://www.google.com/search?q={query}",
-    "bing":       "https://www.bing.com/search?q={query}",
+    "startpage": "https://www.startpage.com/search?q={query}",
+    "brave": "https://search.brave.com/search?q={query}",
+    "ecosia": "https://www.ecosia.org/search?q={query}",
+    "google": "https://www.google.com/search?q={query}",
+    "bing": "https://www.bing.com/search?q={query}",
 }
 
 
 class WebSearchTool(Tool):
     """Open the user's default browser to search the web.
 
-    Privacy model
-    -------------
+    ## Privacy model
+
     This tool **never makes any HTTP request itself**.  It builds a search URL
     and hands it to ``xdg-open``, which opens the URL in whatever browser the
     user has set as their default.  The assistant has no visibility into what
@@ -91,6 +91,7 @@ class WebSearchTool(Tool):
         logger.info("WebSearchTool: opening %s with query %r", engine_key, query)
         try:
             import subprocess  # lazy — only when tool actually runs
+
             # Non-blocking: spawn xdg-open and return immediately.
             # The subprocess is fully detached — we do not wait for it.
             subprocess.Popen(

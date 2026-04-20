@@ -7,7 +7,6 @@ to run efficiently on the AMD Ryzen AI NPU.
 
 All network calls respect the application's ``network.allow_external`` guard —
 model listings are fetched only from the locally configured backend URL.
-
 ## Example
 >>> selector = ModelSelector(config)
 >>> models = selector.list_models()
@@ -39,37 +38,55 @@ logger = logging.getLogger(__name__)
 
 _NPU_RULES: list[dict[str, Any]] = [
     # Explicit ONNX path — always fine (includes vision ONNX models)
-    {"pattern": r"\.onnx$", "level": "ok",
-     "reason": None},
+    {"pattern": r"\.onnx$", "level": "ok", "reason": None},
     # ONNX vision models by known key — explicitly supported on NPU
-    {"pattern": r"\b(phi-3-v|phi-3\.5-vision|florence-2|florence2|moondream2)\b",
-     "level": "ok",
-     "reason": None},
+    {
+        "pattern": r"\b(phi-3-v|phi-3\.5-vision|florence-2|florence2|moondream2)\b",
+        "level": "ok",
+        "reason": None,
+    },
     # Very large models (>30 B params) — memory likely insufficient
-    {"pattern": r"\b(70b|65b|40b|34b|33b)\b", "level": "no",
-     "reason": "Models larger than ~30 B parameters typically exceed NPU memory limits. "
-               "Use a quantized model ≤13 B (e.g. Q4_K_M) or run on CPU/GPU instead."},
+    {
+        "pattern": r"\b(70b|65b|40b|34b|33b)\b",
+        "level": "no",
+        "reason": "Models larger than ~30 B parameters typically exceed NPU memory limits. "
+        "Use a quantized model ≤13 B (e.g. Q4_K_M) or run on CPU/GPU instead.",
+    },
     # Vision models without ONNX — need custom ONNX export to run on NPU
-    {"pattern": r"\b(llava|bakllava|cogvlm|internvl|minicpm-v)\b",
-     "level": "warn",
-     "reason": "This vision model requires a custom ONNX export to run on the NPU. "
-               "Use the bundled Phi-3-vision ONNX or another catalog model instead. "
-               "Inference will fall back to the CPU/GPU backend."},
+    {
+        "pattern": r"\b(llava|bakllava|cogvlm|internvl|minicpm-v)\b",
+        "level": "warn",
+        "reason": "This vision model requires a custom ONNX export to run on the NPU. "
+        "Use the bundled Phi-3-vision ONNX or another catalog model instead. "
+        "Inference will fall back to the CPU/GPU backend.",
+    },
     # Medium models without quantization — may be slow
-    {"pattern": r"\b(13b|14b|20b|24b)\b.*?(?!q[0-9])", "level": "warn",
-     "reason": "Models in the 13–24 B range may be slow without aggressive quantization. "
-               "Consider a Q4_K_M or Q5_K_M variant for better NPU throughput."},
+    {
+        "pattern": r"\b(13b|14b|20b|24b)\b.*?(?!q[0-9])",
+        "level": "warn",
+        "reason": "Models in the 13–24 B range may be slow without aggressive quantization. "
+        "Consider a Q4_K_M or Q5_K_M variant for better NPU throughput.",
+    },
     # Well-quantized small/medium models — good fit
-    {"pattern": r"\b[0-9]b.*?q[0-9]|q[0-9].*?\b[0-9]b\b", "level": "ok",
-     "reason": None},
+    {
+        "pattern": r"\b[0-9]b.*?q[0-9]|q[0-9].*?\b[0-9]b\b",
+        "level": "ok",
+        "reason": None,
+    },
     # Embedding-only models — not suitable for chat
-    {"pattern": r"\b(embed|embedding|nomic-embed|mxbai-embed|all-minilm)\b", "level": "warn",
-     "reason": "Embedding models are not designed for conversational use. "
-               "They will work technically but will not produce natural language replies."},
+    {
+        "pattern": r"\b(embed|embedding|nomic-embed|mxbai-embed|all-minilm)\b",
+        "level": "warn",
+        "reason": "Embedding models are not designed for conversational use. "
+        "They will work technically but will not produce natural language replies.",
+    },
     # Models explicitly requiring full-precision or large context
-    {"pattern": r"\b(f16|f32|fp16|fp32|bf16)\b", "level": "warn",
-     "reason": "Full-precision (f16/f32) models are significantly slower on NPU. "
-               "Prefer a 4-bit or 8-bit quantized variant (e.g. Q4_K_M)."},
+    {
+        "pattern": r"\b(f16|f32|fp16|fp32|bf16)\b",
+        "level": "warn",
+        "reason": "Full-precision (f16/f32) models are significantly slower on NPU. "
+        "Prefer a 4-bit or 8-bit quantized variant (e.g. Q4_K_M).",
+    },
 ]
 
 
@@ -102,7 +119,7 @@ class ModelInfo:
     @property
     def size_gb(self) -> float:
         """Model size in gigabytes (0.0 if unknown)."""
-        return self.size_bytes / (1024 ** 3) if self.size_bytes else 0.0
+        return self.size_bytes / (1024**3) if self.size_bytes else 0.0
 
     def __str__(self) -> str:
         size = f"  {self.size_gb:.1f} GB" if self.size_gb else ""
@@ -128,23 +145,38 @@ def _parse_model_info(name: str, raw: dict) -> ModelInfo:
     family: str = raw.get("details", {}).get("family", "")
     if not family:
         # Guess from name
-        for f in ("llama", "mistral", "gemma", "phi", "qwen", "deepseek",
-                  "codellama", "vicuna", "falcon", "mpt", "starcoder"):
+        for f in (
+            "llama",
+            "mistral",
+            "gemma",
+            "phi",
+            "qwen",
+            "deepseek",
+            "codellama",
+            "vicuna",
+            "falcon",
+            "mpt",
+            "starcoder",
+        ):
             if f in name_lower:
                 family = f
                 break
 
     # Quantization
     quant_match = re.search(r"\b(q[0-9](?:_k_[ms])?|f16|f32|bf16|int8)\b", name_lower)
-    quantization: str = quant_match.group(1) if quant_match else (
-        raw.get("details", {}).get("quantization_level", "")
+    quantization: str = (
+        quant_match.group(1)
+        if quant_match
+        else (raw.get("details", {}).get("quantization_level", ""))
     )
 
     # Vision
-    is_vision = bool(re.search(
-        r"\b(llava|bakllava|moondream|cogvlm|internvl|minicpm-v|phi-3-vision|vision)\b",
-        name_lower,
-    ))
+    is_vision = bool(
+        re.search(
+            r"\b(llava|bakllava|moondream|cogvlm|internvl|minicpm-v|phi-3-vision|vision)\b",
+            name_lower,
+        )
+    )
 
     return ModelInfo(
         name=name,
@@ -159,19 +191,18 @@ def _parse_model_info(name: str, raw: dict) -> ModelInfo:
 class ModelSelector:
     """List, select, and validate models for the configured AI backend.
 
-    Args:
-    config:
-        The application :class:`~src.config.Config` object.
+        Args:
+            config:
+                The application :class:`~src.config.Config` object.
+    ## Usage
 
-    Usage
-    -----
-    ::
+            ::
 
-        selector = ModelSelector(config)
-        models   = selector.list_models()          # fetch from backend
-        current  = selector.get_current_model()    # from config
-        warning  = selector.npu_warning(models[0]) # None → ok
-        selector.set_model("llama3.2:3b-q4_K_M")  # update config in-memory
+                selector = ModelSelector(config)
+                models   = selector.list_models()          # fetch from backend
+                current  = selector.get_current_model()    # from config
+                warning  = selector.npu_warning(models[0]) # None → ok
+                selector.set_model("llama3.2:3b-q4_K_M")  # update config in-memory
     """
 
     def __init__(self, config: Any) -> None:  # noqa: ANN001
@@ -180,7 +211,9 @@ class ModelSelector:
 
     # ── Query backend ─────────────────────────────────────────────────────────
 
-    def list_models(self, timeout: int = 10) -> concurrent.futures.Future[list[ModelInfo]]:
+    def list_models(
+        self, timeout: int = 10
+    ) -> concurrent.futures.Future[list[ModelInfo]]:
         """Return a Future for all models available from the currently configured backend.
 
         Network calls are made only to the locally configured backend URL.
@@ -188,13 +221,13 @@ class ModelSelector:
         unreachable rather than raising an exception.
 
         Args:
-        timeout:
-            Seconds to wait for the backend to respond.
+            timeout:
+                Seconds to wait for the backend to respond.
 
         Returns:
-        concurrent.futures.Future[list[ModelInfo]]
             Future that resolves to models sorted alphabetically by name.
         """
+
         def _fetch() -> list[ModelInfo]:
             backend = self._config.backend
             try:
@@ -208,7 +241,9 @@ class ModelSelector:
                     logger.warning("Unknown backend %r; cannot list models.", backend)
                     return []
             except Exception as exc:  # noqa: BLE001
-                logger.warning("Could not list models from %r backend: %s", backend, exc)
+                logger.warning(
+                    "Could not list models from %r backend: %s", backend, exc
+                )
                 return []
 
         return self._executor.submit(_fetch)
@@ -223,14 +258,12 @@ class ModelSelector:
         allow_external = self._config.network.get("allow_external", False)
         assert_local_url(url, allow_external)
 
-        resp = requests.get(url, timeout=timeout, verify=True,
-                            headers={"Connection": "close"})
+        resp = requests.get(
+            url, timeout=timeout, verify=True, headers={"Connection": "close"}
+        )
         resp.raise_for_status()
         data = resp.json()
-        models = [
-            _parse_model_info(m["name"], m)
-            for m in data.get("models", [])
-        ]
+        models = [_parse_model_info(m["name"], m) for m in data.get("models", [])]
         return sorted(models, key=lambda m: m.name)
 
     def _list_openai(self, timeout: int) -> list[ModelInfo]:
@@ -288,8 +321,8 @@ class ModelSelector:
         :meth:`~src.settings.SettingsManager.save` to write the change.
 
         Args:
-        model_name:
-            Model identifier accepted by the active backend.
+            model_name:
+                Model identifier accepted by the active backend.
         """
         backend = self._config.backend
         if backend == "ollama":
@@ -309,11 +342,11 @@ class ModelSelector:
         fine on the AMD Ryzen AI NPU or the current backend is not NPU).
 
         Args:
-        model:
-            A :class:`ModelInfo` instance or a bare model name string.
+            model:
+                A :class:`ModelInfo` instance or a bare model name string.
 
         Returns:
-        str | None
+            str | None
             Human-readable warning, or ``None`` if no warning applies.
         """
         if isinstance(model, str):
@@ -335,10 +368,12 @@ class ModelSelector:
         # No rule matched — give a generic size-based check
         cfg_warn_gb: float = float(
             self._config.get("model_selector", {}).get("size_warning_gb", 13.0)
-            if hasattr(self._config, "get") else 13.0
+            if hasattr(self._config, "get")
+            else 13.0
         )
         try:
             from src.npu_benchmark import probe_hardware
+
             hw = probe_hardware()
             if hw.ram_gb > 0:
                 # NPU models share system RAM. Usually half of system RAM is a safe threshold
@@ -371,13 +406,13 @@ class ModelSelector:
         """
         warning = self.npu_warning(model)
         return {
-            "name":         model.name,
-            "size_gb":      round(model.size_gb, 2),
-            "family":       model.family,
+            "name": model.name,
+            "size_gb": round(model.size_gb, 2),
+            "family": model.family,
             "quantization": model.quantization,
-            "is_vision":    model.is_vision,
-            "npu_ok":       warning is None,
-            "npu_warning":  warning or "",
+            "is_vision": model.is_vision,
+            "npu_ok": warning is None,
+            "npu_warning": warning or "",
         }
 
     # ── NPU model suggestions ──────────────────────────────────────────────────
@@ -391,16 +426,16 @@ class ModelSelector:
         before text-only models within the same fit tier.
 
         Returns:
-        list[ModelCatalogEntry]
             Catalog entries rated ``"excellent"`` or ``"good"``.
 
         Example:
         ::
 
             for entry in ModelSelector.get_npu_suggestions():
-                print(entry.name, entry.npu_fit_label, "vision=" + str(entry.is_vision))
+            print(entry.name, entry.npu_fit_label, "vision=" + str(entry.is_vision))
         """
         from src.npu_model_installer import get_npu_suggestions
+
         return get_npu_suggestions()
 
     @staticmethod
@@ -408,17 +443,17 @@ class ModelSelector:
         """Return only vision-capable models from the catalog.
 
         Returns:
-        list[ModelCatalogEntry]
             Vision-capable catalog entries sorted by NPU fit.
 
-        Example
+        Example:
 
         ::
 
             for entry in ModelSelector.get_vision_model_suggestions():
-                print(entry.name, entry.size_description)
+            print(entry.name, entry.size_description)
         """
         from src.npu_model_installer import get_vision_models
+
         return get_vision_models()
 
     @staticmethod
@@ -426,8 +461,8 @@ class ModelSelector:
         """Return metadata for the default bundled NPU vision model.
 
         Returns:
-        dict
             Same keys as :meth:`NPUModelInstaller.model_info`.
         """
         from src.npu_model_installer import NPUModelInstaller
+
         return NPUModelInstaller().model_info()

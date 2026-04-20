@@ -41,9 +41,13 @@ class EncodingTool(Tool):
         text = args.get("text", "")
 
         if fmt not in ("hex", "binary"):
-            return ToolResult(tool_name=self.name, error="Format must be 'hex' or 'binary'.")
+            return ToolResult(
+                tool_name=self.name, error="Format must be 'hex' or 'binary'."
+            )
         if action not in ("encode", "decode"):
-            return ToolResult(tool_name=self.name, error="Action must be 'encode' or 'decode'.")
+            return ToolResult(
+                tool_name=self.name, error="Action must be 'encode' or 'decode'."
+            )
         if not text:
             return ToolResult(tool_name=self.name, error="'text' is required.")
 
@@ -65,7 +69,10 @@ class EncodingTool(Tool):
                             tool_name=self.name,
                             error="Binary text length must be a multiple of 8.",
                         )
-                    byte_vals = [int(clean_bin[i:i+8], 2) for i in range(0, len(clean_bin), 8)]
+                    byte_vals = [
+                        int(clean_bin[i : i + 8], 2)
+                        for i in range(0, len(clean_bin), 8)
+                    ]
                     result = bytes(byte_vals).decode("utf-8")
 
             snippet = f"{action.capitalize()}d {fmt}:\n{result}"

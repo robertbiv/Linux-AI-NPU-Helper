@@ -72,13 +72,13 @@ class SettingsManager:
     """Thread-safe settings manager with JSON persistence and change listeners.
 
     Args:
-    path:
-        Path to the ``settings.json`` file.  Created (with secure permissions)
-        if it does not exist.  Pass ``None`` to disable persistence (useful in
-        tests).
-    defaults:
-        Base default values deep-merged *before* the file is loaded.  Typically
-        the ``_DEFAULTS`` dict from :mod:`src.config`.
+        path:
+            Path to the ``settings.json`` file.  Created (with secure permissions)
+            if it does not exist.  Pass ``None`` to disable persistence (useful in
+            tests).
+        defaults:
+            Base default values deep-merged *before* the file is loaded.  Typically
+            the ``_DEFAULTS`` dict from :mod:`src.config`.
     """
 
     def __init__(
@@ -92,6 +92,7 @@ class SettingsManager:
 
         # Start from compiled-in defaults
         from src.config import _DEFAULTS
+
         base = dict(defaults) if defaults is not None else dict(_DEFAULTS)
         self._data: dict = base
 
@@ -141,6 +142,7 @@ class SettingsManager:
         Useful when the config file has been edited externally.
         """
         from src.config import _DEFAULTS
+
         with self._lock:
             self._data = dict(_DEFAULTS)
         self._load()
@@ -149,11 +151,10 @@ class SettingsManager:
 
     def get(self, key_path: str, default: Any = None) -> Any:
         """Return the value at dot-separated *key_path*, or *default*.
+        ## Example
 
-        Example::
-
-            settings.get("ollama.model")          # "llava"
-            settings.get("tools.unload_after_use") # False
+                    settings.get("ollama.model")          # "llava"
+                    settings.get("tools.unload_after_use") # False
         """
         with self._lock:
             try:
@@ -173,6 +174,7 @@ class SettingsManager:
     def all(self) -> dict:
         """Return a deep copy of the entire settings dict."""
         import copy
+
         with self._lock:
             return copy.deepcopy(self._data)
 
@@ -184,14 +186,14 @@ class SettingsManager:
         Notifies all registered change listeners synchronously before returning.
 
         Args:
-        key_path:
-            Dot-separated path, e.g. ``"ollama.model"`` or ``"tools.allowed"``.
-        value:
-            New value (any JSON-serialisable type).
-        save:
-            Write to disk immediately (default: ``True``).  Set to ``False``
-            when making several changes in a batch and calling :meth:`save`
-            manually afterwards.
+            key_path:
+                Dot-separated path, e.g. ``"ollama.model"`` or ``"tools.allowed"``.
+            value:
+                New value (any JSON-serialisable type).
+            save:
+                Write to disk immediately (default: ``True``).  Set to ``False``
+                when making several changes in a batch and calling :meth:`save`
+                manually afterwards.
         """
         with self._lock:
             _set_nested(self._data, key_path, value)
@@ -203,17 +205,16 @@ class SettingsManager:
     def set_many(self, changes: dict[str, Any]) -> None:
         """Apply multiple changes atomically and save once.
 
-        Args:
-        changes:
-            Dict mapping dot-separated key paths to new values.
+                Args:
+                    changes:
+                        Dict mapping dot-separated key paths to new values.
+        ## Example
 
-        Example::
-
-            settings.set_many({
-                "backend": "ollama",
-                "ollama.model": "llama3:8b-q4_K_M",
-                "tools.unload_after_use": True,
-            })
+                        settings.set_many({
+                        "backend": "ollama",
+                        "ollama.model": "llama3:8b-q4_K_M",
+                        "tools.unload_after_use": True,
+                        })
         """
         with self._lock:
             for key_path, value in changes.items():
@@ -226,10 +227,10 @@ class SettingsManager:
         """Deep-merge *values* into an existing top-level *section* and save.
 
         Args:
-        section:
-            Top-level key (e.g. ``"tools"``, ``"ollama"``).
-        values:
-            Dict of new values to merge in.
+            section:
+                Top-level key (e.g. ``"tools"``, ``"ollama"``).
+            values:
+                Dict of new values to merge in.
         """
         with self._lock:
             existing = self._data.get(section, {})
@@ -280,5 +281,6 @@ class SettingsManager:
         """
         from src.config import Config
         import copy
+
         with self._lock:
             return Config(copy.deepcopy(self._data))

@@ -23,8 +23,8 @@ def _has_hidden_component(path: str) -> bool:
 class FindFilesTool(Tool):
     """Search for files by name or glob pattern.
 
-    Backend priority
-    ----------------
+    ## Backend priority
+
     1. ``plocate`` – fastest; uses an mmap-based index updated by a daemon.
     2. ``locate``  – compatible but slightly slower index format.
     3. ``find``    – always available; slower because it walks the filesystem.
@@ -74,6 +74,7 @@ class FindFilesTool(Tool):
         """Return 'plocate', 'locate', or 'find'."""
         if self._backend is None:
             import shutil  # lazy — only needed when first search runs
+
             for cmd in ("plocate", "locate"):
                 if shutil.which(cmd):
                     self._backend = cmd
@@ -116,11 +117,10 @@ class FindFilesTool(Tool):
     # ── Backends ──────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _run_locate(
-        cmd: str, pattern: str, search_path: Path, limit: int
-    ) -> list[str]:
+    def _run_locate(cmd: str, pattern: str, search_path: Path, limit: int) -> list[str]:
         """Run plocate/locate and return matching paths under search_path."""
         import subprocess  # lazy — only when tool actually runs
+
         args = [cmd, "--basename", "-l", str(limit * 2), pattern]
         proc = subprocess.run(
             args,
@@ -138,6 +138,7 @@ class FindFilesTool(Tool):
     ) -> list[str]:
         """Run find(1) to search by name."""
         import subprocess  # lazy — only when tool actually runs
+
         cmd = ["find", str(search_path), "-name", pattern]
         if not include_hidden:
             cmd = (
@@ -152,7 +153,9 @@ class FindFilesTool(Tool):
                 text=True,
                 timeout=30,
             )
-            return [line.strip() for line in proc.stdout.splitlines() if line.strip()][:limit]
+            return [line.strip() for line in proc.stdout.splitlines() if line.strip()][
+                :limit
+            ]
         except subprocess.TimeoutExpired:
             logger.warning("find timed out after 30 s; returning partial results.")
             return []

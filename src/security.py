@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 # ── Exceptions ────────────────────────────────────────────────────────────────
 
+
 class ExternalNetworkBlockedError(RuntimeError):
     """Raised when a request to an external host is attempted while
     ``network.allow_external`` is ``False``."""
@@ -43,6 +44,7 @@ class RateLimitExceededError(RuntimeError):
 
 
 # ── URL guard ─────────────────────────────────────────────────────────────────
+
 
 def is_local_url(url: str) -> bool:
     """Return *True* if *url* resolves to a loopback or RFC-1918 private address.
@@ -66,11 +68,11 @@ def assert_local_url(url: str, allow_external: bool) -> None:
     external traffic is not permitted.
 
     Args:
-    url:
-        Full URL to validate.
-    allow_external:
-        If ``True`` the check is skipped entirely.  Set this only when the
-        user has explicitly opted in via ``network.allow_external: true``.
+        url:
+            Full URL to validate.
+        allow_external:
+            If ``True`` the check is skipped entirely.  Set this only when the
+            user has explicitly opted in via ``network.allow_external: true``.
     """
     if allow_external:
         return
@@ -89,10 +91,10 @@ def assert_local_url(url: str, allow_external: bool) -> None:
 # in one pass.  After that, remaining bare C0/C1 control codes are stripped.
 # Printable Unicode, newlines, and tabs are preserved.
 _CONTROL_CHAR_RE = re.compile(
-    r"\x1b\[[0-9;]*[A-Za-z]"              # ANSI CSI sequences  (must be first)
-    r"|\x1b."                              # Other 2-char ESC sequences
-    r"|[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]" # C0 except \t \n \r
-    r"|[\x80-\x9f]"                        # C1 control range
+    r"\x1b\[[0-9;]*[A-Za-z]"  # ANSI CSI sequences  (must be first)
+    r"|\x1b."  # Other 2-char ESC sequences
+    r"|[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]"  # C0 except \t \n \r
+    r"|[\x80-\x9f]"  # C1 control range
 )
 
 # Hard limit on AI response text returned per streaming chunk to the UI.
@@ -107,14 +109,13 @@ def sanitize_ai_response(text: str, max_chars: int = _MAX_RESPONSE_CHARS) -> str
     - Truncates to *max_chars* to prevent memory exhaustion from a runaway model.
 
     Args:
-    text:
-        Raw text received from the AI backend.
-    max_chars:
-        Maximum number of characters to return.  Text beyond this is silently
-        dropped (the UI will show the truncation naturally during streaming).
+        text:
+            Raw text received from the AI backend.
+        max_chars:
+            Maximum number of characters to return.  Text beyond this is silently
+            dropped (the UI will show the truncation naturally during streaming).
 
     Returns:
-    str
         Sanitised text, safe to display in the UI.
     """
     if not text:
@@ -123,13 +124,15 @@ def sanitize_ai_response(text: str, max_chars: int = _MAX_RESPONSE_CHARS) -> str
     if len(cleaned) > max_chars:
         logger.warning(
             "AI response truncated from %d to %d characters.",
-            len(cleaned), max_chars,
+            len(cleaned),
+            max_chars,
         )
         cleaned = cleaned[:max_chars]
     return cleaned
 
 
 # ── Secure file I/O ───────────────────────────────────────────────────────────
+
 
 def secure_write(path: str | Path, data: str, mode: int = 0o600) -> None:
     """Write *data* to *path* atomically with restricted permissions.
@@ -139,14 +142,14 @@ def secure_write(path: str | Path, data: str, mode: int = 0o600) -> None:
     to *mode* (default ``0o600`` — owner read/write only).
 
     Args:
-    path:
-        Destination file path.
-    data:
-        Text content to write (UTF-8 encoded).
-    mode:
-        POSIX file permission bits.  Default ``0o600`` restricts the file to
-        the owning user, preventing other local users from reading sensitive
-        data such as conversation history or config files.
+        path:
+            Destination file path.
+        data:
+            Text content to write (UTF-8 encoded).
+        mode:
+            POSIX file permission bits.  Default ``0o600`` restricts the file to
+            the owning user, preventing other local users from reading sensitive
+            data such as conversation history or config files.
     """
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -177,6 +180,7 @@ def secure_write(path: str | Path, data: str, mode: int = 0o600) -> None:
 
 # ── Path permission checks ────────────────────────────────────────────────────
 
+
 def check_path_permissions(path: str | Path, label: str = "file") -> None:
     """Log a warning if *path* is readable by group or world.
 
@@ -184,10 +188,10 @@ def check_path_permissions(path: str | Path, label: str = "file") -> None:
     readable only by the owning user (mode ``0o600`` or ``0o400``).
 
     Args:
-    path:
-        File to inspect.
-    label:
-        Human-readable label used in warning messages (e.g. ``"config file"``).
+        path:
+            File to inspect.
+        label:
+            Human-readable label used in warning messages (e.g. ``"config file"``).
     """
     p = Path(path)
     if not p.exists():
@@ -198,7 +202,10 @@ def check_path_permissions(path: str | Path, label: str = "file") -> None:
             logger.warning(
                 "Security: %s %s is readable by group or world (mode=%o). "
                 "Consider restricting it with: chmod 600 %s",
-                label, p, file_stat.st_mode & 0o777, p,
+                label,
+                p,
+                file_stat.st_mode & 0o777,
+                p,
             )
     except OSError as exc:
         logger.debug("Could not check permissions of %s: %s", p, exc)
@@ -206,19 +213,19 @@ def check_path_permissions(path: str | Path, label: str = "file") -> None:
 
 # ── Rate limiter ──────────────────────────────────────────────────────────────
 
+
 class RateLimiter:
     """Thread-safe token-bucket rate limiter for AI backend calls.
 
-    Args:
-    calls_per_minute:
-        Maximum number of calls allowed per minute.  ``0`` disables limiting.
+        Args:
+            calls_per_minute:
+                Maximum number of calls allowed per minute.  ``0`` disables limiting.
+    ## Usage
 
-    Usage
-    -----
-    ::
+            ::
 
-        limiter = RateLimiter(calls_per_minute=30)
-        limiter.check()   # raises RateLimitExceededError if over limit
+                limiter = RateLimiter(calls_per_minute=30)
+                limiter.check()   # raises RateLimitExceededError if over limit
     """
 
     def __init__(self, calls_per_minute: int = 0) -> None:
@@ -269,7 +276,9 @@ _MAX_ARG_STRING_LEN = 4096
 _DANGEROUS_ARG_CHARS_RE = re.compile(r"[\x00]")
 
 
-def validate_tool_args(args: dict[str, Any], schema: dict | None = None) -> dict[str, Any]:
+def validate_tool_args(
+    args: dict[str, Any], schema: dict | None = None
+) -> dict[str, Any]:
     """Sanitise AI-supplied tool arguments before dispatch.
 
     - Strips null bytes from all string values.
@@ -278,22 +287,19 @@ def validate_tool_args(args: dict[str, Any], schema: dict | None = None) -> dict
       ensure required fields are present and types match.
 
     Args:
-    args:
-        Raw argument dict supplied by the AI (already JSON-decoded).
-    schema:
-        Optional JSON Schema dict with a ``"properties"`` key.  Used only for
-        presence and basic type checks; full JSON Schema validation is not
-        performed.
+        args:
+            Raw argument dict supplied by the AI (already JSON-decoded).
+        schema:
+            Optional JSON Schema dict with a ``"properties"`` key.  Used only for
+            presence and basic type checks; full JSON Schema validation is not
+            performed.
 
     Returns:
-    dict
         Sanitised copy of *args*.
 
     Raises:
-    ValueError
-        If a required field from the schema is missing.
-    TypeError
-        If a field's value is of the wrong primitive type.
+        ValueError: If a required field from the schema is missing.
+        TypeError: If a field\'s value is of the wrong primitive type.
     """
     cleaned: dict[str, Any] = {}
     for key, value in args.items():
@@ -304,14 +310,17 @@ def validate_tool_args(args: dict[str, Any], schema: dict | None = None) -> dict
             if len(value) > _MAX_ARG_STRING_LEN:
                 logger.warning(
                     "Tool arg %r truncated from %d to %d chars.",
-                    key, len(value), _MAX_ARG_STRING_LEN,
+                    key,
+                    len(value),
+                    _MAX_ARG_STRING_LEN,
                 )
                 value = value[:_MAX_ARG_STRING_LEN]
         elif isinstance(value, list):
             # Sanitise string items in lists
             value = [
                 _DANGEROUS_ARG_CHARS_RE.sub("", v)[:_MAX_ARG_STRING_LEN]
-                if isinstance(v, str) else v
+                if isinstance(v, str)
+                else v
                 for v in value
             ]
         cleaned[key] = value
@@ -321,9 +330,7 @@ def validate_tool_args(args: dict[str, Any], schema: dict | None = None) -> dict
         required: list[str] = schema.get("required", [])
         for field in required:
             if field not in cleaned:
-                raise ValueError(
-                    f"Tool call is missing required argument: {field!r}"
-                )
+                raise ValueError(f"Tool call is missing required argument: {field!r}")
         for field, field_schema in properties.items():
             if field not in cleaned:
                 continue
@@ -339,21 +346,19 @@ def _check_json_type(field: str, value: Any, expected_type: str | None) -> None:
     if expected_type is None:
         return
     _type_map: dict[str, type | tuple] = {
-        "string":  str,
+        "string": str,
         "integer": int,
-        "number":  (int, float),
+        "number": (int, float),
         "boolean": bool,
-        "array":   list,
-        "object":  dict,
+        "array": list,
+        "object": dict,
     }
     py_type = _type_map.get(expected_type)
     if py_type is None:
         return
     # In JSON Schema, booleans are a subtype of integer in Python; handle that.
     if expected_type == "integer" and isinstance(value, bool):
-        raise TypeError(
-            f"Tool argument {field!r} expected integer, got boolean."
-        )
+        raise TypeError(f"Tool argument {field!r} expected integer, got boolean.")
     if not isinstance(value, py_type):
         raise TypeError(
             f"Tool argument {field!r} expected {expected_type}, "
@@ -370,10 +375,9 @@ _MIN_SECRET_LEN = 4  # Don't mask empty or trivially short "secrets"
 def mask_secret(value: str) -> str:
     """Return a masked version of *value* safe for logging.
 
-    Only the first two and last two characters are kept; everything in between
-    is replaced with ``***``.  Values shorter than 8 characters are fully
-    masked.
-
+        Only the first two and last two characters are kept; everything in between
+        is replaced with ``***``.  Values shorter than 8 characters are fully
+        masked.
     Examples:
     >>> mask_secret("sk-abc123xyz")
     'sk***yz'
@@ -395,11 +399,10 @@ def get_api_key_from_env(env_var: str) -> str:
     version control.
 
     Args:
-    env_var:
-        Name of the environment variable to read.
+        env_var:
+            Name of the environment variable to read.
 
     Returns:
-    str
         The API key value, or an empty string if the variable is not set.
     """
     if not env_var:

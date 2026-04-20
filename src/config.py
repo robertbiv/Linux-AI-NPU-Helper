@@ -54,7 +54,7 @@ _DEFAULTS: dict[str, Any] = {
     "backend": "ollama",
     "ollama": {
         "base_url": "http://localhost:11434",
-        "model": "llava",          # vision-capable model
+        "model": "llava",  # vision-capable model
         "timeout": 120,
     },
     "openai": {
@@ -62,7 +62,7 @@ _DEFAULTS: dict[str, Any] = {
         # e.g. LM Studio: http://localhost:1234/v1
         #      llama.cpp : http://localhost:8080/v1
         "base_url": "http://localhost:1234/v1",
-        "api_key_env": "",         # not needed for local servers
+        "api_key_env": "",  # not needed for local servers
         "model": "local-model",
         "timeout": 120,
     },
@@ -78,7 +78,12 @@ _DEFAULTS: dict[str, Any] = {
         #   model_path: "/path/to/my-model.onnx"
         "model_path": "",
         # Execution provider preference order (VitisAI first, then fallbacks)
-        "providers": ["VitisAIExecutionProvider", "OpenVINOExecutionProvider", "QNNExecutionProvider", "CPUExecutionProvider"],
+        "providers": [
+            "VitisAIExecutionProvider",
+            "OpenVINOExecutionProvider",
+            "QNNExecutionProvider",
+            "CPUExecutionProvider",
+        ],
         # Ryzen AI config JSON expected by VitisAI EP
         "vitisai_config": "/opt/xilinx/xrt/share/vitis_ai_library/models/vitisai_ep_json_config.json",
         # Auto-download a model on first NPU use (disabled by default — use the GUI)
@@ -212,17 +217,17 @@ _DEFAULTS: dict[str, Any] = {
             # to search engines itself.
             "engines": {
                 "duckduckgo": "https://duckduckgo.com/?q={query}",
-                "startpage":  "https://www.startpage.com/search?q={query}",
-                "brave":      "https://search.brave.com/search?q={query}",
-                "ecosia":     "https://www.ecosia.org/search?q={query}",
-                "google":     "https://www.google.com/search?q={query}",
-                "bing":       "https://www.bing.com/search?q={query}",
+                "startpage": "https://www.startpage.com/search?q={query}",
+                "brave": "https://search.brave.com/search?q={query}",
+                "ecosia": "https://www.ecosia.org/search?q={query}",
+                "google": "https://www.google.com/search?q={query}",
+                "bing": "https://www.bing.com/search?q={query}",
             },
         },
     },
     # ── Logging ───────────────────────────────────────────────────────────────
     "log_level": "INFO",
-    "log_file": "",   # empty = stderr only
+    "log_file": "",  # empty = stderr only
     # ── Security hardening ────────────────────────────────────────────────────
     "security": {
         # Maximum AI backend calls per minute (0 = no limit).
@@ -321,10 +326,10 @@ def load(path: str | Path | None = None) -> Config:
     """Load configuration, merging user file over built-in defaults.
 
     Args:
-    path:
-        Explicit path to a ``config.yaml`` file.  When *None* the function
-        searches :data:`_CONFIG_SEARCH_PATHS` in order and uses the first file
-        it finds.  If no file is found the built-in defaults are used as-is.
+        path:
+            Explicit path to a ``config.yaml`` file.  When *None* the function
+            searches :data:`_CONFIG_SEARCH_PATHS` in order and uses the first file
+            it finds.  If no file is found the built-in defaults are used as-is.
     """
     data = dict(_DEFAULTS)
 
@@ -357,6 +362,7 @@ def load(path: str | Path | None = None) -> Config:
     # the security.check_file_permissions setting from merged data.
     if cfg.security.get("check_file_permissions", True) and config_file is not None:
         from src.security import check_path_permissions
+
         check_path_permissions(config_file, label="config file")
 
     return cfg

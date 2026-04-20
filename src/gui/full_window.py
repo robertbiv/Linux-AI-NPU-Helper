@@ -11,7 +11,6 @@ Implements the wide desktop layout shown in the mockup:
 The window exposes :meth:`FullWindow.set_page` to switch pages programmatically
 and emits ``collapse_requested`` when the user clicks the ⤡ button to return
 to compact mode.
-
 ## Usage
 ::
 
@@ -44,20 +43,21 @@ try:
         QVBoxLayout,
         QWidget,
     )
+
     _HAS_QT = True
 except ImportError:
     _HAS_QT = False
     logger.warning("PyQt5 not installed — FullWindow unavailable.")
 
-APP_NAME    = "Neural Monolith"
+APP_NAME = "Neural Monolith"
 APP_VERSION = "V2.4.0-STABLE"
 
 # Page identifiers
-PAGE_CHAT        = "chat"
-PAGE_NPU_PERF    = "npu_performance"
+PAGE_CHAT = "chat"
+PAGE_NPU_PERF = "npu_performance"
 PAGE_NEURAL_MODELS = "neural_models"
 PAGE_SYSTEM_LOGS = "system_logs"
-PAGE_API         = "api_integration"
+PAGE_API = "api_integration"
 PAGE_PREFERENCES = "preferences"
 
 if _HAS_QT:
@@ -114,12 +114,12 @@ if _HAS_QT:
         page_selected = pyqtSignal(str)
 
         _NAV_ITEMS = [
-            ("⬡", "Chat",            PAGE_CHAT),
+            ("⬡", "Chat", PAGE_CHAT),
             ("⬖", "NPU Performance", PAGE_NPU_PERF),
-            ("⬟", "Neural Models",   PAGE_NEURAL_MODELS),
-            ("☰", "System Logs",     PAGE_SYSTEM_LOGS),
+            ("⬟", "Neural Models", PAGE_NEURAL_MODELS),
+            ("☰", "System Logs", PAGE_SYSTEM_LOGS),
             ("⚙", "API Integration", PAGE_API),
-            ("⚙", "Preferences",     PAGE_PREFERENCES),
+            ("⚙", "Preferences", PAGE_PREFERENCES),
         ]
 
         def __init__(self, parent: QWidget | None = None) -> None:
@@ -302,8 +302,11 @@ if _HAS_QT:
                     f"  padding: 0 16px;"
                     f"  border-radius: 0;"
                     f"}}"
-                    + (f"QPushButton:checked {{ border-bottom: 2px solid {T.GREEN}; color: {T.TEXT_PRIMARY}; }}" if is_active else
-                       f"QPushButton:hover {{ color: {T.TEXT_PRIMARY}; }}")
+                    + (
+                        f"QPushButton:checked {{ border-bottom: 2px solid {T.GREEN}; color: {T.TEXT_PRIMARY}; }}"
+                        if is_active
+                        else f"QPushButton:hover {{ color: {T.TEXT_PRIMARY}; }}"
+                    )
                 )
                 layout.addWidget(btn)
                 self._tab_buttons.append(btn)
@@ -390,16 +393,16 @@ if _HAS_QT:
         """Full desktop-layout window for Neural Monolith.
 
         Args:
-        settings_manager:
-            Application :class:`~src.settings.SettingsManager` (optional).
-        ai_assistant:
-            Application :class:`~src.ai_assistant.AIAssistant` (optional).
-        parent:
-            Optional parent widget.
+            settings_manager:
+                Application :class:`~src.settings.SettingsManager` (optional).
+            ai_assistant:
+                Application :class:`~src.ai_assistant.AIAssistant` (optional).
+            parent:
+                Optional parent widget.
 
-        Signals:
-        collapse_requested:
-            Emitted when the user clicks the shrink / ⤡ button.
+            Signals:
+            collapse_requested:
+                Emitted when the user clicks the shrink / ⤡ button.
         """
 
         collapse_requested = pyqtSignal()

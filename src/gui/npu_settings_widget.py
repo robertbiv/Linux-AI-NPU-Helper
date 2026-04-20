@@ -12,7 +12,6 @@ Implements the visual design from the NPU Assistant mockup:
 
 All changes are immediately forwarded to :class:`~src.settings.SettingsManager`
 so they persist to ``settings.json`` without any Apply button.
-
 ## Usage
 ::
 
@@ -46,6 +45,7 @@ try:
         QVBoxLayout,
         QWidget,
     )
+
     _HAS_QT = True
 except ImportError:
     _HAS_QT = False
@@ -187,7 +187,9 @@ if _HAS_QT:
 
         toggled = pyqtSignal(bool)
 
-        def __init__(self, checked: bool = False, parent: QWidget | None = None) -> None:
+        def __init__(
+            self, checked: bool = False, parent: QWidget | None = None
+        ) -> None:
             super().__init__(parent)
             self._checked = checked
             self.setFixedSize(52, 28)
@@ -220,6 +222,7 @@ if _HAS_QT:
 
         def paintEvent(self, event: object) -> None:
             from PyQt5.QtGui import QPainter, QBrush, QColor
+
             painter = QPainter(self)
             painter.setRenderHint(QPainter.Antialiasing)
             painter.setBrush(QBrush(QColor("#ffffff")))
@@ -400,11 +403,11 @@ if _HAS_QT:
         """Settings page with NPU-themed cards matching the mockup design.
 
         Args:
-        settings_manager:
-            The application :class:`~src.settings.SettingsManager` instance.
-            Can be ``None`` (settings are shown but not persisted).
-        parent:
-            Optional parent widget.
+            settings_manager:
+                The application :class:`~src.settings.SettingsManager` instance.
+                Can be ``None`` (settings are shown but not persisted).
+            parent:
+                Optional parent widget.
         """
 
         def __init__(
@@ -536,15 +539,9 @@ if _HAS_QT:
             at_header.addStretch()
             at_layout.addLayout(at_header)
 
-            self._fs_toggle = self._tool_row(
-                at_layout, "⊞ FILE SYSTEM ACCESS", "Auto"
-            )
-            self._web_toggle = self._tool_row(
-                at_layout, "⊕ WEB RETRIEVAL", "Auto"
-            )
-            self._kern_toggle = self._tool_row(
-                at_layout, "⊡ KERNEL TERMINAL", "Off"
-            )
+            self._fs_toggle = self._tool_row(at_layout, "⊞ FILE SYSTEM ACCESS", "Auto")
+            self._web_toggle = self._tool_row(at_layout, "⊕ WEB RETRIEVAL", "Auto")
+            self._kern_toggle = self._tool_row(at_layout, "⊡ KERNEL TERMINAL", "Off")
             layout.addWidget(at_card)
 
             # ── Thermal Thresholds ─────────────────────────────────────────
@@ -593,12 +590,16 @@ if _HAS_QT:
             self._thermal_notify_cb = QCheckBox(
                 "Notify when NPU frequency throttles due to heat."
             )
-            self._thermal_notify_cb.setAccessibleName("Notify when NPU frequency throttles due to heat.")
+            self._thermal_notify_cb.setAccessibleName(
+                "Notify when NPU frequency throttles due to heat."
+            )
             self._thermal_notify_cb.setChecked(True)
             self._thermal_notify_cb.setStyleSheet(
                 f"color: {T.TEXT_SECONDARY}; font-size: 12px; background: transparent;"
             )
-            self._thermal_notify_cb.stateChanged.connect(self._on_thermal_notify_changed)
+            self._thermal_notify_cb.stateChanged.connect(
+                self._on_thermal_notify_changed
+            )
             th_notify_row.addWidget(self._thermal_notify_cb)
             th_layout.addLayout(th_notify_row)
             layout.addWidget(th_card)
@@ -626,7 +627,9 @@ if _HAS_QT:
             dark_card.selected.connect(lambda tid: self._on_theme_selected(tid))
             themes_row.addWidget(dark_card)
 
-            light_card = _ThemeCard("pristine_light", "Pristine Light", dark=False, active=False)
+            light_card = _ThemeCard(
+                "pristine_light", "Pristine Light", dark=False, active=False
+            )
             light_card.selected.connect(lambda tid: self._on_theme_selected(tid))
             themes_row.addWidget(light_card)
             themes_row.addStretch()
@@ -724,6 +727,7 @@ if _HAS_QT:
         def _on_thermal_notify_changed(self, state: int) -> None:
             if self._sm:
                 from PyQt5.QtCore import Qt as _Qt
+
                 self._sm.set(
                     "npu.thermal_notify",
                     state == _Qt.Checked,

@@ -1,4 +1,6 @@
-## 2024-04-18 - Prevent DoS via Unbounded Exponentiation in AST Calculator
-**Vulnerability:** The CalculatorTool securely parsed math expressions using the `ast` module but mapped `ast.Pow` directly to `operator.pow`. This allowed a Denial of Service (DoS) attack where evaluating an expression like `9**9**9**9` would exhaust CPU and memory resources due to arbitrary-precision integers in Python.
-**Learning:** Even when avoiding `eval()` and using safe AST traversal, operations that scale exponentially (like power or factorial) can still act as DoS vectors if left unbounded.
-**Prevention:** Always wrap potentially expensive mathematical operations mapped in AST evaluators with explicit bounds checks. For example, replacing `operator.pow` with a custom `_safe_pow` that raises a `ValueError` if the exponent exceeds a safe threshold (e.g., 10000).
+## 2025-02-27 - [Security Enhancement: Prevent DoS via `math` evaluation in AST]
+**Vulnerability:** Extremely large numbers passed to `math.factorial`, `math.comb`, `math.perm`, or `math.pow` during `ast.parse` in `CalculatorTool` lead to CPU starvation or memory exhaustion (Denial of Service). Additionally, `ast.Attribute` resolution directly fetched attributes from the `math` module via `getattr(math, attr)`, which completely bypassed `_MATH_NAMES` safety wrappers.
+**Learning:** `eval_ast` functions must strictly sanitize function resolution paths. Allowing untrusted AST attributes to use `getattr` on real modules bypasses custom safety limits entirely. Functions that perform exponential or combinatorial scaling must have fixed bounds limits in any public/AI facing sandbox to prevent DoS.
+**Prevention:**
+1. Wrap all computationally expensive standard library functions (like `math.factorial`) in custom functions that check bounds before evaluating.
+2. Resolve `ast.Attribute` evaluations strictly against a pre-populated allow-list mapping dictionary (`_MATH_NAMES`) rather than delegating dynamically back to module scope (`getattr(module, attr)`).

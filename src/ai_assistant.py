@@ -53,14 +53,20 @@ class AIAssistant:
     """Facade for talking to a vision-capable LLM backend.
 
     Args:
-    config:
-        The application :class:`~src.config.Config` object.
-    npu_manager:
-        An optional :class:`~src.npu_manager.NPUManager`.  Only used when
-        ``backend == "npu"``.
+        config:
+            The application :class:`~src.config.Config` object.
+        npu_manager:
+            An optional :class:`~src.npu_manager.NPUManager`.  Only used when
+            ``backend == "npu"``.
     """
 
-    def __init__(self, config, npu_manager=None, registry=None, os_info=None) -> None:  # noqa: ANN001
+    def __init__(
+        self,
+        config: "Any",
+        npu_manager: "Any" = None,
+        registry: "Any" = None,
+        os_info: "Any" = None,
+    ) -> None:
         self._config = config
         self._npu_manager = npu_manager
         self._registry = registry  # ToolRegistry | None
@@ -109,23 +115,22 @@ class AIAssistant:
         to free memory.
 
         Args:
-        prompt:
-            The user's natural-language question or instruction.
-        history:
-            :class:`~src.conversation.ConversationHistory` whose past messages
-            are passed to the model for multi-turn context.
-        screenshot_jpeg:
-            JPEG bytes of the current screen (optional).
-        attachment_image_jpegs:
-            List of JPEG bytes for user-uploaded images (optional).
-        attachment_texts:
-            List of text file contents to include in the context (optional).
-        max_context_messages:
-            How many of the most recent past messages to include in the
-            request.  ``None`` includes all of them.
+            prompt:
+                The user's natural-language question or instruction.
+            history:
+                :class:`~src.conversation.ConversationHistory` whose past messages
+                are passed to the model for multi-turn context.
+            screenshot_jpeg:
+                JPEG bytes of the current screen (optional).
+            attachment_image_jpegs:
+                List of JPEG bytes for user-uploaded images (optional).
+            attachment_texts:
+                List of text file contents to include in the context (optional).
+            max_context_messages:
+                How many of the most recent past messages to include in the
+                request.  ``None`` includes all of them.
 
         Yields:
-        str
             Incremental response tokens as they arrive.
         """
         # Rate-limit check: raises RateLimitExceededError if over the limit.

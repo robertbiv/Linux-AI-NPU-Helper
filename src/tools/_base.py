@@ -60,8 +60,11 @@ class ToolResult:
             return f"[{self.tool_name}] Error: {self.error}"
         if not self.results:
             return f"[{self.tool_name}] No results found."
-        lines = [f"[{self.tool_name}] {len(self.results)} result(s)"
-                 + (" (truncated)" if self.truncated else "") + ":"]
+        lines = [
+            f"[{self.tool_name}] {len(self.results)} result(s)"
+            + (" (truncated)" if self.truncated else "")
+            + ":"
+        ]
         for r in self.results[:max_display]:
             lines.append(f"  {r}")
         if len(self.results) > max_display:
@@ -108,19 +111,19 @@ class ToolPermissions:
     3. ``requires_approval`` — tool may run, but only after the user confirms.
 
     Args:
-    allowed:
-        Whitelist of tool names the AI may call.  An empty set means *all*
-        registered tools are allowed (subject to the disallowed list).
-    disallowed:
-        Blacklist of tool names that are completely blocked.  Takes precedence
-        over ``allowed``.
-    requires_approval:
-        Tool names that need explicit user confirmation before executing.
-        The approval callback receives the tool name and the argument dict and
-        must return ``True`` to proceed.
-    approve_callback:
-        Called as ``approve_callback(tool_name, args) -> bool`` when a tool
-        in ``requires_approval`` is invoked.  Defaults to a terminal prompt.
+        allowed:
+            Whitelist of tool names the AI may call.  An empty set means *all*
+            registered tools are allowed (subject to the disallowed list).
+        disallowed:
+            Blacklist of tool names that are completely blocked.  Takes precedence
+            over ``allowed``.
+        requires_approval:
+            Tool names that need explicit user confirmation before executing.
+            The approval callback receives the tool name and the argument dict and
+            must return ``True`` to proceed.
+        approve_callback:
+            Called as ``approve_callback(tool_name, args) -> bool`` when a tool
+            in ``requires_approval`` is invoked.  Defaults to a terminal prompt.
     """
 
     def __init__(
@@ -158,7 +161,7 @@ class ToolPermissions:
         """Enforce permissions for *tool_name* with *args*.
 
         Returns:
-        ToolResult | None
+            ToolResult | None
             A ``ToolResult`` with an error message if the tool is blocked or
             the user declines.  ``None`` means the tool **may proceed**.
         """
@@ -202,8 +205,7 @@ class ToolPermissions:
         system prompt so the AI doesn't even try to call them.
         """
         return [
-            n for n in all_names
-            if not self.is_disallowed(n) and self.is_allowed(n)
+            n for n in all_names if not self.is_disallowed(n) and self.is_allowed(n)
         ]
 
 
@@ -232,8 +234,8 @@ class ToolDescriptor:
     - Create the tool instance on first use via *factory*.
     - Release the instance after use when *unload_after_use* is ``True``.
 
-    Lifecycle
-    ---------
+    ## Lifecycle
+
     .. code-block:: text
 
         UNLOADED  ──(get_instance)──►  LOADED  ──(release)──►  UNLOADED
@@ -282,10 +284,7 @@ class ToolDescriptor:
         Reads only from the descriptor fields — never touches the instance.
         """
         props = self.parameters_schema.get("properties", {})
-        params = ", ".join(
-            f"{k}: {v.get('type', 'string')}"
-            for k, v in props.items()
-        )
+        params = ", ".join(f"{k}: {v.get('type', 'string')}" for k, v in props.items())
         return f"  {self.name}({params}) — {self.description}"
 
 
@@ -300,8 +299,8 @@ class ToolRegistry:
     call the instance can optionally be released (unloaded) so it is
     garbage-collected, keeping memory usage at a minimum.
 
-    Key properties
-    --------------
+    ## Key properties
+
     - **Zero startup cost**: registering tools is free; nothing is imported
       or constructed until the first ``dispatch()`` for that tool.
     - **Selective unloading**: set ``unload_after_use=True`` per tool (or
@@ -341,17 +340,17 @@ class ToolRegistry:
         is ``True``, in which case the instance is released after every call.
 
         Args:
-        name:
-            Tool name used in ``[TOOL: name {...}]`` markers.
-        description:
-            One-line description shown to the AI in the system prompt.
-        schema:
-            JSON Schema dict for the tool's parameters.
-        factory:
-            Zero-argument callable that returns a fresh ``Tool`` instance.
-        unload_after_use:
-            Override the registry's default unload policy for this tool.
-            ``None`` → inherit the registry default.
+            name:
+                Tool name used in ``[TOOL: name {...}]`` markers.
+            description:
+                One-line description shown to the AI in the system prompt.
+            schema:
+                JSON Schema dict for the tool's parameters.
+            factory:
+                Zero-argument callable that returns a fresh ``Tool`` instance.
+            unload_after_use:
+                Override the registry's default unload policy for this tool.
+                ``None`` → inherit the registry default.
         """
         unload = self._default_unload if unload_after_use is None else unload_after_use
         self._descriptors[name] = ToolDescriptor(
@@ -465,8 +464,8 @@ class ToolRegistry:
     def dispatch(self, call_text: str) -> ToolResult | None:
         """Parse and execute a ``[TOOL: name {...}]`` call from the AI.
 
-        Lifecycle per call
-        ------------------
+        ## Lifecycle per call
+
         1. Parse *call_text* — return ``None`` if no marker found.
         2. Permission check (allow/disallow/approval) — return error result
            if blocked.  **No instance is created for blocked tools.**
@@ -476,11 +475,11 @@ class ToolRegistry:
            instance immediately so memory is reclaimed.
 
         Args:
-        call_text:
-            Text containing a ``[TOOL: name {...}]`` marker.
+            call_text:
+                Text containing a ``[TOOL: name {...}]`` marker.
 
         Returns:
-        ToolResult | None
+            ToolResult | None
             Result of the tool call, or ``None`` if no marker was found.
         """
         m = self._CALL_RE.search(call_text)
@@ -520,6 +519,7 @@ class ToolRegistry:
         # 4. Validate and sanitise AI-supplied arguments before dispatch
         try:
             from src.security import validate_tool_args
+
             args = validate_tool_args(args, schema=desc.parameters_schema)
         except (ValueError, TypeError) as exc:
             return ToolResult(

@@ -4,8 +4,8 @@
 The tool is registered in the tool registry and may be invoked by the AI
 assistant (with user approval) or called directly by the UI on every send.
 
-No-flicker technique
---------------------
+## No-flicker technique
+
 Instead of hiding the application window (which causes a visible pop and
 compositor animation), the window's opacity is set to 0 so it is transparent
 to the screenshot but still occupies its position on the compositor layer.
@@ -38,7 +38,9 @@ from src.tools._base import SearchResult, Tool, ToolResult
 logger = logging.getLogger(__name__)
 
 # Directory where captured screenshots are saved (session-scoped temp dir).
-_SCREENSHOT_DIR = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "npu-assistant-screenshots"
+_SCREENSHOT_DIR = (
+    Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "npu-assistant-screenshots"
+)
 
 
 class ScreenshotTool(Tool):
@@ -89,12 +91,12 @@ class ScreenshotTool(Tool):
     def __init__(self, hide_opacity_fn: "callable | None" = None) -> None:
         """
         Args:
-        hide_opacity_fn:
-            Optional callable ``(opacity: float) -> None`` that adjusts the
-            application window's opacity before and after capture.  When
-            provided the window is made transparent (opacity=0) during capture
-            and restored (opacity=1) afterwards.  The UI layer should supply
-            this so the tool doesn't need a direct widget reference.
+            hide_opacity_fn:
+                Optional callable ``(opacity: float) -> None`` that adjusts the
+                application window's opacity before and after capture.  When
+                provided the window is made transparent (opacity=0) during capture
+                and restored (opacity=1) afterwards.  The UI layer should supply
+                this so the tool doesn't need a direct widget reference.
         """
         self._set_opacity = hide_opacity_fn
 
@@ -104,9 +106,9 @@ class ScreenshotTool(Tool):
         """Execute the screenshot capture.
 
         Args:
-        args:
-            Dict with optional keys: ``monitor`` (int), ``jpeg_quality`` (int),
-            ``save`` (bool).
+            args:
+                Dict with optional keys: ``monitor`` (int), ``jpeg_quality`` (int),
+                ``save`` (bool).
         """
         monitor = int(args.get("monitor", 0))
         quality = int(args.get("jpeg_quality", 75))
@@ -154,13 +156,13 @@ class ScreenshotTool(Tool):
         opacity-fade technique so there is no visible flicker.
 
         Args:
-        window:
-            A ``QWidget`` (or any object with ``setWindowOpacity(float)``
-            and ``update()``).  Pass ``None`` to skip the hide/show step.
-        monitor:
-            Monitor index for ``src.screen_capture.capture``.
-        jpeg_quality:
-            JPEG compression quality 1–95.
+            window:
+                A ``QWidget`` (or any object with ``setWindowOpacity(float)``
+                and ``update()``).  Pass ``None`` to skip the hide/show step.
+            monitor:
+                Monitor index for ``src.screen_capture.capture``.
+            jpeg_quality:
+                JPEG compression quality 1–95.
         """
         from PyQt5.QtWidgets import QApplication  # noqa: PLC0415
 
@@ -172,6 +174,7 @@ class ScreenshotTool(Tool):
         _set_opacity(0.0)
         try:
             from src.screen_capture import capture  # noqa: PLC0415
+
             return capture(monitor=monitor, jpeg_quality=jpeg_quality)
         except Exception as exc:  # noqa: BLE001
             logger.warning("Screen capture failed: %s", exc)
@@ -191,6 +194,7 @@ class ScreenshotTool(Tool):
     @staticmethod
     def _capture(monitor: int, quality: int) -> bytes:
         from src.screen_capture import capture  # noqa: PLC0415
+
         return capture(monitor=monitor, jpeg_quality=quality)
 
     @staticmethod

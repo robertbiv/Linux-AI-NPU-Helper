@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Utility tools registration."""
+
 from src.tools._base import ToolRegistry
 
-def _register_utility_tools(registry: ToolRegistry, cfg: dict, global_unload: bool) -> None:
+
+def _register_utility_tools(
+    registry: ToolRegistry, cfg: dict, global_unload: bool
+) -> None:
     from src.tools.calculator import CalculatorTool
     from src.tools.hash_tool import HashTool
     from src.tools.clipboard_tool import ClipboardTool

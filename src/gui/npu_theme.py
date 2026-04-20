@@ -18,31 +18,31 @@ from __future__ import annotations
 
 # ── Colour constants ──────────────────────────────────────────────────────────
 
-BG_MAIN   = "#0d0f14"   # main window background
-BG_CARD   = "#161820"   # card / panel background
-BG_CARD2  = "#1c1e28"   # slightly elevated card (messages, code blocks)
-BG_INPUT  = "#12141c"   # text-input / code-block background
-BG_BUBBLE_USER = "#22242e"   # user chat bubble
-BG_BUBBLE_AI   = "#181a22"   # assistant chat bubble
-BG_HOVER  = "#2a2c38"   # hover state
+BG_MAIN = "#0d0f14"  # main window background
+BG_CARD = "#161820"  # card / panel background
+BG_CARD2 = "#1c1e28"  # slightly elevated card (messages, code blocks)
+BG_INPUT = "#12141c"  # text-input / code-block background
+BG_BUBBLE_USER = "#22242e"  # user chat bubble
+BG_BUBBLE_AI = "#181a22"  # assistant chat bubble
+BG_HOVER = "#2a2c38"  # hover state
 
-BORDER       = "#2a2c3a"   # card / widget border
-BORDER_GREEN = "#2a4a2a"   # green-tinted border for AI messages
+BORDER = "#2a2c3a"  # card / widget border
+BORDER_GREEN = "#2a4a2a"  # green-tinted border for AI messages
 
-GREEN       = "#39d353"   # primary accent — online / positive
-GREEN_DIM   = "#1e4a28"   # dark-green tinted background
-BLUE        = "#3b7eff"   # secondary accent — interactive
-BLUE_DIM    = "#1a2a50"   # dark-blue tinted background
-RED         = "#e05252"   # error / alert
+GREEN = "#39d353"  # primary accent — online / positive
+GREEN_DIM = "#1e4a28"  # dark-green tinted background
+BLUE = "#3b7eff"  # secondary accent — interactive
+BLUE_DIM = "#1a2a50"  # dark-blue tinted background
+RED = "#e05252"  # error / alert
 
-TEXT_PRIMARY   = "#e8eaf0"   # main readable text
-TEXT_SECONDARY = "#8b90a2"   # captions, timestamps, metadata
-TEXT_MUTED     = "#50546a"   # very dim / disabled
-TEXT_GREEN     = "#39d353"   # green accent text (model name, status)
-TEXT_BLUE      = "#7ab4ff"   # blue accent text (links, values)
-TEXT_CODE      = "#a8d8a8"   # code/terminal text (soft green)
-TEXT_CODE_ERR  = "#e07070"   # ERROR lines in code
-TEXT_CODE_INFO = "#70a0e0"   # INFO lines in code
+TEXT_PRIMARY = "#e8eaf0"  # main readable text
+TEXT_SECONDARY = "#8b90a2"  # captions, timestamps, metadata
+TEXT_MUTED = "#50546a"  # very dim / disabled
+TEXT_GREEN = "#39d353"  # green accent text (model name, status)
+TEXT_BLUE = "#7ab4ff"  # blue accent text (links, values)
+TEXT_CODE = "#a8d8a8"  # code/terminal text (soft green)
+TEXT_CODE_ERR = "#e07070"  # ERROR lines in code
+TEXT_CODE_INFO = "#70a0e0"  # INFO lines in code
 
 
 # ── Global stylesheet ─────────────────────────────────────────────────────────
@@ -86,6 +86,12 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
 
 /* ── Tabs ───────────────────────────────────────────────────────────────── */
 QTabBar::tab:focus {{
+    border: 1px solid {BLUE};
+    outline: none;
+}}
+
+/* ── Item Views (Lists and Tables) ──────────────────────────────────────── */
+QListWidget:focus, QTableWidget:focus {{
     border: 1px solid {BLUE};
     outline: none;
 }}

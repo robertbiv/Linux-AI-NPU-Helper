@@ -27,7 +27,6 @@ Model provenance
 Each entry includes download instructions, an NPU-fit score, and a flag for
 vision capability.  Call :func:`install_model_from_catalog` to install any
 catalog entry.
-
 ## Usage
 ::
 
@@ -61,6 +60,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── Model catalog ─────────────────────────────────────────────────────────────
+
 
 @dataclass
 class ModelCatalogEntry:
@@ -112,41 +112,38 @@ class ModelCatalogEntry:
         GUI dialog so the user doesn't have to leave the application.
     """
 
-    key:            str
-    name:           str
-    publisher:      str
-    description:    str
-    hf_repo:        str
-    hf_variant:     str
-    onnx_filename:  str
-    extra_files:    list[tuple[str, str | None]] = field(default_factory=list)
-    min_size_bytes: int   = 100 * 1024 * 1024   # 100 MB
-    is_vision:      bool  = False
-    npu_fit:        str   = "good"       # excellent / good / fair / not_recommended
+    key: str
+    name: str
+    publisher: str
+    description: str
+    hf_repo: str
+    hf_variant: str
+    onnx_filename: str
+    extra_files: list[tuple[str, str | None]] = field(default_factory=list)
+    min_size_bytes: int = 100 * 1024 * 1024  # 100 MB
+    is_vision: bool = False
+    npu_fit: str = "good"  # excellent / good / fair / not_recommended
     size_description: str = ""
-    license_spdx:   str   = "MIT"
-    license_url:    str   = ""
-    notes:          str   = ""
-    is_default:     bool  = False
+    license_spdx: str = "MIT"
+    license_url: str = ""
+    notes: str = ""
+    is_default: bool = False
     # ── Terms-of-service ──────────────────────────────────────────────────────
-    requires_tos:   bool  = False
+    requires_tos: bool = False
     """``True`` when the publisher requires accepting a Terms of Service before
     downloading.  The GUI will show a TOS dialog and the user must tick an
     acceptance checkbox before the download starts."""
-    tos_url:        str   = ""
+    tos_url: str = ""
     """URL to the full Terms of Service text (opened in a browser when the
     user clicks the 'Read full terms' button in the TOS dialog)."""
-    tos_summary:    str   = ""
+    tos_summary: str = ""
     """One-paragraph plain-text summary of the key TOS restrictions shown
     inside the TOS dialog so the user does not have to leave the app."""
 
     @property
     def hf_base_url(self) -> str:
         """Direct download base URL for this variant on Hugging Face."""
-        return (
-            f"https://huggingface.co/{self.hf_repo}"
-            f"/resolve/main/{self.hf_variant}"
-        )
+        return f"https://huggingface.co/{self.hf_repo}/resolve/main/{self.hf_variant}"
 
     @property
     def hf_repo_url(self) -> str:
@@ -157,9 +154,9 @@ class ModelCatalogEntry:
     def npu_fit_label(self) -> str:
         """Short display label for the static NPU fit score."""
         return {
-            "excellent":       "✅ Excellent",
-            "good":            "✅ Good",
-            "fair":            "⚠ Fair",
+            "excellent": "✅ Excellent",
+            "good": "✅ Good",
+            "fair": "⚠ Fair",
             "not_recommended": "⛔ Not recommended",
         }.get(self.npu_fit, self.npu_fit)
 
@@ -167,18 +164,18 @@ class ModelCatalogEntry:
         """Return the NPU fit adjusted for the detected host hardware.
 
         Args:
-        hw:
-            A :class:`~src.npu_benchmark.HardwareCapabilities` instance.
-            When ``None`` the hardware is probed automatically via
-            :func:`~src.npu_benchmark.probe_hardware`.
+            hw:
+                A :class:`~src.npu_benchmark.HardwareCapabilities` instance.
+                When ``None`` the hardware is probed automatically via
+                :func:`~src.npu_benchmark.probe_hardware`.
 
         Returns:
-        str
             One of ``"excellent"``, ``"good"``, ``"fair"``,
             ``"not_recommended"``.
         """
         try:
             from src.npu_benchmark import adjust_npu_fit, probe_hardware  # noqa: PLC0415
+
             capabilities = hw if hw is not None else probe_hardware()
             return adjust_npu_fit(self.npu_fit, capabilities)
         except Exception:  # noqa: BLE001
@@ -188,9 +185,9 @@ class ModelCatalogEntry:
         """Return the display label for the hardware-adjusted fit score."""
         fit = self.hardware_adjusted_npu_fit(hw)
         return {
-            "excellent":       "✅ Excellent",
-            "good":            "✅ Good",
-            "fair":            "⚠ Fair",
+            "excellent": "✅ Excellent",
+            "good": "✅ Good",
+            "fair": "⚠ Fair",
             "not_recommended": "⛔ Not recommended",
         }.get(fit, fit)
 
@@ -201,208 +198,197 @@ class ModelCatalogEntry:
 # Models are sorted by NPU fit (best first) within each category.
 
 MODEL_CATALOG: list[ModelCatalogEntry] = [
-
     # ── Vision models ─────────────────────────────────────────────────────────
-
     ModelCatalogEntry(
-        key            = "phi3-vision-128k-int4",
-        name           = "Phi-3-vision-128k-instruct (INT4)",
-        publisher      = "Microsoft",
-        description    = "Vision-capable 4.2 B model with 128 K context. "
-                         "Official AMD NPU ONNX build with INT4 quantisation. "
-                         "Accepts screenshots and attached images.",
-        hf_repo        = "microsoft/Phi-3-vision-128k-instruct-onnx",
-        hf_variant     = "cpu-int4-rtn-block-32",
-        onnx_filename  = "phi-3-v-128k-instruct-cpu-int4.onnx",
-        extra_files    = [
+        key="phi3-vision-128k-int4",
+        name="Phi-3-vision-128k-instruct (INT4)",
+        publisher="Microsoft",
+        description="Vision-capable 4.2 B model with 128 K context. "
+        "Official AMD NPU ONNX build with INT4 quantisation. "
+        "Accepts screenshots and attached images.",
+        hf_repo="microsoft/Phi-3-vision-128k-instruct-onnx",
+        hf_variant="cpu-int4-rtn-block-32",
+        onnx_filename="phi-3-v-128k-instruct-cpu-int4.onnx",
+        extra_files=[
             ("phi-3-v-128k-instruct-cpu-int4.onnx.data", None),
-            ("tokenizer.json",            None),
-            ("tokenizer_config.json",     None),
-            ("special_tokens_map.json",   None),
-            ("processor_config.json",     None),
-            ("preprocessor_config.json",  None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
+            ("special_tokens_map.json", None),
+            ("processor_config.json", None),
+            ("preprocessor_config.json", None),
         ],
-        min_size_bytes  = 500 * 1024 * 1024,   # 500 MB
-        is_vision       = True,
-        npu_fit         = "excellent",
-        size_description = "~4.2 GB",
-        license_spdx    = "MIT",
-        license_url     = "https://huggingface.co/microsoft/Phi-3-vision-128k-instruct-onnx/blob/main/LICENSE",
-        notes           = "Requires onnxruntime-genai ≥ 0.3. "
-                          "Best for screen-aware AI assistant tasks.",
-        is_default      = True,
+        min_size_bytes=500 * 1024 * 1024,  # 500 MB
+        is_vision=True,
+        npu_fit="excellent",
+        size_description="~4.2 GB",
+        license_spdx="MIT",
+        license_url="https://huggingface.co/microsoft/Phi-3-vision-128k-instruct-onnx/blob/main/LICENSE",
+        notes="Requires onnxruntime-genai ≥ 0.3. "
+        "Best for screen-aware AI assistant tasks.",
+        is_default=True,
     ),
-
     ModelCatalogEntry(
-        key            = "phi35-vision-int4",
-        name           = "Phi-3.5-vision-instruct (INT4)",
-        publisher      = "Microsoft",
-        description    = "Updated vision model with improved instruction following "
-                         "and multi-frame image support. INT4 quantised for NPU.",
-        hf_repo        = "microsoft/Phi-3.5-vision-instruct-onnx",
-        hf_variant     = "cpu-int4-rtn-block-32",
-        onnx_filename  = "phi-3.5-vision-instruct-cpu-int4.onnx",
-        extra_files    = [
+        key="phi35-vision-int4",
+        name="Phi-3.5-vision-instruct (INT4)",
+        publisher="Microsoft",
+        description="Updated vision model with improved instruction following "
+        "and multi-frame image support. INT4 quantised for NPU.",
+        hf_repo="microsoft/Phi-3.5-vision-instruct-onnx",
+        hf_variant="cpu-int4-rtn-block-32",
+        onnx_filename="phi-3.5-vision-instruct-cpu-int4.onnx",
+        extra_files=[
             ("phi-3.5-vision-instruct-cpu-int4.onnx.data", None),
-            ("tokenizer.json",            None),
-            ("tokenizer_config.json",     None),
-            ("processor_config.json",     None),
-            ("preprocessor_config.json",  None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
+            ("processor_config.json", None),
+            ("preprocessor_config.json", None),
         ],
-        min_size_bytes  = 500 * 1024 * 1024,
-        is_vision       = True,
-        npu_fit         = "excellent",
-        size_description = "~4.5 GB",
-        license_spdx    = "MIT",
-        license_url     = "https://huggingface.co/microsoft/Phi-3.5-vision-instruct-onnx/blob/main/LICENSE",
-        notes           = "Recommended upgrade from Phi-3-vision. "
-                          "Better at following complex instructions.",
+        min_size_bytes=500 * 1024 * 1024,
+        is_vision=True,
+        npu_fit="excellent",
+        size_description="~4.5 GB",
+        license_spdx="MIT",
+        license_url="https://huggingface.co/microsoft/Phi-3.5-vision-instruct-onnx/blob/main/LICENSE",
+        notes="Recommended upgrade from Phi-3-vision. "
+        "Better at following complex instructions.",
     ),
-
     ModelCatalogEntry(
-        key            = "florence2-base",
-        name           = "Florence-2-base (ONNX)",
-        publisher      = "Microsoft",
-        description    = "Tiny 0.23 B vision-language model for image captioning, "
-                         "OCR, and object detection. Very fast on NPU.",
-        hf_repo        = "onnx-community/Florence-2-base",
-        hf_variant     = "onnx",
-        onnx_filename  = "model.onnx",
-        extra_files    = [
-            ("model.onnx.data",          None),
-            ("tokenizer.json",           None),
-            ("tokenizer_config.json",    None),
+        key="florence2-base",
+        name="Florence-2-base (ONNX)",
+        publisher="Microsoft",
+        description="Tiny 0.23 B vision-language model for image captioning, "
+        "OCR, and object detection. Very fast on NPU.",
+        hf_repo="onnx-community/Florence-2-base",
+        hf_variant="onnx",
+        onnx_filename="model.onnx",
+        extra_files=[
+            ("model.onnx.data", None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
         ],
-        min_size_bytes  = 50 * 1024 * 1024,
-        is_vision       = True,
-        npu_fit         = "excellent",
-        size_description = "~0.6 GB",
-        license_spdx    = "MIT",
-        license_url     = "https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE",
-        notes           = "Best for OCR and image captioning. "
-                          "Limited conversational ability.",
+        min_size_bytes=50 * 1024 * 1024,
+        is_vision=True,
+        npu_fit="excellent",
+        size_description="~0.6 GB",
+        license_spdx="MIT",
+        license_url="https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE",
+        notes="Best for OCR and image captioning. Limited conversational ability.",
     ),
-
     ModelCatalogEntry(
-        key            = "moondream2-onnx",
-        name           = "Moondream 2 (ONNX)",
-        publisher      = "vikhyatk",
-        description    = "Tiny 1.86 B vision model. Excellent for answering "
-                         "questions about images and screenshots.",
-        hf_repo        = "vikhyatk/moondream2",
-        hf_variant     = "onnx",
-        onnx_filename  = "moondream2.onnx",
-        extra_files    = [
-            ("tokenizer.json",          None),
-            ("tokenizer_config.json",   None),
+        key="moondream2-onnx",
+        name="Moondream 2 (ONNX)",
+        publisher="vikhyatk",
+        description="Tiny 1.86 B vision model. Excellent for answering "
+        "questions about images and screenshots.",
+        hf_repo="vikhyatk/moondream2",
+        hf_variant="onnx",
+        onnx_filename="moondream2.onnx",
+        extra_files=[
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
         ],
-        min_size_bytes  = 100 * 1024 * 1024,
-        is_vision       = True,
-        npu_fit         = "good",
-        size_description = "~1.8 GB",
-        license_spdx    = "Apache-2.0",
-        license_url     = "https://huggingface.co/vikhyatk/moondream2/blob/main/LICENSE",
-        notes           = "Great balance of size and vision quality.",
+        min_size_bytes=100 * 1024 * 1024,
+        is_vision=True,
+        npu_fit="good",
+        size_description="~1.8 GB",
+        license_spdx="Apache-2.0",
+        license_url="https://huggingface.co/vikhyatk/moondream2/blob/main/LICENSE",
+        notes="Great balance of size and vision quality.",
     ),
-
     # ── Text-only models (NPU-optimised) ──────────────────────────────────────
-
     ModelCatalogEntry(
-        key            = "phi3-mini-4k-int4",
-        name           = "Phi-3-mini-4k-instruct (INT4)",
-        publisher      = "Microsoft",
-        description    = "3.8 B text model with 4 K context. No vision, "
-                         "but very fast and capable for command + code tasks.",
-        hf_repo        = "microsoft/Phi-3-mini-4k-instruct-onnx",
-        hf_variant     = "cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
-        onnx_filename  = "phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx",
-        extra_files    = [
+        key="phi3-mini-4k-int4",
+        name="Phi-3-mini-4k-instruct (INT4)",
+        publisher="Microsoft",
+        description="3.8 B text model with 4 K context. No vision, "
+        "but very fast and capable for command + code tasks.",
+        hf_repo="microsoft/Phi-3-mini-4k-instruct-onnx",
+        hf_variant="cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+        onnx_filename="phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx",
+        extra_files=[
             ("phi3-mini-4k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx.data", None),
-            ("tokenizer.json",            None),
-            ("tokenizer_config.json",     None),
-            ("special_tokens_map.json",   None),
-            ("added_tokens.json",         None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
+            ("special_tokens_map.json", None),
+            ("added_tokens.json", None),
         ],
-        min_size_bytes  = 500 * 1024 * 1024,
-        is_vision       = False,
-        npu_fit         = "excellent",
-        size_description = "~2.3 GB",
-        license_spdx    = "MIT",
-        license_url     = "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx/blob/main/LICENSE",
-        notes           = "Fastest option. Use when vision is not needed.",
+        min_size_bytes=500 * 1024 * 1024,
+        is_vision=False,
+        npu_fit="excellent",
+        size_description="~2.3 GB",
+        license_spdx="MIT",
+        license_url="https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-onnx/blob/main/LICENSE",
+        notes="Fastest option. Use when vision is not needed.",
     ),
-
     ModelCatalogEntry(
-        key            = "phi35-mini-int4",
-        name           = "Phi-3.5-mini-instruct (INT4)",
-        publisher      = "Microsoft",
-        description    = "3.8 B updated text model with 128 K context and "
-                         "stronger reasoning than Phi-3-mini.",
-        hf_repo        = "microsoft/Phi-3.5-mini-instruct-onnx",
-        hf_variant     = "cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
-        onnx_filename  = "phi-3.5-mini-instruct-cpu-int4.onnx",
-        extra_files    = [
+        key="phi35-mini-int4",
+        name="Phi-3.5-mini-instruct (INT4)",
+        publisher="Microsoft",
+        description="3.8 B updated text model with 128 K context and "
+        "stronger reasoning than Phi-3-mini.",
+        hf_repo="microsoft/Phi-3.5-mini-instruct-onnx",
+        hf_variant="cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+        onnx_filename="phi-3.5-mini-instruct-cpu-int4.onnx",
+        extra_files=[
             ("phi-3.5-mini-instruct-cpu-int4.onnx.data", None),
-            ("tokenizer.json",          None),
-            ("tokenizer_config.json",   None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
         ],
-        min_size_bytes  = 500 * 1024 * 1024,
-        is_vision       = False,
-        npu_fit         = "excellent",
-        size_description = "~2.3 GB",
-        license_spdx    = "MIT",
-        license_url     = "https://huggingface.co/microsoft/Phi-3.5-mini-instruct-onnx/blob/main/LICENSE",
-        notes           = "Recommended text-only upgrade from Phi-3-mini.",
+        min_size_bytes=500 * 1024 * 1024,
+        is_vision=False,
+        npu_fit="excellent",
+        size_description="~2.3 GB",
+        license_spdx="MIT",
+        license_url="https://huggingface.co/microsoft/Phi-3.5-mini-instruct-onnx/blob/main/LICENSE",
+        notes="Recommended text-only upgrade from Phi-3-mini.",
     ),
-
     ModelCatalogEntry(
-        key            = "qwen25-15b-int4",
-        name           = "Qwen2.5-1.5B-Instruct (INT4)",
-        publisher      = "Alibaba Cloud",
-        description    = "1.5 B multilingual text model with strong code and "
-                         "reasoning. Very compact, runs instantly on NPU.",
-        hf_repo        = "Qwen/Qwen2.5-1.5B-Instruct-ONNX",
-        hf_variant     = "cpu-int4-rtn-block-32",
-        onnx_filename  = "model.onnx",
-        extra_files    = [
-            ("model.onnx.data",        None),
-            ("tokenizer.json",         None),
-            ("tokenizer_config.json",  None),
+        key="qwen25-15b-int4",
+        name="Qwen2.5-1.5B-Instruct (INT4)",
+        publisher="Alibaba Cloud",
+        description="1.5 B multilingual text model with strong code and "
+        "reasoning. Very compact, runs instantly on NPU.",
+        hf_repo="Qwen/Qwen2.5-1.5B-Instruct-ONNX",
+        hf_variant="cpu-int4-rtn-block-32",
+        onnx_filename="model.onnx",
+        extra_files=[
+            ("model.onnx.data", None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
         ],
-        min_size_bytes  = 50 * 1024 * 1024,
-        is_vision       = False,
-        npu_fit         = "excellent",
-        size_description = "~1.0 GB",
-        license_spdx    = "Apache-2.0",
-        license_url     = "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/blob/main/LICENSE",
-        notes           = "Best choice for low-memory systems.",
+        min_size_bytes=50 * 1024 * 1024,
+        is_vision=False,
+        npu_fit="excellent",
+        size_description="~1.0 GB",
+        license_spdx="Apache-2.0",
+        license_url="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/blob/main/LICENSE",
+        notes="Best choice for low-memory systems.",
     ),
-
     ModelCatalogEntry(
-        key            = "gemma2-2b-int4",
-        name           = "Gemma 2 2B Instruct (INT4)",
-        publisher      = "Google",
-        description    = "2 B text model from Google. Strong at instruction "
-                         "following and summarisation.",
-        hf_repo        = "google/gemma-2-2b-it-onnx",
-        hf_variant     = "cpu-int4",
-        onnx_filename  = "model.onnx",
-        extra_files    = [
-            ("model.onnx.data",        None),
-            ("tokenizer.json",         None),
-            ("tokenizer_config.json",  None),
+        key="gemma2-2b-int4",
+        name="Gemma 2 2B Instruct (INT4)",
+        publisher="Google",
+        description="2 B text model from Google. Strong at instruction "
+        "following and summarisation.",
+        hf_repo="google/gemma-2-2b-it-onnx",
+        hf_variant="cpu-int4",
+        onnx_filename="model.onnx",
+        extra_files=[
+            ("model.onnx.data", None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
         ],
-        min_size_bytes  = 100 * 1024 * 1024,
-        is_vision       = False,
-        npu_fit         = "good",
-        size_description = "~1.4 GB",
-        license_spdx    = "Gemma",
-        license_url     = "https://ai.google.dev/gemma/terms",
-        notes           = "Requires accepting Google's Gemma Terms of Use "
-                          "on Hugging Face before downloading.",
-        requires_tos    = True,
-        tos_url         = "https://ai.google.dev/gemma/terms",
-        tos_summary     = (
+        min_size_bytes=100 * 1024 * 1024,
+        is_vision=False,
+        npu_fit="good",
+        size_description="~1.4 GB",
+        license_spdx="Gemma",
+        license_url="https://ai.google.dev/gemma/terms",
+        notes="Requires accepting Google's Gemma Terms of Use "
+        "on Hugging Face before downloading.",
+        requires_tos=True,
+        tos_url="https://ai.google.dev/gemma/terms",
+        tos_summary=(
             "Gemma models are subject to Google's Gemma Terms of Use. "
             "You may use this model for research and commercial applications "
             "under those terms. You must not use the model to violate "
@@ -410,38 +396,36 @@ MODEL_CATALOG: list[ModelCatalogEntry] = [
             "AI-generated nature. Redistribution requires preserving this notice."
         ),
     ),
-
     # ── Gemma Vision models (Google) ──────────────────────────────────────────
-
     ModelCatalogEntry(
-        key            = "paligemma-3b-int4",
-        name           = "PaliGemma 3B (INT4, vision)",
-        publisher      = "Google",
-        description    = "3 B vision-language model from Google. Understands "
-                         "images and text together. Excellent for screenshot "
-                         "Q&A, OCR, and image captioning on NPU.",
-        hf_repo        = "onnx-community/paligemma-3b-pt-224-onnx",
-        hf_variant     = "int4",
-        onnx_filename  = "model.onnx",
-        extra_files    = [
-            ("model.onnx.data",             None),
-            ("tokenizer.json",              None),
-            ("tokenizer_config.json",       None),
-            ("special_tokens_map.json",     None),
-            ("processor_config.json",       None),
-            ("preprocessor_config.json",    None),
+        key="paligemma-3b-int4",
+        name="PaliGemma 3B (INT4, vision)",
+        publisher="Google",
+        description="3 B vision-language model from Google. Understands "
+        "images and text together. Excellent for screenshot "
+        "Q&A, OCR, and image captioning on NPU.",
+        hf_repo="onnx-community/paligemma-3b-pt-224-onnx",
+        hf_variant="int4",
+        onnx_filename="model.onnx",
+        extra_files=[
+            ("model.onnx.data", None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
+            ("special_tokens_map.json", None),
+            ("processor_config.json", None),
+            ("preprocessor_config.json", None),
         ],
-        min_size_bytes  = 100 * 1024 * 1024,
-        is_vision       = True,
-        npu_fit         = "excellent",
-        size_description = "~1.7 GB",
-        license_spdx    = "Gemma",
-        license_url     = "https://ai.google.dev/gemma/terms",
-        notes           = "Requires accepting Google's Gemma Terms of Use. "
-                          "Optimised for 224×224 image understanding tasks.",
-        requires_tos    = True,
-        tos_url         = "https://ai.google.dev/gemma/terms",
-        tos_summary     = (
+        min_size_bytes=100 * 1024 * 1024,
+        is_vision=True,
+        npu_fit="excellent",
+        size_description="~1.7 GB",
+        license_spdx="Gemma",
+        license_url="https://ai.google.dev/gemma/terms",
+        notes="Requires accepting Google's Gemma Terms of Use. "
+        "Optimised for 224×224 image understanding tasks.",
+        requires_tos=True,
+        tos_url="https://ai.google.dev/gemma/terms",
+        tos_summary=(
             "PaliGemma is a Gemma model subject to Google's Gemma Terms of Use. "
             "You may use it for research and qualifying commercial applications. "
             "You must not use it to generate harmful, deceptive, or illegal "
@@ -450,36 +434,35 @@ MODEL_CATALOG: list[ModelCatalogEntry] = [
             "applications built on it."
         ),
     ),
-
     ModelCatalogEntry(
-        key            = "gemma3-4b-vision-int4",
-        name           = "Gemma 3 4B-IT (INT4, vision)",
-        publisher      = "Google",
-        description    = "4 B multimodal model from Google with strong vision "
-                         "and language capabilities. Handles screenshots, "
-                         "diagrams, and code understanding on NPU.",
-        hf_repo        = "onnx-community/gemma-3-4b-it-ONNX",
-        hf_variant     = "onnx/int4",
-        onnx_filename  = "model.onnx",
-        extra_files    = [
-            ("model.onnx.data",             None),
-            ("tokenizer.json",              None),
-            ("tokenizer_config.json",       None),
-            ("special_tokens_map.json",     None),
-            ("processor_config.json",       None),
-            ("preprocessor_config.json",    None),
+        key="gemma3-4b-vision-int4",
+        name="Gemma 3 4B-IT (INT4, vision)",
+        publisher="Google",
+        description="4 B multimodal model from Google with strong vision "
+        "and language capabilities. Handles screenshots, "
+        "diagrams, and code understanding on NPU.",
+        hf_repo="onnx-community/gemma-3-4b-it-ONNX",
+        hf_variant="onnx/int4",
+        onnx_filename="model.onnx",
+        extra_files=[
+            ("model.onnx.data", None),
+            ("tokenizer.json", None),
+            ("tokenizer_config.json", None),
+            ("special_tokens_map.json", None),
+            ("processor_config.json", None),
+            ("preprocessor_config.json", None),
         ],
-        min_size_bytes  = 200 * 1024 * 1024,
-        is_vision       = True,
-        npu_fit         = "good",
-        size_description = "~2.5 GB",
-        license_spdx    = "Gemma",
-        license_url     = "https://ai.google.dev/gemma/terms",
-        notes           = "Requires accepting Google's Gemma Terms of Use. "
-                          "Best Gemma vision model for general assistant tasks.",
-        requires_tos    = True,
-        tos_url         = "https://ai.google.dev/gemma/terms",
-        tos_summary     = (
+        min_size_bytes=200 * 1024 * 1024,
+        is_vision=True,
+        npu_fit="good",
+        size_description="~2.5 GB",
+        license_spdx="Gemma",
+        license_url="https://ai.google.dev/gemma/terms",
+        notes="Requires accepting Google's Gemma Terms of Use. "
+        "Best Gemma vision model for general assistant tasks.",
+        requires_tos=True,
+        tos_url="https://ai.google.dev/gemma/terms",
+        tos_summary=(
             "Gemma 3 is subject to Google's Gemma Terms of Use. "
             "You may use it for research and qualifying commercial applications. "
             "You must not use it to generate harmful, deceptive, or illegal "
@@ -491,6 +474,7 @@ MODEL_CATALOG: list[ModelCatalogEntry] = [
 ]
 
 # ── Convenience accessors ─────────────────────────────────────────────────────
+
 
 def get_default_entry() -> ModelCatalogEntry:
     """Return the catalog entry marked ``is_default=True``."""
@@ -545,6 +529,7 @@ def install_dir_for(entry: ModelCatalogEntry) -> Path:
 
 # ── NPUModelInstaller ─────────────────────────────────────────────────────────
 
+
 class InstallError(Exception):
     """Raised when the model cannot be downloaded or verified."""
 
@@ -552,21 +537,21 @@ class InstallError(Exception):
 class NPUModelInstaller:
     """Download and manage a single NPU model (default or catalog entry).
 
-    Args:
-    install_dir:
-        Override the install directory.  Defaults to
-        ``MODELS_ROOT / entry.key`` for the given *entry*.
-    entry:
-        Catalog entry to install.  Defaults to :func:`get_default_entry`
-        (Phi-3-vision-128k-instruct).
+        Args:
+            install_dir:
+                Override the install directory.  Defaults to
+                ``MODELS_ROOT / entry.key`` for the given *entry*.
+            entry:
+                Catalog entry to install.  Defaults to :func:`get_default_entry`
+                (Phi-3-vision-128k-instruct).
 
     Example:
     ::
 
-        installer = NPUModelInstaller()          # default vision model
-        if not installer.is_installed():
-            installer.install(progress_callback=print)
-        path = installer.model_path()
+                installer = NPUModelInstaller()          # default vision model
+                if not installer.is_installed():
+                installer.install(progress_callback=print)
+                path = installer.model_path()
     """
 
     def __init__(
@@ -611,7 +596,9 @@ class NPUModelInstaller:
             logger.warning(
                 "ONNX file %s exists but is too small (%d bytes ≤ %d); "
                 "treating as incomplete.",
-                onnx.name, size, self._entry.min_size_bytes,
+                onnx.name,
+                size,
+                self._entry.min_size_bytes,
             )
             return False
         return True
@@ -626,21 +613,19 @@ class NPUModelInstaller:
         """Download and install the model.
 
         Args:
-        progress_callback:
-            Optional callable receiving human-readable progress strings.
-        skip_verify:
-            Skip SHA-256 verification (not recommended).
-        allow_external:
-            Allow downloads from the internet.  When ``False`` and the model is
-            not installed, :class:`InstallError` is raised with manual-install
-            instructions.
+            progress_callback:
+                Optional callable receiving human-readable progress strings.
+            skip_verify:
+                Skip SHA-256 verification (not recommended).
+            allow_external:
+                Allow downloads from the internet.  When ``False`` and the model is
+                not installed, :class:`InstallError` is raised with manual-install
+                instructions.
 
         Returns:
-        Path
             Path to the primary ONNX file.
 
         Raises:
-        InstallError
             Download or verification failed.
         """
         if self.is_installed():
@@ -667,7 +652,10 @@ class NPUModelInstaller:
             f"Installing {self._entry.name} "
             f"({self._entry.size_description}) to {self._dir} …",
         )
-        _cb(progress_callback, "This may take several minutes depending on your connection.")
+        _cb(
+            progress_callback,
+            "This may take several minutes depending on your connection.",
+        )
 
         all_files = [
             (self._entry.onnx_filename, None),
@@ -675,7 +663,7 @@ class NPUModelInstaller:
         ]
 
         for filename, expected_sha256 in all_files:
-            url  = f"{self._entry.hf_base_url}/{filename}"
+            url = f"{self._entry.hf_base_url}/{filename}"
             dest = self._dir / filename
             if dest.exists():
                 _cb(progress_callback, f"  Skipping {filename} (already present)")
@@ -702,7 +690,9 @@ class NPUModelInstaller:
                 "The download may have been interrupted. Please retry."
             )
 
-        _cb(progress_callback, f"✅ {self._entry.name} installed at {self.model_path()}")
+        _cb(
+            progress_callback, f"✅ {self._entry.name} installed at {self.model_path()}"
+        )
         return self.model_path()
 
     def uninstall(self) -> None:
@@ -720,27 +710,27 @@ class NPUModelInstaller:
         ``install_dir``, ``onnx_file``, ``is_installed``, ``size_bytes``,
         ``size_gb``, ``is_default``.
         """
-        onnx  = self.model_path()
-        size  = onnx.stat().st_size if onnx.exists() else 0
+        onnx = self.model_path()
+        size = onnx.stat().st_size if onnx.exists() else 0
         return {
-            "key":              self._entry.key,
-            "name":             self._entry.name,
-            "publisher":        self._entry.publisher,
-            "description":      self._entry.description,
-            "is_vision":        self._entry.is_vision,
-            "npu_fit":          self._entry.npu_fit,
-            "npu_fit_label":    self._entry.npu_fit_label,
+            "key": self._entry.key,
+            "name": self._entry.name,
+            "publisher": self._entry.publisher,
+            "description": self._entry.description,
+            "is_vision": self._entry.is_vision,
+            "npu_fit": self._entry.npu_fit,
+            "npu_fit_label": self._entry.npu_fit_label,
             "size_description": self._entry.size_description,
-            "license_spdx":     self._entry.license_spdx,
-            "license_url":      self._entry.license_url,
-            "hf_repo_url":      self._entry.hf_repo_url,
-            "notes":            self._entry.notes,
-            "install_dir":      str(self._dir),
-            "onnx_file":        str(onnx),
-            "is_installed":     self.is_installed(),
-            "size_bytes":       size,
-            "size_gb":          round(size / (1024 ** 3), 2) if size else 0.0,
-            "is_default":       self._entry.is_default,
+            "license_spdx": self._entry.license_spdx,
+            "license_url": self._entry.license_url,
+            "hf_repo_url": self._entry.hf_repo_url,
+            "notes": self._entry.notes,
+            "install_dir": str(self._dir),
+            "onnx_file": str(onnx),
+            "is_installed": self.is_installed(),
+            "size_bytes": size,
+            "size_gb": round(size / (1024**3), 2) if size else 0.0,
+            "is_default": self._entry.is_default,
         }
 
     # ── Internals ─────────────────────────────────────────────────────────────
@@ -768,15 +758,13 @@ class NPUModelInstaller:
 
         tmp_path: Path | None = None
         try:
-            fd, tmp_str = tempfile.mkstemp(
-                dir=dest.parent, prefix=f".{dest.name}.tmp."
-            )
+            fd, tmp_str = tempfile.mkstemp(dir=dest.parent, prefix=f".{dest.name}.tmp.")
             tmp_path = Path(tmp_str)
 
             with os.fdopen(fd, "wb") as fh:
                 with requests.get(url, stream=True, timeout=300, verify=True) as resp:
                     resp.raise_for_status()
-                    total      = int(resp.headers.get("content-length", 0))
+                    total = int(resp.headers.get("content-length", 0))
                     downloaded = 0
                     for chunk in resp.iter_content(chunk_size=1024 * 1024):
                         if chunk:
@@ -784,11 +772,11 @@ class NPUModelInstaller:
                             downloaded += len(chunk)
                             if total and progress_callback:
                                 pct = int(downloaded * 100 / total)
-                                mb  = downloaded / (1024 * 1024)
+                                mb = downloaded / (1024 * 1024)
                                 _cb(
                                     progress_callback,
                                     f"    {dest.name}: "
-                                    f"{mb:.0f} MB / {total/(1024*1024):.0f} MB "
+                                    f"{mb:.0f} MB / {total / (1024 * 1024):.0f} MB "
                                     f"({pct}%)",
                                 )
 
@@ -820,6 +808,7 @@ class NPUModelInstaller:
 
 # ── Catalog installer ─────────────────────────────────────────────────────────
 
+
 def install_model_from_catalog(
     entry: ModelCatalogEntry,
     *,
@@ -830,21 +819,19 @@ def install_model_from_catalog(
     """Install a model from the catalog and return its ONNX path.
 
     Args:
-    entry:
-        A :class:`ModelCatalogEntry` from :data:`MODEL_CATALOG`.
-    install_dir:
-        Override the default install location.
-    progress_callback:
-        Optional callable receiving progress strings.
-    allow_external:
-        Allow downloading from the internet.
+        entry:
+            A :class:`ModelCatalogEntry` from :data:`MODEL_CATALOG`.
+        install_dir:
+            Override the default install location.
+        progress_callback:
+            Optional callable receiving progress strings.
+        allow_external:
+            Allow downloading from the internet.
 
     Returns:
-    Path
         Path to the primary ONNX file.
 
     Raises:
-    InstallError
         Download or verification failed.
     """
     installer = NPUModelInstaller(install_dir=install_dir, entry=entry)
@@ -855,6 +842,7 @@ def install_model_from_catalog(
 
 
 # ── Module-level helpers ──────────────────────────────────────────────────────
+
 
 def _cb(callback: Callable[[str], None] | None, message: str) -> None:
     """Invoke *callback* if not None; always log at DEBUG level."""
@@ -877,15 +865,15 @@ def ensure_default_model(
     fall back to the Ollama/OpenAI backend gracefully.
 
     Args:
-    install_dir:
-        Override the default install location.
-    progress_callback:
-        Optional callable receiving progress strings.
-    allow_external:
-        Whether to allow downloading from the internet.
+        install_dir:
+            Override the default install location.
+        progress_callback:
+            Optional callable receiving progress strings.
+        allow_external:
+            Whether to allow downloading from the internet.
 
     Returns:
-    Path | None
+        Path | None
         Path to the ONNX file, or ``None`` if installation failed.
     """
     try:

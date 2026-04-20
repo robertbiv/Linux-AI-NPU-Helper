@@ -38,13 +38,11 @@ class DiffTool(Tool):
             lines_a = text_a.splitlines(keepends=True)
             lines_b = text_b.splitlines(keepends=True)
 
-            diff = list(difflib.unified_diff(
-                lines_a,
-                lines_b,
-                fromfile="original",
-                tofile="modified",
-                n=3
-            ))
+            diff = list(
+                difflib.unified_diff(
+                    lines_a, lines_b, fromfile="original", tofile="modified", n=3
+                )
+            )
 
             if not diff:
                 snippet = "Texts are identical."

@@ -14,8 +14,8 @@
 ``network``     Active network interfaces and their IP addresses.
 ``all``         A concise summary covering every topic above.
 
-Data sources (in priority order)
----------------------------------
+## Data sources (in priority order)
+
 - ``/proc/*`` and ``/sys/*`` — direct kernel interfaces, fastest and most
   accurate.  No subprocess, no extra packages.
 - Command-line tools (``upower``, ``lspci``, ``lscpu``, ``ip``) — used when
@@ -98,11 +98,15 @@ def _query_battery() -> str:
                 # Fetch upower dump lazily upon finding the first battery
                 if upower_devices is None:
                     upower_dump = run_command(["upower", "--dump"])
-                    upower_devices = upower_dump.split("Device: ") if upower_dump else []
+                    upower_devices = (
+                        upower_dump.split("Device: ") if upower_dump else []
+                    )
 
                 name = ps_dir.name
                 capacity = read_sys_file(f"{ps_dir.path}/capacity")
-                status = read_sys_file(f"{ps_dir.path}/status")  # Charging / Discharging / Full
+                status = read_sys_file(
+                    f"{ps_dir.path}/status"
+                )  # Charging / Discharging / Full
                 technology = read_sys_file(f"{ps_dir.path}/technology")
 
                 line = f"{name}: "
@@ -159,9 +163,9 @@ def _query_battery_health() -> str:
                 full = read_sys_file(f"{ps_dir.path}/charge_full") or read_sys_file(
                     f"{ps_dir.path}/energy_full"
                 )
-                design = read_sys_file(f"{ps_dir.path}/charge_full_design") or read_sys_file(
-                    f"{ps_dir.path}/energy_full_design"
-                )
+                design = read_sys_file(
+                    f"{ps_dir.path}/charge_full_design"
+                ) or read_sys_file(f"{ps_dir.path}/energy_full_design")
                 cycle_count = read_sys_file(f"{ps_dir.path}/cycle_count")
 
                 if full and design:
