@@ -378,12 +378,11 @@ def mask_secret(value: str) -> str:
         Only the first two and last two characters are kept; everything in between
         is replaced with ``***``.  Values shorter than 8 characters are fully
         masked.
-    ## Examples
-
-        >>> mask_secret("sk-abc123xyz")
-        'sk***yz'
-        >>> mask_secret("short")
-        '***'
+    Examples:
+    >>> mask_secret("sk-abc123xyz")
+    'sk***yz'
+    >>> mask_secret("short")
+    '***'
     """
     if not value or len(value) < _MIN_SECRET_LEN:
         return _MASK

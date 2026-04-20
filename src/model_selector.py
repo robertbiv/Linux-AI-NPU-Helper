@@ -428,6 +428,8 @@ class ModelSelector:
         Returns:
             Catalog entries rated ``"excellent"`` or ``"good"``.
 
+        Example:
+        ::
 
             for entry in ModelSelector.get_npu_suggestions():
             print(entry.name, entry.npu_fit_label, "vision=" + str(entry.is_vision))
@@ -443,6 +445,9 @@ class ModelSelector:
         Returns:
             Vision-capable catalog entries sorted by NPU fit.
 
+        Example:
+
+        ::
 
             for entry in ModelSelector.get_vision_model_suggestions():
             print(entry.name, entry.size_description)

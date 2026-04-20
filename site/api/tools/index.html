@@ -2,116 +2,116 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-
+    
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-
+      
         <meta name="description" content="A privacy-first AI assistant for Linux that runs locally on the AMD Ryzen AI NPU. Zero cloud, zero telemetry — all inference stays on your machine.">
-
-
+      
+      
         <meta name="author" content="robertbiv">
-
-
+      
+      
         <link rel="canonical" href="https://robertbiv.github.io/Linux-AI-NPU-Assistant/api/tools/">
-
-
+      
+      
         <link rel="prev" href="../shell_detector/">
-
-
+      
+      
         <link rel="next" href="../npu_manager/">
-
-
-
-
-
+      
+      
+        
+      
+      
       <link rel="icon" href="../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
-
-
-
+    
+    
+      
         <title>Tools - Linux AI NPU Assistant</title>
-
-
-
+      
+    
+    
       <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
-
-
+      
+        
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
 
 
-
-
-
-
-
-
-
-
-
-
+    
+    
+      
+    
+    
+      
+        
+        
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-
-
-
+      
+    
+    
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
-
+    
       <link rel="stylesheet" href="../../stylesheets/extra.css">
-
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
 
-
-
-
-
+    
+    
   </head>
-
-
-
-
-
-
-
-
-
+  
+  
+    
+    
+      
+    
+    
+    
+    
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
-
-
+  
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
-
-
+      
+        
         <a href="#tools" class="md-skip">
           Skip to content
         </a>
-
+      
     </div>
     <div data-md-component="announce">
-
+      
     </div>
-
+    
       <div data-md-color-scheme="default" data-md-component="outdated" hidden>
-
+        
       </div>
+    
+    
+      
 
-
-
-
-
+  
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="Linux AI NPU Assistant" class="md-header__button md-logo" aria-label="Linux AI NPU Assistant" data-md-component="logo">
-
-
+      
+  
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h12v1h3v2h-3v2h3v2h-3v2h3v2h-3v2h3v2h-3v1H6v-1H3v-2h3v-2H3v-2h3v-2H3V9h3V7H3V5h3zm5 11v3h1v-3zm2 0v3h1v-3zm2 0v3h1v-3z"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-
+      
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
@@ -123,49 +123,49 @@
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
-
+            
               Tools
-
+            
           </span>
         </div>
       </div>
     </div>
-
-
+    
+      
         <form class="md-header__option" data-md-component="palette">
-
-
-
-
+  
+    
+    
+    
     <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
-
+    
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
       </label>
-
-
-
-
-
+    
+  
+    
+    
+    
     <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
-
+    
       <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
       </label>
-
-
+    
+  
 </form>
-
-
-
+      
+    
+    
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-
-
-
-
-
+    
+    
+    
+      
+      
         <label class="md-header__button md-icon" for="__search">
-
+          
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         </label>
         <div class="md-search" data-md-component="search" role="dialog">
@@ -174,21 +174,21 @@
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-
+        
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-
+        
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
-
+        
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-
+          
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
-
+      
         <div class="md-search__suggest" data-md-component="search-suggest"></div>
-
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
@@ -202,13 +202,13 @@
     </div>
   </div>
 </div>
-
-
-
+      
+    
+    
       <div class="md-header__source">
         <a href="https://github.com/robertbiv/Linux-AI-NPU-Assistant" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
-
+    
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
@@ -216,117 +216,117 @@
   </div>
 </a>
       </div>
-
+    
   </nav>
-
-
-
+  
+    
+      
 <nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
-
-
-
-
-
-
+      
+        
+  
+  
+  
+  
     <li class="md-tabs__item">
       <a href="../.." class="md-tabs__link">
-
-
-
-
-
+        
+  
+  
+    
+  
   Home
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+      
+        
+  
+  
+  
+  
+    
+    
       <li class="md-tabs__item">
         <a href="../../guides/documentation-standards/" class="md-tabs__link">
-
-
-
+          
+  
+  
   User Guides
 
         </a>
       </li>
+    
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
       <li class="md-tabs__item md-tabs__item--active">
         <a href="../config/" class="md-tabs__link">
-
-
-
+          
+  
+  
   API Reference
 
         </a>
       </li>
+    
+  
 
-
-
-
+      
     </ul>
   </div>
 </nav>
-
-
+    
+  
 </header>
-
+    
     <div class="md-container" data-md-component="container">
-
-
-
-
+      
+      
+        
+      
       <main class="md-main" data-md-component="main">
         <div class="md-main__inner md-grid">
-
-
-
+          
+            
+              
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
+                    
 
 
-
-
+  
 
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="Linux AI NPU Assistant" class="md-nav__button md-logo" aria-label="Linux AI NPU Assistant" data-md-component="logo">
-
-
+      
+  
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 4h12v1h3v2h-3v2h3v2h-3v2h3v2h-3v2h3v2h-3v1H6v-1H3v-2h3v-2H3v-2h3v-2H3V9h3V7H3V5h3zm5 11v3h1v-3zm2 0v3h1v-3zm2 0v3h1v-3z"/></svg>
 
     </a>
     Linux AI NPU Assistant
   </label>
-
+  
     <div class="md-nav__source">
       <a href="https://github.com/robertbiv/Linux-AI-NPU-Assistant" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
-
+    
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
@@ -334,2448 +334,2448 @@
   </div>
 </a>
     </div>
-
+  
   <ul class="md-nav__list" data-md-scrollfix>
-
-
-
-
-
-
-
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../.." class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Home
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
     <li class="md-nav__item md-nav__item--nested">
-
-
-
-
-
+      
+        
+        
+          
+        
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
-
-
+        
+          
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-
-
-
+            
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     User Guides
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
             <span class="md-nav__icon md-icon"></span>
           </label>
-
+        
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
-
-
+            
+  
     User Guides
-
+  
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-
-
-
-
-
-
-
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../guides/documentation-standards/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Documentation Standards and Formatting
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../guides/building-flatpak/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Building the Flatpak locally
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../guides/model-guide/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     AI Model Guide
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../guides/settings-guide/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Settings Guide
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
+              
+            
           </ul>
         </nav>
-
+      
     </li>
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-
-
-
+      
+        
+        
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
-
-
+        
+          
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
-
-
-
+            
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     API Reference
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
             <span class="md-nav__icon md-icon"></span>
           </label>
-
+        
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
-
-
+            
+  
     API Reference
-
+  
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-
-
-
-
-
-
-
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../config/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Configuration
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../ai_assistant/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     AI Assistant
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../security/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Security
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../settings/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Settings Manager
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../model_selector/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Model Selector
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../conversation/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Conversation History
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../os_detector/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     OS Detector
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../shell_detector/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Shell Detector
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
-
+      
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-
-
-
-
-
+      
+      
+        
+      
+      
         <label class="md-nav__link md-nav__link--active" for="__toc">
-
-
-
+          
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Tools
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
           <span class="md-nav__icon md-icon"></span>
         </label>
-
+      
       <a href="./" class="md-nav__link md-nav__link--active">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     Tools
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
-
-
+      
+        
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-
-
-
-
-
-
+  
+  
+  
+    
+  
+  
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-
+      
         <li class="md-nav__item">
   <a href="#registry-and-base-types" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Registry and base types
-
+      
     </span>
   </a>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools._base" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;_base
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" _base">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SearchResult
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" SearchResult">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.path" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;path
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.line_number" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;line_number
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.snippet" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;snippet
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.score" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;score
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolResult" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolResult
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolResult">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolResult.truncated" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;truncated
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolResult.to_text" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_text
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.Tool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;Tool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" Tool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.Tool.schema_text" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;schema_text
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolPermissions
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolPermissions">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions.is_allowed" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;is_allowed
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions.check" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;check
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions.visible_names" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;visible_names
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolDescriptor
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolDescriptor">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor--lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Lifecycle
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.is_loaded" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;is_loaded
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.get_instance" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_instance
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.release" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;release
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.schema_text" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;schema_text
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolRegistry
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolRegistry">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry--key-properties" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Key properties
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.register_lazy" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;register_lazy
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.register" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;register
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.get" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.get_descriptor" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_descriptor
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.names" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;names
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.loaded_names" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;loaded_names
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.unload" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;unload
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.unload_all" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;unload_all
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.system_prompt_section" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;system_prompt_section
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.dispatch" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;dispatch
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" dispatch">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.dispatch--lifecycle-per-call" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Lifecycle per call
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.find_calls" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;find_calls
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#available-tools" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Available tools
-
+      
     </span>
   </a>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.find_files" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;find_files
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" find_files">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.find_files.FindFilesTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;FindFilesTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" FindFilesTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.find_files.FindFilesTool--backend-priority" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Backend priority
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.search_in_files" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;search_in_files
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" search_in_files">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.search_in_files.SearchInFilesTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SearchInFilesTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" SearchInFilesTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.search_in_files.SearchInFilesTool--backend-priority" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Backend priority
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.web_fetch" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;web_fetch
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" web_fetch">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_fetch.WebFetchTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;WebFetchTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" WebFetchTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_fetch.WebFetchTool--security-model" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Security model
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.web_search" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;web_search
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" web_search">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_search.WebSearchTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;WebSearchTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" WebSearchTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_search.WebSearchTool--privacy-model" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Privacy model
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.man_reader" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;man_reader
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" man_reader">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.man_reader.ManPageTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ManPageTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.system_control" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;system_control
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" system_control">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_control.SystemControlTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SystemControlTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" SystemControlTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_control.SystemControlTool--backend-detection" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Backend detection
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_control.SystemControlTool--safety" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Safety
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.system_info" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;system_info
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" system_info">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_info--queries-answered" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Queries answered
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_info--data-sources-in-priority-order" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Data sources (in priority order)
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_info.SystemInfoTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SystemInfoTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.app" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;app
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" app">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.app--actions" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Actions
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.app.AppTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;AppTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.installed_apps" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;installed_apps
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" installed_apps">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.installed_apps.InstalledAppsTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;InstalledAppsTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.process_info" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;process_info
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" process_info">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.process_info.ProcessInfoTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ProcessInfoTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
     </ul>
-
+  
 </nav>
-
+      
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../npu_manager/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     NPU Manager
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
-
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../gui/" class="md-nav__link">
-
-
-
+        
+  
+  
   <span class="md-ellipsis">
-
-
+    
+  
     GUI
+  
 
-
-
+    
   </span>
-
-
+  
+  
 
       </a>
     </li>
+  
 
-
-
-
+              
+            
           </ul>
         </nav>
-
+      
     </li>
+  
 
-
-
+    
   </ul>
 </nav>
                   </div>
                 </div>
               </div>
-
-
-
+            
+            
+              
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
-
+                    
 
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-
-
-
-
-
-
+  
+  
+  
+    
+  
+  
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-
+      
         <li class="md-nav__item">
   <a href="#registry-and-base-types" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Registry and base types
-
+      
     </span>
   </a>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools._base" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;_base
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" _base">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SearchResult
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" SearchResult">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.path" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;path
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.line_number" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;line_number
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.snippet" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;snippet
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.SearchResult.score" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;score
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolResult" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolResult
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolResult">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolResult.truncated" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;truncated
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolResult.to_text" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;to_text
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.Tool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;Tool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" Tool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.Tool.schema_text" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;schema_text
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolPermissions
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolPermissions">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions.is_allowed" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;is_allowed
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions.check" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;check
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolPermissions.visible_names" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;visible_names
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolDescriptor
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolDescriptor">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor--lifecycle" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Lifecycle
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.is_loaded" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;is_loaded
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.get_instance" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_instance
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.release" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;release
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolDescriptor.schema_text" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;schema_text
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ToolRegistry
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" ToolRegistry">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry--key-properties" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Key properties
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.register_lazy" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;register_lazy
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.register" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;register
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.get" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.get_descriptor" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_descriptor
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.names" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;names
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.loaded_names" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;loaded_names
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.unload" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;unload
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.unload_all" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;unload_all
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.system_prompt_section" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;system_prompt_section
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.dispatch" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;dispatch
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" dispatch">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.dispatch--lifecycle-per-call" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Lifecycle per call
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools._base.ToolRegistry.find_calls" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;find_calls
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#available-tools" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Available tools
-
+      
     </span>
   </a>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.find_files" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;find_files
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" find_files">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.find_files.FindFilesTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;FindFilesTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" FindFilesTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.find_files.FindFilesTool--backend-priority" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Backend priority
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.search_in_files" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;search_in_files
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" search_in_files">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.search_in_files.SearchInFilesTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SearchInFilesTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" SearchInFilesTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.search_in_files.SearchInFilesTool--backend-priority" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Backend priority
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.web_fetch" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;web_fetch
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" web_fetch">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_fetch.WebFetchTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;WebFetchTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" WebFetchTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_fetch.WebFetchTool--security-model" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Security model
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.web_search" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;web_search
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" web_search">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_search.WebSearchTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;WebSearchTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" WebSearchTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.web_search.WebSearchTool--privacy-model" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Privacy model
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.man_reader" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;man_reader
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" man_reader">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.man_reader.ManPageTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ManPageTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.system_control" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;system_control
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" system_control">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_control.SystemControlTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SystemControlTool
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" SystemControlTool">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_control.SystemControlTool--backend-detection" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Backend detection
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_control.SystemControlTool--safety" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Safety
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.system_info" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;system_info
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" system_info">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_info--queries-answered" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Queries answered
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_info--data-sources-in-priority-order" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Data sources (in priority order)
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.system_info.SystemInfoTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SystemInfoTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.app" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;app
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" app">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.app--actions" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         Actions
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.app.AppTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;AppTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.installed_apps" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;installed_apps
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" installed_apps">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.installed_apps.InstalledAppsTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;InstalledAppsTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
         <li class="md-nav__item">
   <a href="#src.tools.process_info" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;process_info
-
+      
     </span>
   </a>
-
+  
     <nav class="md-nav" aria-label=" process_info">
       <ul class="md-nav__list">
-
+        
           <li class="md-nav__item">
   <a href="#src.tools.process_info.ProcessInfoTool" class="md-nav__link">
     <span class="md-ellipsis">
-
+      
         <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ProcessInfoTool
-
+      
     </span>
   </a>
-
+  
 </li>
-
+        
       </ul>
     </nav>
-
+  
 </li>
-
+      
     </ul>
-
+  
 </nav>
                   </div>
                 </div>
               </div>
-
-
-
+            
+          
+          
             <div class="md-content" data-md-component="content">
+              
+                
 
 
 
-
-
-
+  
 
 
   <nav class="md-path" aria-label="Navigation" >
     <ol class="md-path__list">
-
-
-
-
+      
+        
+  
+  
     <li class="md-path__item">
       <a href="../.." class="md-path__link">
-
+        
   <span class="md-ellipsis">
     Home
   </span>
 
       </a>
     </li>
+  
 
-
-
-
-
-
-
-
-
+      
+      
+        
+  
+  
+    
+    
       <li class="md-path__item">
         <a href="../config/" class="md-path__link">
-
+          
   <span class="md-ellipsis">
     API Reference
   </span>
 
         </a>
       </li>
+    
+  
 
-
-
-
+      
     </ol>
   </nav>
 
-
+              
               <article class="md-content__inner md-typeset">
+                
+                  
 
 
-
-
-
-
+  
+  
 
 
 <h1 id="tools">Tools<a class="headerlink" href="#tools" title="Permanent link">&para;</a></h1>
@@ -2978,9 +2978,7 @@
   </span>
 
 <a href="#src.tools._base.ToolResult" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ToolResult</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">tool_name</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n"><span title="list">list</span></span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">truncated</span><span class="o">=</span><span class="kc">False</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ToolResult</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n"><span title="list">list</span></span><span class="p">(),</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">truncated</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3068,7 +3066,7 @@
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_display</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="k">def</span> <span class="nf">to_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_display</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Format the result as a human-readable string for the AI/UI.&quot;&quot;&quot;</span>
 </span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
 </span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tool_name</span><span class="si">}</span><span class="s2">] Error: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -3160,7 +3158,7 @@
 <span class="normal"><a href="#__codelineno-0-96">96</a></span>
 <span class="normal"><a href="#__codelineno-0-97">97</a></span>
 <span class="normal"><a href="#__codelineno-0-98">98</a></span>
-<span class="normal"><a href="#__codelineno-0-99">99</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="k">def</span><span class="w"> </span><span class="nf">schema_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-99">99</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="k">def</span> <span class="nf">schema_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a compact description for inclusion in the system prompt.&quot;&quot;&quot;</span>
 </span><span id="__span-0-95"><a id="__codelineno-0-95" name="__codelineno-0-95"></a>    <span class="n">params</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
 </span><span id="__span-0-96"><a id="__codelineno-0-96" name="__codelineno-0-96"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;string&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -3190,12 +3188,7 @@
 
 
 <a href="#src.tools._base.ToolPermissions" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ToolPermissions</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">allowed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">disallowed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">requires_approval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">approve_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ToolPermissions</span><span class="p">(</span><span class="n">allowed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">requires_approval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">approve_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3311,7 +3304,7 @@ in <code>requires_approval</code> is invoked.  Defaults to a terminal prompt.</p
 <span class="normal"><a href="#__codelineno-0-136">136</a></span>
 <span class="normal"><a href="#__codelineno-0-137">137</a></span>
 <span class="normal"><a href="#__codelineno-0-138">138</a></span>
-<span class="normal"><a href="#__codelineno-0-139">139</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-129"><a id="__codelineno-0-129" name="__codelineno-0-129"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-139">139</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-129"><a id="__codelineno-0-129" name="__codelineno-0-129"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-130"><a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-131"><a id="__codelineno-0-131" name="__codelineno-0-131"></a>    <span class="n">allowed</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="__span-0-132"><a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="n">disallowed</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3364,7 +3357,7 @@ in <code>requires_approval</code> is invoked.  Defaults to a terminal prompt.</p
 <span class="normal"><a href="#__codelineno-0-150">150</a></span>
 <span class="normal"><a href="#__codelineno-0-151">151</a></span>
 <span class="normal"><a href="#__codelineno-0-152">152</a></span>
-<span class="normal"><a href="#__codelineno-0-153">153</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_allowed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-153">153</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="k">def</span> <span class="nf">is_allowed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 </span><span id="__span-0-147"><a id="__codelineno-0-147" name="__codelineno-0-147"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True if *name* passes the whitelist check.</span>
 </span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a>
 </span><span id="__span-0-149"><a id="__codelineno-0-149" name="__codelineno-0-149"></a><span class="sd">    If no whitelist is configured (empty set) every tool passes.</span>
@@ -3476,7 +3469,7 @@ in <code>requires_approval</code> is invoked.  Defaults to a terminal prompt.</p
 <span class="normal"><a href="#__codelineno-0-194">194</a></span>
 <span class="normal"><a href="#__codelineno-0-195">195</a></span>
 <span class="normal"><a href="#__codelineno-0-196">196</a></span>
-<span class="normal"><a href="#__codelineno-0-197">197</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-160"><a id="__codelineno-0-160" name="__codelineno-0-160"></a><span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ToolResult | None&quot;</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-197">197</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-160"><a id="__codelineno-0-160" name="__codelineno-0-160"></a><span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ToolResult | None&quot;</span><span class="p">:</span>
 </span><span id="__span-0-161"><a id="__codelineno-0-161" name="__codelineno-0-161"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Enforce permissions for *tool_name* with *args*.</span>
 </span><span id="__span-0-162"><a id="__codelineno-0-162" name="__codelineno-0-162"></a>
 </span><span id="__span-0-163"><a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="sd">    Returns:</span>
@@ -3548,7 +3541,7 @@ system prompt so the AI doesn't even try to call them.</p>
 <span class="normal"><a href="#__codelineno-0-206">206</a></span>
 <span class="normal"><a href="#__codelineno-0-207">207</a></span>
 <span class="normal"><a href="#__codelineno-0-208">208</a></span>
-<span class="normal"><a href="#__codelineno-0-209">209</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="k">def</span><span class="w"> </span><span class="nf">visible_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal"><a href="#__codelineno-0-209">209</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="k">def</span> <span class="nf">visible_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 </span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the subset of *all_names* that are advertised to the AI.</span>
 </span><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a>
 </span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    Disallowed tools and tools outside the whitelist are hidden from the</span>
@@ -3584,13 +3577,7 @@ system prompt so the AI doesn't even try to call them.</p>
   </span>
 
 <a href="#src.tools._base.ToolDescriptor" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ToolDescriptor</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">name</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">description</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">parameters_schema</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">factory</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">unload_after_use</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ToolDescriptor</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">parameters_schema</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">unload_after_use</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3681,7 +3668,7 @@ manually via :meth:<code>ToolRegistry.unload</code> / :meth:<code>ToolRegistry.u
 <span class="normal"><a href="#__codelineno-0-263">263</a></span>
 <span class="normal"><a href="#__codelineno-0-264">264</a></span>
 <span class="normal"><a href="#__codelineno-0-265">265</a></span>
-<span class="normal"><a href="#__codelineno-0-266">266</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tool</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-266">266</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="k">def</span> <span class="nf">get_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tool</span><span class="p">:</span>
 </span><span id="__span-0-262"><a id="__codelineno-0-262" name="__codelineno-0-262"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the live tool instance, creating it on first call.&quot;&quot;&quot;</span>
 </span><span id="__span-0-263"><a id="__codelineno-0-263" name="__codelineno-0-263"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-264"><a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Lazy-loading tool: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -3715,7 +3702,7 @@ manually via :meth:<code>ToolRegistry.unload</code> / :meth:<code>ToolRegistry.u
 <span class="normal"><a href="#__codelineno-0-269">269</a></span>
 <span class="normal"><a href="#__codelineno-0-270">270</a></span>
 <span class="normal"><a href="#__codelineno-0-271">271</a></span>
-<span class="normal"><a href="#__codelineno-0-272">272</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="k">def</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-272">272</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Release the tool instance so it can be garbage-collected.&quot;&quot;&quot;</span>
 </span><span id="__span-0-270"><a id="__codelineno-0-270" name="__codelineno-0-270"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-271"><a id="__codelineno-0-271" name="__codelineno-0-271"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Unloading tool: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -3752,7 +3739,7 @@ manually via :meth:<code>ToolRegistry.unload</code> / :meth:<code>ToolRegistry.u
 <span class="normal"><a href="#__codelineno-0-285">285</a></span>
 <span class="normal"><a href="#__codelineno-0-286">286</a></span>
 <span class="normal"><a href="#__codelineno-0-287">287</a></span>
-<span class="normal"><a href="#__codelineno-0-288">288</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-281"><a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="k">def</span><span class="w"> </span><span class="nf">schema_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-288">288</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-281"><a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="k">def</span> <span class="nf">schema_text</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="__span-0-282"><a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a compact one-line description for the AI system prompt.</span>
 </span><span id="__span-0-283"><a id="__codelineno-0-283" name="__codelineno-0-283"></a>
 </span><span id="__span-0-284"><a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    Reads only from the descriptor fields — never touches the instance.</span>
@@ -3823,7 +3810,7 @@ garbage-collected, keeping memory usage at a minimum.</p>
 <span class="normal"><a href="#__codelineno-0-320">320</a></span>
 <span class="normal"><a href="#__codelineno-0-321">321</a></span>
 <span class="normal"><a href="#__codelineno-0-322">322</a></span>
-<span class="normal"><a href="#__codelineno-0-323">323</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-316"><a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-316"><a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-317"><a id="__codelineno-0-317" name="__codelineno-0-317"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-318"><a id="__codelineno-0-318" name="__codelineno-0-318"></a>    <span class="n">permissions</span><span class="p">:</span> <span class="n">ToolPermissions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="__span-0-319"><a id="__codelineno-0-319" name="__codelineno-0-319"></a>    <span class="n">unload_after_use</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -3855,14 +3842,7 @@ garbage-collected, keeping memory usage at a minimum.</p>
 
 
 <a href="#src.tools._base.ToolRegistry.register_lazy" class="headerlink" title="Permanent link">&para;</a></h4>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">register_lazy</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">name</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">description</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">schema</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">factory</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">unload_after_use</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">register_lazy</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">unload_after_use</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4007,7 +3987,7 @@ is <code>True</code>, in which case the instance is released after every call.</
 <span class="normal"><a href="#__codelineno-0-360">360</a></span>
 <span class="normal"><a href="#__codelineno-0-361">361</a></span>
 <span class="normal"><a href="#__codelineno-0-362">362</a></span>
-<span class="normal"><a href="#__codelineno-0-363">363</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-327"><a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="k">def</span><span class="w"> </span><span class="nf">register_lazy</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-363">363</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-327"><a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="k">def</span> <span class="nf">register_lazy</span><span class="p">(</span>
 </span><span id="__span-0-328"><a id="__codelineno-0-328" name="__codelineno-0-328"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-329"><a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 </span><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a>    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -4087,7 +4067,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-378">378</a></span>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
-<span class="normal"><a href="#__codelineno-0-381">381</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-365"><a id="__codelineno-0-365" name="__codelineno-0-365"></a><span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">:</span> <span class="n">Tool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-381">381</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-365"><a id="__codelineno-0-365" name="__codelineno-0-365"></a><span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tool</span><span class="p">:</span> <span class="n">Tool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-366"><a id="__codelineno-0-366" name="__codelineno-0-366"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an already-constructed tool instance (convenience API).</span>
 </span><span id="__span-0-367"><a id="__codelineno-0-367" name="__codelineno-0-367"></a>
 </span><span id="__span-0-368"><a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="sd">    The instance is wrapped in a descriptor so it participates in the</span>
@@ -4133,7 +4113,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-387">387</a></span>
 <span class="normal"><a href="#__codelineno-0-388">388</a></span>
 <span class="normal"><a href="#__codelineno-0-389">389</a></span>
-<span class="normal"><a href="#__codelineno-0-390">390</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-390">390</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-385"><a id="__codelineno-0-385" name="__codelineno-0-385"></a><span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-386"><a id="__codelineno-0-386" name="__codelineno-0-386"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the tool instance for *name*, loading it if needed.&quot;&quot;&quot;</span>
 </span><span id="__span-0-387"><a id="__codelineno-0-387" name="__codelineno-0-387"></a>    <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </span><span id="__span-0-388"><a id="__codelineno-0-388" name="__codelineno-0-388"></a>    <span class="k">if</span> <span class="n">desc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -4165,7 +4145,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
               <summary>Source code in <code>src/tools/_base.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-392">392</a></span>
 <span class="normal"><a href="#__codelineno-0-393">393</a></span>
-<span class="normal"><a href="#__codelineno-0-394">394</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_descriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolDescriptor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-394">394</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-392"><a id="__codelineno-0-392" name="__codelineno-0-392"></a><span class="k">def</span> <span class="nf">get_descriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolDescriptor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-393"><a id="__codelineno-0-393" name="__codelineno-0-393"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the :class:`ToolDescriptor` for *name*.&quot;&quot;&quot;</span>
 </span><span id="__span-0-394"><a id="__codelineno-0-394" name="__codelineno-0-394"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
@@ -4194,7 +4174,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
               <summary>Source code in <code>src/tools/_base.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-396">396</a></span>
 <span class="normal"><a href="#__codelineno-0-397">397</a></span>
-<span class="normal"><a href="#__codelineno-0-398">398</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="k">def</span><span class="w"> </span><span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal"><a href="#__codelineno-0-398">398</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-396"><a id="__codelineno-0-396" name="__codelineno-0-396"></a><span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 </span><span id="__span-0-397"><a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all registered tool names.&quot;&quot;&quot;</span>
 </span><span id="__span-0-398"><a id="__codelineno-0-398" name="__codelineno-0-398"></a>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
@@ -4223,7 +4203,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
               <summary>Source code in <code>src/tools/_base.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-400">400</a></span>
 <span class="normal"><a href="#__codelineno-0-401">401</a></span>
-<span class="normal"><a href="#__codelineno-0-402">402</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="k">def</span><span class="w"> </span><span class="nf">loaded_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal"><a href="#__codelineno-0-402">402</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-400"><a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="k">def</span> <span class="nf">loaded_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 </span><span id="__span-0-401"><a id="__codelineno-0-401" name="__codelineno-0-401"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return names of tools whose instances are currently in memory.&quot;&quot;&quot;</span>
 </span><span id="__span-0-402"><a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">is_loaded</span><span class="p">]</span>
 </span></code></pre></div></td></tr></table></div>
@@ -4262,7 +4242,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-413">413</a></span>
 <span class="normal"><a href="#__codelineno-0-414">414</a></span>
 <span class="normal"><a href="#__codelineno-0-415">415</a></span>
-<span class="normal"><a href="#__codelineno-0-416">416</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="k">def</span><span class="w"> </span><span class="nf">unload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-416">416</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-406"><a id="__codelineno-0-406" name="__codelineno-0-406"></a><span class="k">def</span> <span class="nf">unload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 </span><span id="__span-0-407"><a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Release the instance for tool *name*.</span>
 </span><span id="__span-0-408"><a id="__codelineno-0-408" name="__codelineno-0-408"></a>
 </span><span id="__span-0-409"><a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">    Returns ``True`` if the tool was loaded and is now released,</span>
@@ -4310,7 +4290,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-427">427</a></span>
 <span class="normal"><a href="#__codelineno-0-428">428</a></span>
 <span class="normal"><a href="#__codelineno-0-429">429</a></span>
-<span class="normal"><a href="#__codelineno-0-430">430</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="k">def</span><span class="w"> </span><span class="nf">unload_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal"><a href="#__codelineno-0-430">430</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-418"><a id="__codelineno-0-418" name="__codelineno-0-418"></a><span class="k">def</span> <span class="nf">unload_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 </span><span id="__span-0-419"><a id="__codelineno-0-419" name="__codelineno-0-419"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Release all currently loaded tool instances.</span>
 </span><span id="__span-0-420"><a id="__codelineno-0-420" name="__codelineno-0-420"></a>
 </span><span id="__span-0-421"><a id="__codelineno-0-421" name="__codelineno-0-421"></a><span class="sd">    Returns the list of tool names that were unloaded.</span>
@@ -4375,7 +4355,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-457">457</a></span>
 <span class="normal"><a href="#__codelineno-0-458">458</a></span>
 <span class="normal"><a href="#__codelineno-0-459">459</a></span>
-<span class="normal"><a href="#__codelineno-0-460">460</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="k">def</span><span class="w"> </span><span class="nf">system_prompt_section</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-460">460</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-434"><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="k">def</span> <span class="nf">system_prompt_section</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 </span><span id="__span-0-435"><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the block injected into the AI system prompt.</span>
 </span><span id="__span-0-436"><a id="__codelineno-0-436" name="__codelineno-0-436"></a>
 </span><span id="__span-0-437"><a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    Only lists tools the AI is permitted to call.</span>
@@ -4479,7 +4459,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
                   <code><a class="autorefs autorefs-internal" title="            ToolResult
 
 
-
+  
       dataclass
    (src.tools._base.ToolResult)" href="#src.tools._base.ToolResult">ToolResult</a> | None</code>
             </td>
@@ -4494,7 +4474,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
                   <code><a class="autorefs autorefs-internal" title="            ToolResult
 
 
-
+  
       dataclass
    (src.tools._base.ToolResult)" href="#src.tools._base.ToolResult">ToolResult</a> | None</code>
             </td>
@@ -4585,7 +4565,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-536">536</a></span>
 <span class="normal"><a href="#__codelineno-0-537">537</a></span>
 <span class="normal"><a href="#__codelineno-0-538">538</a></span>
-<span class="normal"><a href="#__codelineno-0-539">539</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResult</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-539">539</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-464"><a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">call_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResult</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-465"><a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse and execute a ``[TOOL: name {...}]`` call from the AI.</span>
 </span><span id="__span-0-466"><a id="__codelineno-0-466" name="__codelineno-0-466"></a>
 </span><span id="__span-0-467"><a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">    ## Lifecycle per call</span>
@@ -4642,7 +4622,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 </span><span id="__span-0-518"><a id="__codelineno-0-518" name="__codelineno-0-518"></a>
 </span><span id="__span-0-519"><a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="c1"># 4. Validate and sanitise AI-supplied arguments before dispatch</span>
 </span><span id="__span-0-520"><a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-0-521"><a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">src.security</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_tool_args</span>
+</span><span id="__span-0-521"><a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="kn">from</span> <span class="nn">src.security</span> <span class="kn">import</span> <span class="n">validate_tool_args</span>
 </span><span id="__span-0-522"><a id="__codelineno-0-522" name="__codelineno-0-522"></a>
 </span><span id="__span-0-523"><a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="n">args</span> <span class="o">=</span> <span class="n">validate_tool_args</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">desc</span><span class="o">.</span><span class="n">parameters_schema</span><span class="p">)</span>
 </span><span id="__span-0-524"><a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -4687,7 +4667,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
               <summary>Source code in <code>src/tools/_base.py</code></summary>
               <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-541">541</a></span>
 <span class="normal"><a href="#__codelineno-0-542">542</a></span>
-<span class="normal"><a href="#__codelineno-0-543">543</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-541"><a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_calls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal"><a href="#__codelineno-0-543">543</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-541"><a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="k">def</span> <span class="nf">find_calls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 </span><span id="__span-0-542"><a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return all ``[TOOL: ...]`` substrings found in *text*.&quot;&quot;&quot;</span>
 </span><span id="__span-0-543"><a id="__codelineno-0-543" name="__codelineno-0-543"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CALL_RE</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
 </span></code></pre></div></td></tr></table></div>
@@ -4785,7 +4765,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
                     <summary>Source code in <code>src/tools/find_files.py</code></summary>
                     <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
-<span class="normal"><a href="#__codelineno-0-71">71</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_search_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-71">71</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_search_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_default_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">default_search_path</span> <span class="ow">or</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">())</span>
 </span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># cached after first call</span>
 </span></code></pre></div></td></tr></table></div>
@@ -4863,9 +4843,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 
 
 <a href="#src.tools.search_in_files.SearchInFilesTool" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">SearchInFilesTool</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">default_search_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blocked_paths</span><span class="o">=</span><span class="kc">None</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">SearchInFilesTool</span><span class="p">(</span><span class="n">default_search_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blocked_paths</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4900,7 +4878,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 <span class="normal"><a href="#__codelineno-0-88">88</a></span>
 <span class="normal"><a href="#__codelineno-0-89">89</a></span>
 <span class="normal"><a href="#__codelineno-0-90">90</a></span>
-<span class="normal"><a href="#__codelineno-0-91">91</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="n">default_search_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="n">blocked_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4986,15 +4964,7 @@ pre-loaded (<code>is_loaded == True</code>) immediately after registration.</p>
 
 
 <a href="#src.tools.web_fetch.WebFetchTool" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">WebFetchTool</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">max_response_chars</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">allowed_content_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">domain_allowlist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">domain_blocklist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">max_redirects</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">read_timeout</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">WebFetchTool</span><span class="p">(</span><span class="n">max_response_chars</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="n">allowed_content_types</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">domain_allowlist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">domain_blocklist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_redirects</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">read_timeout</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5063,7 +5033,7 @@ by the user before it happens.</p>
 <span class="normal"><a href="#__codelineno-0-187">187</a></span>
 <span class="normal"><a href="#__codelineno-0-188">188</a></span>
 <span class="normal"><a href="#__codelineno-0-189">189</a></span>
-<span class="normal"><a href="#__codelineno-0-190">190</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-166"><a id="__codelineno-0-166" name="__codelineno-0-166"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-190">190</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-166"><a id="__codelineno-0-166" name="__codelineno-0-166"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-167"><a id="__codelineno-0-167" name="__codelineno-0-167"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-168"><a id="__codelineno-0-168" name="__codelineno-0-168"></a>    <span class="n">max_response_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8_000</span><span class="p">,</span>
 </span><span id="__span-0-169"><a id="__codelineno-0-169" name="__codelineno-0-169"></a>    <span class="n">allowed_content_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5199,7 +5169,7 @@ the browser does after that point.</p>
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-65"><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a>    <span class="n">default_engine</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;duckduckgo&quot;</span><span class="p">,</span>
 </span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">engines</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5367,7 +5337,7 @@ enough for SYNOPSIS + OPTIONS of most commands.</p>
 <span class="normal"><a href="#__codelineno-0-132">132</a></span>
 <span class="normal"><a href="#__codelineno-0-133">133</a></span>
 <span class="normal"><a href="#__codelineno-0-134">134</a></span>
-<span class="normal"><a href="#__codelineno-0-135">135</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-127"><a id="__codelineno-0-127" name="__codelineno-0-127"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-135">135</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-127"><a id="__codelineno-0-127" name="__codelineno-0-127"></a><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
 </span><span id="__span-0-128"><a id="__codelineno-0-128" name="__codelineno-0-128"></a>    <span class="bp">self</span><span class="p">,</span>
 </span><span id="__span-0-129"><a id="__codelineno-0-129" name="__codelineno-0-129"></a>    <span class="n">max_chars</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8_000</span><span class="p">,</span>
 </span><span id="__span-0-130"><a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="n">default_sections</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5928,76 +5898,76 @@ which process uses the most CPU/RAM.</p>
 
 
 
-
+                
               </article>
             </div>
-
-
+          
+          
   <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
 
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
-
+        
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
-
+  
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
   Back to top
 </button>
-
+        
       </main>
-
+      
         <footer class="md-footer">
-
+  
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
-
+  
     <div class="md-copyright__highlight">
       Copyright &copy; 2025 robertbiv
     </div>
-
-
+  
+  
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
       Material for MkDocs
     </a>
-
+  
 </div>
-
-
+      
+        
 <div class="md-social">
-
-
-
-
-
-
-
-
+  
+    
+    
+    
+    
+      
+      
+    
     <a href="https://github.com/robertbiv/Linux-AI-NPU-Assistant" target="_blank" rel="noopener" title="github.com" class="md-social__link">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
     </a>
-
+  
 </div>
-
+      
     </div>
   </div>
 </footer>
-
+      
     </div>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-
-
-
-
-
+    
+    
+    
+      
+      
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate", "content.tabs.link", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
-
-
+    
+    
       <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
-
-
+      
+    
   </body>
 </html>
