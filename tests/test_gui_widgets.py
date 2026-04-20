@@ -837,6 +837,15 @@ class TestNPUSuitability:
         from src.npu_benchmark import adjust_npu_fit
         assert adjust_npu_fit("good", self._hw(16, 4, True)) in ("fair", "not_recommended")
 
+
+    def test_unrecognized_fit_string(self):
+        from src.npu_benchmark import adjust_npu_fit
+        # If no adjustment is triggered (e.g. good hardware, but not high end)
+        assert adjust_npu_fit("unknown", self._hw(16, 16, True)) == "unknown"
+        # If adjustment is triggered (e.g. low ram), it treats "unknown" as "good"
+        # index 1 + 1 (low ram) -> index 2 ("fair")
+        assert adjust_npu_fit("unknown", self._hw(16, 4, True)) == "fair"
+
     def test_catalog_adjusted_label(self):
         from src.npu_model_installer import MODEL_CATALOG
         from src.npu_benchmark import HardwareCapabilities
