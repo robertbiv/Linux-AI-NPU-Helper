@@ -90,6 +90,12 @@ QTabBar::tab:focus {{
     outline: none;
 }}
 
+/* ── Item Views (Lists and Tables) ──────────────────────────────────────── */
+QListWidget:focus, QTableWidget:focus {{
+    border: 1px solid {BLUE};
+    outline: none;
+}}
+
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 QPushButton {{
     background-color: {BG_CARD2};
