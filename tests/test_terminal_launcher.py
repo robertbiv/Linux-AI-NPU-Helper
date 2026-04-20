@@ -55,8 +55,8 @@ class TestTerminalLauncherHelpers:
         ]
 
     def test_pick_script(self):
-        body, runner = _pick_script("bash", "'ls -la'")
-        assert "'ls -la'" in body
+        body, runner = _pick_script("bash")
+        assert 'LINUX_AI_COMMAND' in body
         assert runner == "sh"
 
 
@@ -204,3 +204,49 @@ class TestOpenWithCommand:
         launch_cmd = mock_popen.call_args[0][0]
         # Fish shell uses /bin/sh to run its wrapper
         assert launch_cmd == ["/usr/bin/gnome-terminal", "--", "/bin/sh", "/tmp/ai_helper_test.sh"]
+
+    @patch("src.terminal_launcher._find_terminal")
+    @patch("src.terminal_launcher.tempfile.mkstemp")
+    @patch("src.terminal_launcher.os.write")
+    @patch("src.terminal_launcher.os.close")
+    @patch("src.terminal_launcher.os.chmod")
+    @patch("src.terminal_launcher._schedule_delete")
+    @patch("subprocess.Popen")
+    @patch("src.shell_detector.detect")
+    def test_command_injection_mitigation(
+        self,
+        mock_detect,
+        mock_popen,
+        mock_schedule_delete,
+        mock_chmod,
+        mock_close,
+        mock_write,
+        mock_mkstemp,
+        mock_find_terminal,
+    ):
+        mock_find_terminal.return_value = ("/usr/bin/gnome-terminal", "dashdash")
+
+        mock_shell_info = MagicMock()
+        mock_shell_info.family = "fish"
+        mock_shell_info.path = "/bin/fish"
+        mock_shell_info.name = "fish"
+        mock_detect.return_value = mock_shell_info
+
+        mock_mkstemp.return_value = (123, "/tmp/ai_helper_test.sh")
+
+        # Malicious command that would have exploited the old version
+        malicious_cmd = "'; touch /tmp/pwned; #"
+        success, msg = open_with_command(malicious_cmd)
+
+        assert success is True
+
+        # Check that the environment variable was passed correctly
+        env = mock_popen.call_args[1]["env"]
+        assert env["LINUX_AI_COMMAND"] == malicious_cmd
+
+        # Verify script body doesn't contain the raw malicious command (it's in the env now)
+        # We need to see what was written to the script.
+        # mock_write.call_args[0][1] is the script body.
+        script_body = mock_write.call_args[0][1].decode()
+        assert malicious_cmd not in script_body
+        assert "LINUX_AI_COMMAND" in script_body
