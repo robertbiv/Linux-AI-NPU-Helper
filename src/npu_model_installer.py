@@ -545,6 +545,7 @@ class NPUModelInstaller:
                 Catalog entry to install.  Defaults to :func:`get_default_entry`
                 (Phi-3-vision-128k-instruct).
 
+
     Example:
     ::
 
