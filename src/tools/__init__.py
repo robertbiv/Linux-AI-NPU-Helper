@@ -5,6 +5,7 @@ Each tool lives in its own module inside this package.  Import from here:
 
     from src.tools import ToolRegistry, ToolResult, build_default_registry
 """
+
 from __future__ import annotations
 
 

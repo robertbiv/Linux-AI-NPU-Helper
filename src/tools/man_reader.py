@@ -82,12 +82,12 @@ class ManPageTool(Tool):
     and never contacts any network resource.
 
     Args:
-    max_chars:
-        Maximum characters returned per call.  Defaults to 8 000, which is
-        enough for SYNOPSIS + OPTIONS of most commands.
-    default_sections:
-        Section names to extract when the caller doesn't specify any.  Use
-        ``[]`` to return the full man page (up to *max_chars*).
+        max_chars:
+            Maximum characters returned per call.  Defaults to 8 000, which is
+            enough for SYNOPSIS + OPTIONS of most commands.
+        default_sections:
+            Section names to extract when the caller doesn't specify any.  Use
+            ``[]`` to return the full man page (up to *max_chars*).
     """
 
     name = "read_man_page"
@@ -131,9 +131,7 @@ class ManPageTool(Tool):
     ) -> None:
         self._max_chars = min(max_chars, _ABSOLUTE_MAX_CHARS)
         self._default_sections: list[str] = (
-            default_sections
-            if default_sections is not None
-            else list(_USEFUL_SECTIONS)
+            default_sections if default_sections is not None else list(_USEFUL_SECTIONS)
         )
 
     def run(self, args: dict[str, Any]) -> ToolResult:
@@ -146,7 +144,7 @@ class ManPageTool(Tool):
             return ToolResult(
                 tool_name=self.name,
                 error=f"Invalid command name: {command!r}. "
-                      "Only alphanumeric characters, hyphens, underscores, and dots are allowed.",
+                "Only alphanumeric characters, hyphens, underscores, and dots are allowed.",
             )
 
         man_section: str = args.get("man_section", "").strip()
@@ -155,6 +153,7 @@ class ManPageTool(Tool):
 
         # Check man is available (lazy import shutil — only on first run)
         import shutil  # lazy
+
         if not shutil.which("man"):
             return ToolResult(
                 tool_name=self.name,
@@ -166,8 +165,9 @@ class ManPageTool(Tool):
             cmd.append(man_section)
         cmd.append(command)
 
-        import os        # lazy
+        import os  # lazy
         import subprocess  # lazy
+
         env = os.environ.copy()
         env["MANPAGER"] = "cat"
         env["MANWIDTH"] = "100"
@@ -197,7 +197,7 @@ class ManPageTool(Tool):
             return ToolResult(
                 tool_name=self.name,
                 error=f"No man page found for '{command}'"
-                      + (f": {stderr}" if stderr else "."),
+                + (f": {stderr}" if stderr else "."),
             )
 
         raw = _strip_man_formatting(proc.stdout)

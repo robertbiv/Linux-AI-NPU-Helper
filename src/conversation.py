@@ -44,20 +44,20 @@ from src.security import check_path_permissions, secure_write
 logger = logging.getLogger(__name__)
 
 _DEFAULT_MAX_MESSAGES = 200
-_DEFAULT_HISTORY_DIR = (
-    Path.home() / ".local" / "share" / "linux-ai-npu-assistant"
-)
+_DEFAULT_HISTORY_DIR = Path.home() / ".local" / "share" / "linux-ai-npu-assistant"
 _DEFAULT_HISTORY_FILE = _DEFAULT_HISTORY_DIR / "history.json"
-_DEFAULT_HISTORY_ENC  = _DEFAULT_HISTORY_DIR / "history.enc"
-_DEFAULT_KEY_FILE     = _DEFAULT_HISTORY_DIR / "history.key"
+_DEFAULT_HISTORY_ENC = _DEFAULT_HISTORY_DIR / "history.enc"
+_DEFAULT_KEY_FILE = _DEFAULT_HISTORY_DIR / "history.key"
 
 
 # ── Encryption helpers ────────────────────────────────────────────────────────
+
 
 def _fernet_available() -> bool:
     """Return True if the *cryptography* package is importable."""
     try:
         from cryptography.fernet import Fernet  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -67,10 +67,10 @@ def generate_encryption_key() -> bytes:
     """Generate a new Fernet key (32 bytes, URL-safe base64-encoded).
 
     Returns:
-    bytes
         A 44-byte URL-safe base64 string suitable for ``Fernet(key)``.
     """
     from cryptography.fernet import Fernet
+
     return Fernet.generate_key()
 
 
@@ -82,11 +82,10 @@ def load_or_create_key(key_path: Path) -> bytes:
     contents are returned unchanged.
 
     Args:
-    key_path:
-        Path to the ``history.key`` file.
+        key_path:
+            Path to the ``history.key`` file.
 
     Returns:
-    bytes
         The Fernet key bytes.
     """
     if key_path.exists():
@@ -121,6 +120,7 @@ def encrypt_data(plaintext: str, key: bytes) -> str:
     The returned string is ASCII-safe and can be written to a text file.
     """
     from cryptography.fernet import Fernet
+
     f = Fernet(key)
     return f.encrypt(plaintext.encode("utf-8")).decode("ascii")
 
@@ -129,10 +129,10 @@ def decrypt_data(ciphertext: str, key: bytes) -> str:
     """Decrypt Fernet *ciphertext* and return the original plaintext.
 
     Raises:
-    cryptography.fernet.InvalidToken
-        If the key is wrong or the data was tampered with.
+        cryptography.fernet.InvalidToken: If the key is wrong or the data was tampered with.
     """
     from cryptography.fernet import Fernet
+
     f = Fernet(key)
     return f.decrypt(ciphertext.encode("ascii")).decode("utf-8")
 
@@ -149,15 +149,15 @@ def _derive_key_from_password(
     ``create_salt=False`` to skip creation (returns ``None`` if no salt file).
 
     Args:
-    password:
-        User-chosen password string.
-    key_dir:
-        Directory containing (or that will contain) ``history.salt``.
-    create_salt:
-        When ``True`` a new salt is generated if none exists yet.
+        password:
+            User-chosen password string.
+        key_dir:
+            Directory containing (or that will contain) ``history.salt``.
+        create_salt:
+            When ``True`` a new salt is generated if none exists yet.
 
     Returns:
-    bytes | None
+        bytes | None
         A 44-byte URL-safe base64 Fernet key, or ``None`` when
         ``create_salt`` is ``False`` and no salt file exists.
     """
@@ -198,10 +198,14 @@ def _derive_key_from_password(
 class Message:
     """A single turn in the conversation."""
 
-    role: str               # "user" | "assistant" | "system"
+    role: str  # "user" | "assistant" | "system"
     content: str
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    has_image: bool = False  # True when the turn included a screenshot or uploaded image
+    timestamp: str = field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
+    has_image: bool = (
+        False  # True when the turn included a screenshot or uploaded image
+    )
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -220,27 +224,27 @@ class ConversationHistory:
     """Thread-safe, persistent conversation history.
 
     Args:
-    max_messages:
-        Maximum number of messages kept in memory.  When the list exceeds
-        this limit the oldest messages are removed first.
-    persist_path:
-        JSON file path for persistence.  Pass ``None`` to disable disk
-        persistence (history lives only for the current session).  When
-        *encrypt* is ``True`` the path is rewritten with a ``.enc``
-        extension automatically.
-    system_prompt:
-        An optional system message prepended to every API call to establish
-        the assistant's persona / instructions.
-    encrypt:
-        When ``True`` (and the ``cryptography`` package is installed), the
-        history file is encrypted with Fernet symmetric encryption.  A key
-        file is stored alongside the history file with ``0o600`` permissions.
-        Defaults to ``True`` when *cryptography* is available, ``False``
-        otherwise (graceful degradation).
-    encryption_key:
-        Optional pre-existing Fernet key bytes.  When omitted the key is
-        loaded from (or created in) a ``history.key`` file next to the
-        history file.
+        max_messages:
+            Maximum number of messages kept in memory.  When the list exceeds
+            this limit the oldest messages are removed first.
+        persist_path:
+            JSON file path for persistence.  Pass ``None`` to disable disk
+            persistence (history lives only for the current session).  When
+            *encrypt* is ``True`` the path is rewritten with a ``.enc``
+            extension automatically.
+        system_prompt:
+            An optional system message prepended to every API call to establish
+            the assistant's persona / instructions.
+        encrypt:
+            When ``True`` (and the ``cryptography`` package is installed), the
+            history file is encrypted with Fernet symmetric encryption.  A key
+            file is stored alongside the history file with ``0o600`` permissions.
+            Defaults to ``True`` when *cryptography* is available, ``False``
+            otherwise (graceful degradation).
+        encryption_key:
+            Optional pre-existing Fernet key bytes.  When omitted the key is
+            loaded from (or created in) a ``history.key`` file next to the
+            history file.
     """
 
     def __init__(
@@ -248,7 +252,7 @@ class ConversationHistory:
         max_messages: int = _DEFAULT_MAX_MESSAGES,
         persist_path: Path | str | None = _DEFAULT_HISTORY_FILE,
         system_prompt: str = "",
-        encrypt: bool = False,            # opt-in; set True or call set_password()
+        encrypt: bool = False,  # opt-in; set True or call set_password()
         encryption_key: bytes | None = None,  # pre-supplied key (tests / custom setup)
     ) -> None:
         self._max = max_messages
@@ -306,16 +310,15 @@ class ConversationHistory:
         """Append a message and persist immediately.
 
         Args:
-        role:
-            ``"user"`` or ``"assistant"``.
-        content:
-            Text content of the message.
-        has_image:
-            Set to ``True`` when the turn included an image (screenshot or
-            uploaded file).  The image itself is not stored here.
+            role:
+                ``"user"`` or ``"assistant"``.
+            content:
+                Text content of the message.
+            has_image:
+                Set to ``True`` when the turn included an image (screenshot or
+                uploaded file).  The image itself is not stored here.
 
         Returns:
-        Message
             The newly added message object.
         """
         msg = Message(role=role, content=content, has_image=has_image)
@@ -364,11 +367,11 @@ class ConversationHistory:
         """Return the message list in OpenAI ``/chat/completions`` format.
 
         Args:
-        include_system:
-            Prepend the system prompt if one is configured.
-        max_context:
-            Only include the most recent *max_context* messages (besides the
-            system message).  Use this to avoid hitting context-length limits.
+            include_system:
+                Prepend the system prompt if one is configured.
+            max_context:
+                Only include the most recent *max_context* messages (besides the
+                system message).  Use this to avoid hitting context-length limits.
         """
         messages: list[dict] = []
         if include_system and self._system_prompt:
@@ -392,9 +395,7 @@ class ConversationHistory:
         Ollama's chat endpoint mirrors the OpenAI format, so this is a thin
         wrapper around :meth:`to_openai_messages`.
         """
-        return self.to_openai_messages(
-            include_system=True, max_context=max_context
-        )
+        return self.to_openai_messages(include_system=True, max_context=max_context)
 
     # ── Password-based key derivation ────────────────────────────────────────
 
@@ -411,13 +412,12 @@ class ConversationHistory:
         key.
 
         Args:
-        password:
-            User-chosen password.  An empty string disables password-based
-            encryption and falls back to the auto-generated random key.
+            password:
+                User-chosen password.  An empty string disables password-based
+                encryption and falls back to the auto-generated random key.
 
         Raises:
-        RuntimeError
-            If the ``cryptography`` package is not installed.
+            RuntimeError: If the ``cryptography`` package is not installed.
         """
         if not _fernet_available():
             raise RuntimeError(
@@ -445,8 +445,7 @@ class ConversationHistory:
         before switching to *new_password*.
 
         Raises:
-        ValueError
-            If *old_password* is wrong (decryption fails).
+            ValueError: If *old_password* is wrong (decryption fails).
         """
         if self._path is None or not self._path.exists():
             self.set_password(new_password)
@@ -473,8 +472,8 @@ class ConversationHistory:
         permissions — callers are responsible for handling it securely.
 
         Args:
-        export_path:
-            Destination file path (will be created or overwritten).
+            export_path:
+                Destination file path (will be created or overwritten).
         """
         with self._lock:
             data = [m.to_dict() for m in self._messages]
@@ -482,10 +481,9 @@ class ConversationHistory:
         out = Path(export_path)
         out.parent.mkdir(parents=True, exist_ok=True)
         from src.security import secure_write
+
         secure_write(out, text)
-        logger.info(
-            "Exported %d messages (plaintext) → %s", len(data), out
-        )
+        logger.info("Exported %d messages (plaintext) → %s", len(data), out)
 
     def import_history(
         self,
@@ -499,29 +497,25 @@ class ConversationHistory:
         Supports both plain-JSON exports and Fernet-encrypted ``.enc`` files.
 
         Args:
-        import_path:
-            Path to the file to import.  May be a plain-JSON file produced by
-            :meth:`export_plaintext` or an encrypted ``.enc`` produced when
-            *encrypt* is enabled.
-        password:
-            Password for encrypted files.  Pass ``None`` for plain-JSON.
-            If the file looks encrypted and no password is supplied a
-            :class:`ValueError` is raised.
-        merge:
-            When ``True`` messages from the import are merged with the
-            existing history (deduplication by timestamp).  When ``False``
-            (default) the current history is **replaced** by the imported one.
+            import_path:
+                Path to the file to import.  May be a plain-JSON file produced by
+                :meth:`export_plaintext` or an encrypted ``.enc`` produced when
+                *encrypt* is enabled.
+            password:
+                Password for encrypted files.  Pass ``None`` for plain-JSON.
+                If the file looks encrypted and no password is supplied a
+                :class:`ValueError` is raised.
+            merge:
+                When ``True`` messages from the import are merged with the
+                existing history (deduplication by timestamp).  When ``False``
+                (default) the current history is **replaced** by the imported one.
 
         Returns:
-        int
             Number of messages successfully imported.
 
         Raises:
-        FileNotFoundError
-            If *import_path* does not exist.
-        ValueError
-            If the password is wrong, the file is not valid history JSON, or
-            the file appears encrypted but no password was given.
+            FileNotFoundError: If *import_path* does not exist.
+            ValueError: If the password is wrong, the file is not valid history JSON, or the file appears encrypted but no password was given.
         """
         path = Path(import_path)
         if not path.exists():
@@ -541,9 +535,7 @@ class ConversationHistory:
                     "Please provide the password used when it was saved."
                 )
             # Try salt file next to the import file first, then the default dir.
-            key = _derive_key_from_password(
-                password, path.parent, create_salt=False
-            )
+            key = _derive_key_from_password(password, path.parent, create_salt=False)
             if key is None:
                 key = _derive_key_from_password(
                     password, _DEFAULT_HISTORY_DIR, create_salt=False
@@ -583,9 +575,7 @@ class ConversationHistory:
             try:
                 imported.append(Message.from_dict(d))
             except (KeyError, TypeError) as exc:
-                logger.warning(
-                    "Skipped malformed message during import: %s", exc
-                )
+                logger.warning("Skipped malformed message during import: %s", exc)
 
         with self._lock:
             if merge:
@@ -600,9 +590,7 @@ class ConversationHistory:
 
         self._save()
         count = len(imported)
-        logger.info(
-            "Imported %d messages from %s (merge=%s)", count, path, merge
-        )
+        logger.info("Imported %d messages from %s (merge=%s)", count, path, merge)
         return count
 
     # ── Persistence ───────────────────────────────────────────────────────────
@@ -657,8 +645,6 @@ class ConversationHistory:
                 self._messages = [Message.from_dict(d) for d in raw]
                 if len(self._messages) > self._max:
                     self._messages = self._messages[-self._max :]
-            logger.info(
-                "Loaded %d messages from %s", len(self._messages), self._path
-            )
+            logger.info("Loaded %d messages from %s", len(self._messages), self._path)
         except (OSError, json.JSONDecodeError, KeyError) as exc:
             logger.warning("Could not load conversation history: %s", exc)

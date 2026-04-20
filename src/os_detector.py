@@ -5,8 +5,8 @@ Detects the running Linux distribution and environment so the AI assistant
 can generate distro-accurate commands (e.g. ``apt`` on Ubuntu/Debian,
 ``dnf`` on Fedora, ``pacman`` on Arch, etc.).
 
-Detection sources (in priority order)
---------------------------------------
+## Detection sources (in priority order)
+
 1. ``/etc/os-release``  — machine-readable, present on all modern distros.
 2. ``platform.freedesktop_os_release()``  — Python 3.10+ stdlib wrapper for
    the same file (used when available).
@@ -37,77 +37,78 @@ logger = logging.getLogger(__name__)
 # Placed in rough order of specificity so niche managers are found before
 # generic ones that may also be installed alongside them.
 _PKG_MANAGERS: list[tuple[str, str]] = [
-    ("pacman",  "pacman"),        # Arch, Manjaro, EndeavourOS …
-    ("paru",    "paru"),          # Arch AUR helper (wraps pacman)
-    ("yay",     "yay"),           # Arch AUR helper (wraps pacman)
-    ("dnf",     "dnf"),           # Fedora 22+, RHEL 8+, CentOS Stream
-    ("dnf5",    "dnf5"),          # Fedora 41+
-    ("yum",     "yum"),           # RHEL/CentOS 7 and older
-    ("zypper",  "zypper"),        # openSUSE, SLES
-    ("apt",     "apt"),           # Debian, Ubuntu, Mint, Pop!_OS …
-    ("apt-get", "apt-get"),       # older Debian/Ubuntu scripts
-    ("apk",     "apk"),           # Alpine Linux
-    ("emerge",  "emerge"),        # Gentoo, Calculate Linux
-    ("xbps-install", "xbps"),     # Void Linux
-    ("nix-env", "nix"),           # NixOS / Nix on other distros
-    ("guix",    "guix"),          # GNU Guix System
-    ("eopkg",   "eopkg"),         # Solus
-    ("pkg",     "pkg"),           # FreeBSD (non-Linux but handled gracefully)
+    ("pacman", "pacman"),  # Arch, Manjaro, EndeavourOS …
+    ("paru", "paru"),  # Arch AUR helper (wraps pacman)
+    ("yay", "yay"),  # Arch AUR helper (wraps pacman)
+    ("dnf", "dnf"),  # Fedora 22+, RHEL 8+, CentOS Stream
+    ("dnf5", "dnf5"),  # Fedora 41+
+    ("yum", "yum"),  # RHEL/CentOS 7 and older
+    ("zypper", "zypper"),  # openSUSE, SLES
+    ("apt", "apt"),  # Debian, Ubuntu, Mint, Pop!_OS …
+    ("apt-get", "apt-get"),  # older Debian/Ubuntu scripts
+    ("apk", "apk"),  # Alpine Linux
+    ("emerge", "emerge"),  # Gentoo, Calculate Linux
+    ("xbps-install", "xbps"),  # Void Linux
+    ("nix-env", "nix"),  # NixOS / Nix on other distros
+    ("guix", "guix"),  # GNU Guix System
+    ("eopkg", "eopkg"),  # Solus
+    ("pkg", "pkg"),  # FreeBSD (non-Linux but handled gracefully)
 ]
 
 # Map distro ID (from os-release) → canonical package manager name when the
 # executable alone isn't enough to distinguish (e.g. ID=ubuntu → apt).
 _ID_TO_PKG: dict[str, str] = {
-    "ubuntu":       "apt",
-    "debian":       "apt",
-    "linuxmint":    "apt",
-    "pop":          "apt",
-    "elementary":   "apt",
-    "kali":         "apt",
-    "raspbian":     "apt",
-    "fedora":       "dnf",
-    "rhel":         "dnf",
-    "centos":       "dnf",
-    "almalinux":    "dnf",
-    "rocky":        "dnf",
-    "ol":           "dnf",       # Oracle Linux
-    "opensuse-leap":    "zypper",
+    "ubuntu": "apt",
+    "debian": "apt",
+    "linuxmint": "apt",
+    "pop": "apt",
+    "elementary": "apt",
+    "kali": "apt",
+    "raspbian": "apt",
+    "fedora": "dnf",
+    "rhel": "dnf",
+    "centos": "dnf",
+    "almalinux": "dnf",
+    "rocky": "dnf",
+    "ol": "dnf",  # Oracle Linux
+    "opensuse-leap": "zypper",
     "opensuse-tumbleweed": "zypper",
-    "sles":         "zypper",
-    "arch":         "pacman",
-    "manjaro":      "pacman",
-    "endeavouros":  "pacman",
-    "garuda":       "pacman",
-    "artix":        "pacman",
-    "alpine":       "apk",
-    "gentoo":       "emerge",
-    "void":         "xbps",
-    "nixos":        "nix",
-    "guix":         "guix",
-    "solus":        "eopkg",
+    "sles": "zypper",
+    "arch": "pacman",
+    "manjaro": "pacman",
+    "endeavouros": "pacman",
+    "garuda": "pacman",
+    "artix": "pacman",
+    "alpine": "apk",
+    "gentoo": "emerge",
+    "void": "xbps",
+    "nixos": "nix",
+    "guix": "guix",
+    "solus": "eopkg",
 }
 
 # Map package manager → human-readable install command template
 _INSTALL_CMD: dict[str, str] = {
-    "apt":      "sudo apt install {package}",
-    "apt-get":  "sudo apt-get install {package}",
-    "dnf":      "sudo dnf install {package}",
-    "dnf5":     "sudo dnf5 install {package}",
-    "yum":      "sudo yum install {package}",
-    "zypper":   "sudo zypper install {package}",
-    "pacman":   "sudo pacman -S {package}",
-    "paru":     "paru -S {package}",
-    "yay":      "yay -S {package}",
-    "apk":      "sudo apk add {package}",
-    "emerge":   "sudo emerge {package}",
-    "xbps":     "sudo xbps-install {package}",
-    "nix":      "nix-env -iA nixpkgs.{package}",
-    "guix":     "guix install {package}",
-    "eopkg":    "sudo eopkg install {package}",
-    "pkg":      "sudo pkg install {package}",
+    "apt": "sudo apt install {package}",
+    "apt-get": "sudo apt-get install {package}",
+    "dnf": "sudo dnf install {package}",
+    "dnf5": "sudo dnf5 install {package}",
+    "yum": "sudo yum install {package}",
+    "zypper": "sudo zypper install {package}",
+    "pacman": "sudo pacman -S {package}",
+    "paru": "paru -S {package}",
+    "yay": "yay -S {package}",
+    "apk": "sudo apk add {package}",
+    "emerge": "sudo emerge {package}",
+    "xbps": "sudo xbps-install {package}",
+    "nix": "nix-env -iA nixpkgs.{package}",
+    "guix": "guix install {package}",
+    "eopkg": "sudo eopkg install {package}",
+    "pkg": "sudo pkg install {package}",
 }
 
 # ── Init system detection ─────────────────────────────────────────────────────
+
 
 def _detect_init() -> str:
     """Return the init system name: 'systemd', 'openrc', 'runit', 'sysv', or 'unknown'."""
@@ -138,6 +139,7 @@ def _detect_init() -> str:
 
 
 # ── Desktop environment detection ─────────────────────────────────────────────
+
 
 def _detect_desktop() -> str:
     """Return the desktop environment name or 'none' if running headless."""
@@ -301,10 +303,10 @@ def _read_legacy_release() -> dict[str, str]:
     """Try legacy distro-specific release files when os-release is absent."""
     checks: list[tuple[str, str, str]] = [
         # (file, id, name_template)
-        ("/etc/arch-release",   "arch",   "Arch Linux"),
+        ("/etc/arch-release", "arch", "Arch Linux"),
         ("/etc/alpine-release", "alpine", "Alpine Linux"),
         ("/etc/gentoo-release", "gentoo", "Gentoo Linux"),
-        ("/etc/void-release",   "void",   "Void Linux"),
+        ("/etc/void-release", "void", "Void Linux"),
     ]
     for path_str, distro_id, distro_name in checks:
         if Path(path_str).exists():
@@ -365,19 +367,28 @@ def detect() -> OSInfo:
     if not raw:
         raw = _read_legacy_release()
 
-    distro_id   = raw.get("ID", "").lower()
-    name        = raw.get("NAME", "")
+    distro_id = raw.get("ID", "").lower()
+    name = raw.get("NAME", "")
     pretty_name = raw.get("PRETTY_NAME", "")
-    version     = raw.get("VERSION_ID", raw.get("VERSION", ""))
-    codename    = raw.get("VERSION_CODENAME", raw.get("UBUNTU_CODENAME", ""))
-    id_like     = raw.get("ID_LIKE", "")
+    version = raw.get("VERSION_ID", raw.get("VERSION", ""))
+    codename = raw.get("VERSION_CODENAME", raw.get("UBUNTU_CODENAME", ""))
+    id_like = raw.get("ID_LIKE", "")
 
     # Strip keys already captured from the "extra" bucket
     _known = {
-        "ID", "NAME", "PRETTY_NAME", "VERSION_ID", "VERSION",
-        "VERSION_CODENAME", "UBUNTU_CODENAME", "ID_LIKE",
-        "HOME_URL", "SUPPORT_URL", "BUG_REPORT_URL",
-        "PRIVACY_POLICY_URL", "LOGO",
+        "ID",
+        "NAME",
+        "PRETTY_NAME",
+        "VERSION_ID",
+        "VERSION",
+        "VERSION_CODENAME",
+        "UBUNTU_CODENAME",
+        "ID_LIKE",
+        "HOME_URL",
+        "SUPPORT_URL",
+        "BUG_REPORT_URL",
+        "PRIVACY_POLICY_URL",
+        "LOGO",
     }
     extra = {k: v for k, v in raw.items() if k not in _known}
 

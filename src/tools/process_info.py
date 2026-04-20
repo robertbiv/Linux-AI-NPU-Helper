@@ -35,7 +35,7 @@ def _proc_mem_kb(pid: int) -> int:
     if idx != -1:
         try:
             end = text.find("\n", idx)
-            return int(text[idx + 6:end if end != -1 else None].split()[0])
+            return int(text[idx + 6 : end if end != -1 else None].split()[0])
         except (ValueError, IndexError):
             pass
     return 0
@@ -198,7 +198,7 @@ def _load_summary() -> str:
     if idx != -1:
         end = meminfo.find("\n", idx)
         try:
-            total = int(meminfo[idx + 9:end if end != -1 else None].split()[0])
+            total = int(meminfo[idx + 9 : end if end != -1 else None].split()[0])
         except (ValueError, IndexError):
             pass
 
@@ -206,7 +206,7 @@ def _load_summary() -> str:
     if idx != -1:
         end = meminfo.find("\n", idx)
         try:
-            avail = int(meminfo[idx + 13:end if end != -1 else None].split()[0])
+            avail = int(meminfo[idx + 13 : end if end != -1 else None].split()[0])
         except (ValueError, IndexError):
             pass
 

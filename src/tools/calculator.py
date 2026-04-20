@@ -17,20 +17,25 @@ def _safe_pow(a: Any, b: Any) -> Any:
         raise ValueError("Exponent too large")
     return operator.pow(a, b)
 
+
+
 def _safe_factorial(n: Any) -> Any:
     if isinstance(n, int) and n > 10000:
         raise ValueError("Argument too large for factorial")
     return math.factorial(n)
+
 
 def _safe_comb(n: Any, k: Any) -> Any:
     if isinstance(n, int) and n > 10000:
         raise ValueError("Argument too large for comb")
     return getattr(math, "comb")(n, k)
 
+
 def _safe_perm(n: Any, k: Any) -> Any:
     if isinstance(n, int) and n > 10000:
         raise ValueError("Argument too large for perm")
     return getattr(math, "perm")(n, k)
+
 
 # Allowed operators
 _OPERATORS = {
@@ -47,9 +52,7 @@ _OPERATORS = {
 }
 
 # Allowed math functions and constants
-_MATH_NAMES = {
-    k: v for k, v in math.__dict__.items() if not k.startswith("_")
-}
+_MATH_NAMES = {k: v for k, v in math.__dict__.items() if not k.startswith("_")}
 _MATH_NAMES["factorial"] = _safe_factorial
 if hasattr(math, "comb"):
     _MATH_NAMES["comb"] = _safe_comb
@@ -57,6 +60,7 @@ if hasattr(math, "perm"):
     _MATH_NAMES["perm"] = _safe_perm
 if hasattr(math, "pow"):
     _MATH_NAMES["pow"] = _safe_pow
+
 
 def _eval_ast(node: ast.AST) -> Any:
     if isinstance(node, ast.Expression):
@@ -99,6 +103,7 @@ def _eval_ast(node: ast.AST) -> Any:
         raise AttributeError(f"Unsupported attribute: {node.attr}")
     else:
         raise TypeError(f"Unsupported AST node: {type(node)}")
+
 
 class CalculatorTool(Tool):
     """Evaluate mathematical expressions safely."""

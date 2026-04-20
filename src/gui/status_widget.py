@@ -13,7 +13,6 @@ Displays live NPU metrics in card-style panels:
 All metric values can be pushed in via :meth:`StatusWidget.update_metrics`
 which accepts a plain dict so callers can populate it however they like
 (polling files in ``/sys``, onnxruntime callbacks, etc.).
-
 ## Usage
 ::
 
@@ -58,6 +57,7 @@ try:
         QVBoxLayout,
         QWidget,
     )
+
     _HAS_QT = True
 except ImportError:
     _HAS_QT = False
@@ -171,7 +171,9 @@ if _HAS_QT:
             # Header row: icon + badge
             header = QHBoxLayout()
             icon = QLabel("⬡")
-            icon.setStyleSheet(f"color: {T.TEXT_SECONDARY}; font-size: 16px; background: transparent;")
+            icon.setStyleSheet(
+                f"color: {T.TEXT_SECONDARY}; font-size: 16px; background: transparent;"
+            )
             header.addWidget(icon)
             header.addStretch()
             if badge_text:
@@ -235,11 +237,15 @@ if _HAS_QT:
     def _latency_row(label: str, value: str) -> QHBoxLayout:
         row = QHBoxLayout()
         lbl = QLabel(label)
-        lbl.setStyleSheet(f"color: {T.TEXT_SECONDARY}; font-size: 13px; background: transparent;")
+        lbl.setStyleSheet(
+            f"color: {T.TEXT_SECONDARY}; font-size: 13px; background: transparent;"
+        )
         row.addWidget(lbl)
         row.addStretch()
         val = QLabel(value)
-        val.setStyleSheet(f"color: {T.TEXT_PRIMARY}; font-size: 13px; background: transparent;")
+        val.setStyleSheet(
+            f"color: {T.TEXT_PRIMARY}; font-size: 13px; background: transparent;"
+        )
         row.addWidget(val)
         return row
 
@@ -335,20 +341,33 @@ if _HAS_QT:
 
             # ── Metric cards ───────────────────────────────────────────────
             self._card_clock = _MetricCard(
-                "Clock Speed", "78", "%", "NPU Clock Speed",
-                progress=78, bar_color=T.BLUE, badge_text="LIVE",
+                "Clock Speed",
+                "78",
+                "%",
+                "NPU Clock Speed",
+                progress=78,
+                bar_color=T.BLUE,
+                badge_text="LIVE",
             )
             layout.addWidget(self._card_clock)
 
             self._card_mem = _MetricCard(
-                "Memory Buffer", "62", "%", "Memory Buffer",
-                progress=62, bar_color=T.BLUE,
+                "Memory Buffer",
+                "62",
+                "%",
+                "Memory Buffer",
+                progress=62,
+                bar_color=T.BLUE,
             )
             layout.addWidget(self._card_mem)
 
             self._card_thermal = _MetricCard(
-                "Thermal Load", "54", "°C", "Thermal Load",
-                progress=54, bar_color=T.GREEN,
+                "Thermal Load",
+                "54",
+                "°C",
+                "Thermal Load",
+                progress=54,
+                bar_color=T.GREEN,
             )
             layout.addWidget(self._card_thermal)
 
@@ -410,7 +429,9 @@ if _HAS_QT:
 
             lat_title_row = QHBoxLayout()
             lat_icon = QLabel("⏱")
-            lat_icon.setStyleSheet(f"color: {T.BLUE}; font-size: 18px; background: transparent;")
+            lat_icon.setStyleSheet(
+                f"color: {T.BLUE}; font-size: 18px; background: transparent;"
+            )
             lat_title_row.addWidget(lat_icon)
             lat_title = QLabel("Inference Latency")
             lat_title.setStyleSheet(
@@ -498,12 +519,18 @@ if _HAS_QT:
             layout.addStretch()
 
             # Seed with defaults
-            self._refresh_kernels([
-                {"cmd": "EXEC", "name": "lora_fusion_v4.bin", "status": "READY"},
-                {"cmd": "LOAD", "name": "quantization_int8_map...", "status": "..."},
-                {"cmd": "STAT", "name": "stream_buffer_clear", "status": "OK"},
-                {"cmd": "SYNC", "name": "neural_engine_sync...", "status": "0ms"},
-            ])
+            self._refresh_kernels(
+                [
+                    {"cmd": "EXEC", "name": "lora_fusion_v4.bin", "status": "READY"},
+                    {
+                        "cmd": "LOAD",
+                        "name": "quantization_int8_map...",
+                        "status": "...",
+                    },
+                    {"cmd": "STAT", "name": "stream_buffer_clear", "status": "OK"},
+                    {"cmd": "SYNC", "name": "neural_engine_sync...", "status": "0ms"},
+                ]
+            )
             self._refresh_ctx_tags(["X-VECTOR ON", "FP16 ACCEL"])
 
             scroll.setWidget(page)
@@ -568,9 +595,7 @@ if _HAS_QT:
                     self._lat_first_row, f"{metrics['t_first_ms']}ms"
                 )
             if "t_per_ms" in metrics:
-                self._update_latency_row(
-                    self._lat_per_row, f"{metrics['t_per_ms']}ms"
-                )
+                self._update_latency_row(self._lat_per_row, f"{metrics['t_per_ms']}ms")
             if "jitter_ms" in metrics:
                 self._update_latency_row(
                     self._lat_jitter_row, f"{metrics['jitter_ms']}ms"

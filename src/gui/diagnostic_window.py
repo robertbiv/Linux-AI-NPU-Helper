@@ -15,7 +15,6 @@ unit-testable without a display.
   streams output to an embedded text view
 - **Auto-refresh** every 30 seconds (configurable)
 - **Copy report** — copies the full JSON report to the clipboard
-
 ## Usage
 ::
 
@@ -53,6 +52,7 @@ try:
         QVBoxLayout,
         QWidget,
     )
+
     _HAS_QT = True
 except ImportError:
     _HAS_QT = False
@@ -60,7 +60,7 @@ except ImportError:
 
 # Colour map for status values
 _STATUS_COLOURS = {
-    "ok":   "#27ae60",
+    "ok": "#27ae60",
     "warn": "#e67e22",
     "fail": "#c0392b",
     "skip": "#95a5a6",
@@ -71,8 +71,9 @@ if _HAS_QT:
 
     class _TestRunThread(QThread):
         """Runs the test suite in a background thread."""
+
         line_ready = pyqtSignal(str)
-        finished   = pyqtSignal(dict)
+        finished = pyqtSignal(dict)
 
         def __init__(self, reporter: Any, parent: QWidget | None = None) -> None:
             super().__init__(parent)
@@ -86,6 +87,7 @@ if _HAS_QT:
 
     class _RefreshThread(QThread):
         """Fetches the full diagnostic report in a background thread."""
+
         finished = pyqtSignal(dict)
 
         def __init__(self, reporter: Any, parent: QWidget | None = None) -> None:
@@ -99,7 +101,7 @@ if _HAS_QT:
     # ── Helper widget builders ─────────────────────────────────────────────────
 
     def _status_item(text: str, status: str) -> QTableWidgetItem:
-        item   = QTableWidgetItem(text)
+        item = QTableWidgetItem(text)
         item.setData(Qt.AccessibleTextRole, text)
         colour = _STATUS_COLOURS.get(status.lower(), "#95a5a6")
         item.setForeground(QColor(colour))
@@ -138,14 +140,14 @@ if _HAS_QT:
         """Live diagnostic dashboard.
 
         Args:
-        config:
-            The application :class:`~src.config.Config` object.
-        registry:
-            Optional :class:`~src.tools.ToolRegistry` for tool status.
-        settings_manager:
-            Optional :class:`~src.settings.SettingsManager`.
-        parent:
-            Optional parent widget.
+            config:
+                The application :class:`~src.config.Config` object.
+            registry:
+                Optional :class:`~src.tools.ToolRegistry` for tool status.
+            settings_manager:
+                Optional :class:`~src.settings.SettingsManager`.
+            parent:
+                Optional parent widget.
         """
 
         def __init__(
@@ -157,6 +159,7 @@ if _HAS_QT:
         ) -> None:
             super().__init__(parent)
             from src.gui.diagnostic_reporter import DiagnosticReporter
+
             self._reporter = DiagnosticReporter(config, registry, settings_manager)
             self._report: dict = {}
 
@@ -167,6 +170,7 @@ if _HAS_QT:
             # Apply desktop theme
             try:
                 from src.gui.theme import apply_to_app
+
                 apply_to_app(QApplication.instance())
             except Exception as exc:  # noqa: BLE001
                 logger.debug("Could not apply theme: %s", exc)
@@ -247,7 +251,7 @@ if _HAS_QT:
             test_layout.addLayout(test_btns)
 
             self._test_output = QPlainTextEdit()
-            self._test_output.setAccessibleName('Test Output Log')
+            self._test_output.setAccessibleName("Test Output Log")
             self._test_output.setReadOnly(True)
             self._test_output.setFont(QFont("Monospace", 9))
             test_layout.addWidget(self._test_output)
@@ -286,6 +290,7 @@ if _HAS_QT:
 
         def _on_report(self, report: dict) -> None:
             import datetime
+
             self._report = report
             self._populate_overview(report)
             self._populate_security(report.get("security", {}))
@@ -293,7 +298,7 @@ if _HAS_QT:
             self._populate_tools(report.get("tools", []))
 
             overall = report.get("overall_status", "skip")
-            colour  = _STATUS_COLOURS.get(overall, "#95a5a6")
+            colour = _STATUS_COLOURS.get(overall, "#95a5a6")
             self._overall_label.setText(f"● Overall: {overall.upper()}")
             self._overall_label.setStyleSheet(f"color: {colour};")
             self._last_refresh.setText(
@@ -306,76 +311,86 @@ if _HAS_QT:
             # Backend
             b = report.get("backend", {})
             latency = f"  ({b.get('latency_ms')} ms)" if b.get("latency_ms") else ""
-            rows.append((
-                "AI Backend",
-                b.get("status", "skip"),
-                f"{b.get('backend','')} @ {b.get('url','')}{latency}  {b.get('error','')}",
-            ))
+            rows.append(
+                (
+                    "AI Backend",
+                    b.get("status", "skip"),
+                    f"{b.get('backend', '')} @ {b.get('url', '')}{latency}  {b.get('error', '')}",
+                )
+            )
 
             # NPU
             n = report.get("npu", {})
             providers = ", ".join(n.get("providers", [])) or "none"
-            rows.append((
-                "NPU (ONNX)",
-                n.get("status", "skip"),
-                f"ONNX {n.get('onnxruntime_version','n/a')}  providers: {providers}  {n.get('error','')}",
-            ))
+            rows.append(
+                (
+                    "NPU (ONNX)",
+                    n.get("status", "skip"),
+                    f"ONNX {n.get('onnxruntime_version', 'n/a')}  providers: {providers}  {n.get('error', '')}",
+                )
+            )
 
             # Security
             sec = report.get("security", {})
-            rows.append((
-                "Security",
-                sec.get("status", "skip"),
-                f"{sec.get('issues', 0)} issue(s) — see Security tab",
-            ))
+            rows.append(
+                (
+                    "Security",
+                    sec.get("status", "skip"),
+                    f"{sec.get('issues', 0)} issue(s) — see Security tab",
+                )
+            )
 
             # Settings
             s = report.get("settings", {})
-            rows.append((
-                "Settings",
-                s.get("status", "skip"),
-                f"{s.get('path','')}  exists={s.get('exists',False)}  "
-                f"listeners={s.get('listener_count',0)}",
-            ))
+            rows.append(
+                (
+                    "Settings",
+                    s.get("status", "skip"),
+                    f"{s.get('path', '')}  exists={s.get('exists', False)}  "
+                    f"listeners={s.get('listener_count', 0)}",
+                )
+            )
 
             # System
             sys_ = report.get("system", {})
-            rows.append((
-                "System",
-                sys_.get("status", "skip"),
-                f"{sys_.get('os_name','')} {sys_.get('os_version','')}  "
-                f"DE={sys_.get('desktop_environment','?')}  "
-                f"shell={sys_.get('shell','?')}",
-            ))
+            rows.append(
+                (
+                    "System",
+                    sys_.get("status", "skip"),
+                    f"{sys_.get('os_name', '')} {sys_.get('os_version', '')}  "
+                    f"DE={sys_.get('desktop_environment', '?')}  "
+                    f"shell={sys_.get('shell', '?')}",
+                )
+            )
 
             # Network
             net = report.get("network", {})
-            rows.append((
-                "Network guard",
-                net.get("status", "skip"),
-                net.get("error") or (
-                    f"URL: {net.get('backend_url','')}  "
-                    f"local={net.get('backend_url_is_local',False)}"
-                ),
-            ))
+            rows.append(
+                (
+                    "Network guard",
+                    net.get("status", "skip"),
+                    net.get("error")
+                    or (
+                        f"URL: {net.get('backend_url', '')}  "
+                        f"local={net.get('backend_url_is_local', False)}"
+                    ),
+                )
+            )
 
             table = _make_status_table(rows, accessible_name="Overview Status Table")
             # Replace existing table in layout
             layout = self._overview_tab.layout()
-            old    = layout.itemAt(0)
+            old = layout.itemAt(0)
             if old and old.widget():
                 old.widget().deleteLater()
             layout.insertWidget(0, table)
 
         def _populate_security(self, sec: dict) -> None:
             checks = sec.get("checks", [])
-            rows   = [
-                (c["label"], c["status"], c["detail"])
-                for c in checks
-            ]
+            rows = [(c["label"], c["status"], c["detail"]) for c in checks]
             table = _make_status_table(rows, accessible_name="Security Status Table")
             layout = self._security_tab.layout()
-            old    = layout.itemAt(0)
+            old = layout.itemAt(0)
             if old and old.widget():
                 old.widget().deleteLater()
             layout.insertWidget(0, table)
@@ -385,13 +400,15 @@ if _HAS_QT:
                 (
                     d["name"],
                     d["status"],
-                    f"v{d['version']}" if d["version"] else ("required" if d["required"] else "optional"),
+                    f"v{d['version']}"
+                    if d["version"]
+                    else ("required" if d["required"] else "optional"),
                 )
                 for d in deps
             ]
             table = _make_status_table(rows, accessible_name="Dependencies Status Table")
             layout = self._deps_tab.layout()
-            old    = layout.itemAt(0)
+            old = layout.itemAt(0)
             if old and old.widget():
                 old.widget().deleteLater()
             layout.insertWidget(0, table)
@@ -407,7 +424,7 @@ if _HAS_QT:
             ]
             table = _make_status_table(rows, accessible_name="Tools Status Table")
             layout = self._tools_tab.layout()
-            old    = layout.itemAt(0)
+            old = layout.itemAt(0)
             if old and old.widget():
                 old.widget().deleteLater()
             layout.insertWidget(0, table)
@@ -427,12 +444,12 @@ if _HAS_QT:
 
         def _on_tests_done(self, result: dict) -> None:
             self._run_tests_btn.setEnabled(True)
-            passed  = result.get("passed",  0)
-            failed  = result.get("failed",  0)
-            total   = result.get("total",   0)
+            passed = result.get("passed", 0)
+            failed = result.get("failed", 0)
+            total = result.get("total", 0)
             elapsed = result.get("duration_s", 0)
-            status  = result.get("status",  "skip")
-            colour  = _STATUS_COLOURS.get(status, "#95a5a6")
+            status = result.get("status", "skip")
+            colour = _STATUS_COLOURS.get(status, "#95a5a6")
             summary = (
                 f"<span style='color:{colour}'>"
                 f"{passed}/{total} passed, {failed} failed "

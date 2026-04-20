@@ -55,10 +55,12 @@ class PasswordGeneratorTool(Tool):
         # Ensure it contains at least one of each required type if symbols are included
         if include_symbols and length >= 4:
             while True:
-                if (any(c.islower() for c in password)
-                        and any(c.isupper() for c in password)
-                        and any(c.isdigit() for c in password)
-                        and any(c in "!@#$%^&*()-_=+[]{}|;:,.<>?" for c in password)):
+                if (
+                    any(c.islower() for c in password)
+                    and any(c.isupper() for c in password)
+                    and any(c.isdigit() for c in password)
+                    and any(c in "!@#$%^&*()-_=+[]{}|;:,.<>?" for c in password)
+                ):
                     break
                 password = "".join(secrets.choice(alphabet) for _ in range(length))
 

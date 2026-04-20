@@ -66,7 +66,9 @@ class TimeTool(Tool):
 
                 ts_float = float(ts)
                 if tz == "utc":
-                    dt = datetime.datetime.fromtimestamp(ts_float, datetime.timezone.utc)
+                    dt = datetime.datetime.fromtimestamp(
+                        ts_float, datetime.timezone.utc
+                    )
                     tz_str = "UTC"
                 else:
                     dt = datetime.datetime.fromtimestamp(ts_float)

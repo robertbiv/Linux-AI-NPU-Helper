@@ -27,12 +27,12 @@ class NPUSession:
         # session memory freed here
 
     Args:
-    model_path:
-        Path to a pre-compiled ONNX model.
-    providers:
-        Ordered list of ONNX Runtime Execution Providers to try.
-    vitisai_config:
-        Optional path to the VitisAI EP JSON configuration file.
+        model_path:
+            Path to a pre-compiled ONNX model.
+        providers:
+            Ordered list of ONNX Runtime Execution Providers to try.
+        vitisai_config:
+            Optional path to the VitisAI EP JSON configuration file.
     """
 
     def __init__(
@@ -58,7 +58,12 @@ class NPUSession:
         logger.debug("Available ONNX RT providers: %s", available)
 
         if providers is None:
-            providers = ["VitisAIExecutionProvider", "OpenVINOExecutionProvider", "QNNExecutionProvider", "CPUExecutionProvider"]
+            providers = [
+                "VitisAIExecutionProvider",
+                "OpenVINOExecutionProvider",
+                "QNNExecutionProvider",
+                "CPUExecutionProvider",
+            ]
 
         # Filter to only providers that are actually available
         selected: list[Any] = []
@@ -67,9 +72,7 @@ class NPUSession:
                 if p == "VitisAIExecutionProvider" and vitisai_config:
                     cfg_path = str(vitisai_config)
                     if os.path.exists(cfg_path):
-                        selected.append(
-                            (p, {"config_file": cfg_path})
-                        )
+                        selected.append((p, {"config_file": cfg_path}))
                     else:
                         logger.warning(
                             "VitisAI config not found at %s; skipping VitisAI EP.",
@@ -118,17 +121,14 @@ class NPUSession:
         """Run inference.
 
         Args:
-        feeds:
-            Dict mapping input names to numpy arrays.
+            feeds:
+                Dict mapping input names to numpy arrays.
 
         Returns:
-        list
             Raw ONNX Runtime output tensors.
 
-        Note
-        ----
-        The session may be ``None`` after :py:meth:`close` is called.  Always
-        use this object inside a ``with`` block or check :py:attr:`is_open`.
+            The session may be ``None`` after :py:meth:`close` is called.  Always
+            use this object inside a ``with`` block or check :py:attr:`is_open`.
         """
         if self._session is None:
             raise RuntimeError("NPUSession has been closed.")
@@ -165,12 +165,16 @@ class NPUManager:
 
         try:
             import onnxruntime as ort  # type: ignore[import]
+
             available = ort.get_available_providers()
-            self._available = any(p in available for p in (
-                "VitisAIExecutionProvider",
-                "OpenVINOExecutionProvider",
-                "QNNExecutionProvider"
-            ))
+            self._available = any(
+                p in available
+                for p in (
+                    "VitisAIExecutionProvider",
+                    "OpenVINOExecutionProvider",
+                    "QNNExecutionProvider",
+                )
+            )
         except ImportError:
             self._available = False
 
@@ -187,6 +191,7 @@ class NPUManager:
 
         try:
             import onnxruntime as ort  # type: ignore[import]
+
             info["onnxruntime_version"] = ort.__version__
             info["providers"] = ort.get_available_providers()
         except ImportError:
@@ -201,7 +206,9 @@ class NPUManager:
                 with os.scandir(amd_gpu_path) as it:
                     for d in it:
                         try:
-                            if (Path(d.path) / "device" / "vendor").read_text(errors="replace").strip().lower() == "0x1002":  # AMD vendor ID
+                            if (Path(d.path) / "device" / "vendor").read_text(
+                                errors="replace"
+                            ).strip().lower() == "0x1002":  # AMD vendor ID
                                 amd_devices.append(d.name)
                         except OSError:
                             pass
@@ -217,7 +224,7 @@ class NPUManager:
 
     def load_model(
         self,
-        progress_callback=None,  # Callable[[str], None] | None
+        progress_callback: "Callable[[str], None] | None" = None,
     ) -> "NPUSession | None":
         """Load the configured ONNX model onto the NPU (or CPU fallback).
 
@@ -227,11 +234,11 @@ class NPUManager:
         automatically from Hugging Face on first call.
 
         Args:
-        progress_callback:
-            Optional callable receiving download-progress strings.
+            progress_callback:
+                Optional callable receiving download-progress strings.
 
         Returns:
-        NPUSession | None
+            NPUSession | None
             Loaded session, or ``None`` if no model is available.
         """
         model_path = self._config.get("model_path", "")
@@ -248,7 +255,12 @@ class NPUManager:
                 model_path=model_path,
                 providers=self._config.get(
                     "providers",
-                    ["VitisAIExecutionProvider", "OpenVINOExecutionProvider", "QNNExecutionProvider", "CPUExecutionProvider"],
+                    [
+                        "VitisAIExecutionProvider",
+                        "OpenVINOExecutionProvider",
+                        "QNNExecutionProvider",
+                        "CPUExecutionProvider",
+                    ],
                 ),
                 vitisai_config=self._config.get("vitisai_config"),
             )
@@ -277,8 +289,7 @@ class NPUManager:
             return ""
 
         logger.info(
-            "Default NPU model (Phi-3-mini ONNX) not found; "
-            "downloading automatically…"
+            "Default NPU model (Phi-3-mini ONNX) not found; downloading automatically…"
         )
         try:
             path = installer.install(
@@ -290,7 +301,11 @@ class NPUManager:
             logger.warning("Auto-install of default NPU model failed: %s", exc)
             return ""
 
-    def run_inference(self, feeds: dict[str, Any], progress_callback=None) -> list[Any]:
+    def run_inference(
+        self,
+        feeds: dict[str, Any],
+        progress_callback: "Callable[[str], None] | None" = None,
+    ) -> list[Any]:
         """Load the model, run inference, and immediately unload if configured.
 
         When ``resources.unload_model_after_inference`` is ``True`` (default)
@@ -298,10 +313,10 @@ class NPUManager:
         released straight away.
 
         Args:
-        feeds:
-            Dict mapping input names to numpy arrays.
-        progress_callback:
-            Optional callable for download-progress messages on first run.
+            feeds:
+                Dict mapping input names to numpy arrays.
+            progress_callback:
+                Optional callable for download-progress messages on first run.
         """
         session = self.load_model(progress_callback=progress_callback)
         if session is None:
@@ -312,12 +327,14 @@ class NPUManager:
             if self._resource_config.get("unload_model_after_inference", True):
                 self.unload()
 
-    def get_session(self, progress_callback=None) -> "NPUSession | None":
+    def get_session(
+        self, progress_callback: "Callable[[str], None] | None" = None
+    ) -> "NPUSession | None":
         """Return the cached session, loading it if necessary.
 
         Args:
-        progress_callback:
-            Optional callable for download-progress messages on first run.
+            progress_callback:
+                Optional callable for download-progress messages on first run.
         """
         if self._session is None:
             return self.load_model(progress_callback=progress_callback)

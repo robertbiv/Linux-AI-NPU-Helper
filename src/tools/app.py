@@ -42,18 +42,18 @@ _DESKTOP_DIRS: list[Path] = [
 
 # Package manager search commands keyed by executable name
 _PKG_SEARCH_CMDS: dict[str, list[str]] = {
-    "apt":      ["apt", "search", "--names-only"],
-    "apt-get":  ["apt-cache", "search"],
-    "dnf":      ["dnf", "search"],
-    "dnf5":     ["dnf5", "search"],
-    "yum":      ["yum", "search"],
-    "pacman":   ["pacman", "-Ss"],
-    "zypper":   ["zypper", "search"],
-    "apk":      ["apk", "search"],
-    "emerge":   ["emerge", "--search"],
+    "apt": ["apt", "search", "--names-only"],
+    "apt-get": ["apt-cache", "search"],
+    "dnf": ["dnf", "search"],
+    "dnf5": ["dnf5", "search"],
+    "yum": ["yum", "search"],
+    "pacman": ["pacman", "-Ss"],
+    "zypper": ["zypper", "search"],
+    "apk": ["apk", "search"],
+    "emerge": ["emerge", "--search"],
     "xbps-install": ["xbps-query", "-Rs"],
-    "nix-env":  ["nix-env", "-qaP", "--description"],
-    "eopkg":    ["eopkg", "search"],
+    "nix-env": ["nix-env", "-qaP", "--description"],
+    "eopkg": ["eopkg", "search"],
 }
 
 
@@ -98,13 +98,15 @@ def _load_desktop_cache() -> list[dict[str, Any]]:
                     if no_display == "true":
                         continue
 
-                    _desktop_cache.append({
-                        "name":    name,
-                        "comment": comment,
-                        "exec":    exec_val,
-                        "file":    entry.path,
-                        "stem":    stem,
-                    })
+                    _desktop_cache.append(
+                        {
+                            "name": name,
+                            "comment": comment,
+                            "exec": exec_val,
+                            "file": entry.path,
+                            "stem": stem,
+                        }
+                    )
         except OSError:
             continue
     return _desktop_cache
@@ -130,6 +132,7 @@ def _desktop_field(text: str, key: str, default: str = "") -> str:
 def _find_pkg_manager() -> tuple[str, list[str]] | None:
     """Return (executable, search_cmd_prefix) for the first available PM."""
     import shutil  # lazy
+
     for exe, cmd in _PKG_SEARCH_CMDS.items():
         if shutil.which(exe):
             return exe, cmd
@@ -138,7 +141,7 @@ def _find_pkg_manager() -> tuple[str, list[str]] | None:
 
 def _launch_app(name: str) -> tuple[bool, str]:
     """Try to open an application by name.  Returns (success, message)."""
-    import shutil     # lazy
+    import shutil  # lazy
     import subprocess  # lazy
 
     # 1. gtk-launch (searches .desktop by desktop-id)
@@ -149,7 +152,8 @@ def _launch_app(name: str) -> tuple[bool, str]:
             try:
                 r = subprocess.run(
                     ["gtk-launch", did],
-                    capture_output=True, timeout=5,
+                    capture_output=True,
+                    timeout=5,
                 )
                 if r.returncode == 0:
                     return True, f"Launched '{name}' via gtk-launch."
@@ -158,6 +162,7 @@ def _launch_app(name: str) -> tuple[bool, str]:
 
     # 2. Exec= field from .desktop file
     import shlex  # lazy
+
     for hit in _load_desktop_cache():
         if hit["name"].lower() != name.lower():
             continue
@@ -282,7 +287,9 @@ class AppTool(Tool):
             snippet = hit["name"]
             if hit["comment"]:
                 snippet += f" — {hit['comment']}"
-            results.append(SearchResult(path=hit["file"], snippet=f"[installed] {snippet}"))
+            results.append(
+                SearchResult(path=hit["file"], snippet=f"[installed] {snippet}")
+            )
 
         # 2. Package manager search
         pm_info = _find_pkg_manager()
@@ -295,14 +302,18 @@ class AppTool(Tool):
                     text=True,
                     timeout=20,
                 )
-                lines = [line.strip() for line in proc.stdout.splitlines() if line.strip()][:30]
+                lines = [
+                    line.strip() for line in proc.stdout.splitlines() if line.strip()
+                ][:30]
                 for line in lines:
                     results.append(SearchResult(path="pkg_manager", snippet=line))
             except subprocess.TimeoutExpired:
-                results.append(SearchResult(
-                    path="pkg_manager",
-                    snippet="Package manager search timed out.",
-                ))
+                results.append(
+                    SearchResult(
+                        path="pkg_manager",
+                        snippet="Package manager search timed out.",
+                    )
+                )
             except Exception as exc:  # noqa: BLE001
                 logger.warning("Package search error: %s", exc)
 
@@ -321,6 +332,7 @@ class AppTool(Tool):
         # Build install command using os_detector
         try:
             from src.os_detector import detect
+
             os_info = detect()
             if os_info.install_command:
                 cmd = os_info.install_command.format(package=package)

@@ -41,12 +41,12 @@ class CommandExecutor:
     """Extracts and safely executes shell commands from AI responses.
 
     Args:
-    safety_config:
-        The ``safety`` section from the application config.
-    confirm_callback:
-        A callable that receives a command string and returns ``True`` if the
-        user approves execution, ``False`` otherwise.  Defaults to a
-        terminal-based confirmation prompt.
+        safety_config:
+            The ``safety`` section from the application config.
+        confirm_callback:
+            A callable that receives a command string and returns ``True`` if the
+            user approves execution, ``False`` otherwise.  Defaults to a
+            terminal-based confirmation prompt.
     """
 
     def __init__(
@@ -103,11 +103,10 @@ class CommandExecutor:
         """Ask for confirmation and run *command* if approved.
 
         Args:
-        command:
-            Raw shell command string.
+            command:
+                Raw shell command string.
 
         Returns:
-        CommandResult
             Contains the exit code, stdout, and stderr.  The subprocess is
             fully reaped before this method returns.
         """
@@ -169,9 +168,12 @@ class CommandExecutor:
                 output=CommandOutput(returncode=-1, stdout="", stderr=str(exc)),
             )
 
-    def _execute_pipeline(self, command_str: str, timeout: int = 120) -> subprocess.CompletedProcess:
+    def _execute_pipeline(
+        self, command_str: str, timeout: int = 120
+    ) -> subprocess.CompletedProcess:
         """Execute a shell pipeline safely without shell=True."""
         import shlex
+
         try:
             tokens = shlex.split(command_str)
         except ValueError as e:
@@ -192,7 +194,14 @@ class CommandExecutor:
             if t == "|":
                 if not current_cmd:
                     raise ValueError("Syntax error: unexpected '|'")
-                pipelines.append({"args": current_cmd, "in": in_file, "out": out_file, "append": append_out})
+                pipelines.append(
+                    {
+                        "args": current_cmd,
+                        "in": in_file,
+                        "out": out_file,
+                        "append": append_out,
+                    }
+                )
                 current_cmd = []
                 in_file = None
                 out_file = None
@@ -215,13 +224,22 @@ class CommandExecutor:
                 in_file = tokens[i + 1]
                 i += 1
             elif t in ("&&", "||", ";"):
-                raise ValueError(f"Shell operator '{t}' is not supported for security reasons.")
+                raise ValueError(
+                    f"Shell operator '{t}' is not supported for security reasons."
+                )
             else:
                 current_cmd.append(t)
             i += 1
 
         if current_cmd:
-            pipelines.append({"args": current_cmd, "in": in_file, "out": out_file, "append": append_out})
+            pipelines.append(
+                {
+                    "args": current_cmd,
+                    "in": in_file,
+                    "out": out_file,
+                    "append": append_out,
+                }
+            )
         elif pipelines:
             raise ValueError("Syntax error: unexpected end of command after '|'")
 
@@ -234,8 +252,8 @@ class CommandExecutor:
 
         try:
             for idx, step in enumerate(pipelines):
-                is_first = (idx == 0)
-                is_last = (idx == len(pipelines) - 1)
+                is_first = idx == 0
+                is_last = idx == len(pipelines) - 1
 
                 cmd_args = step["args"]
                 stdin_f = step["in"]
@@ -244,7 +262,9 @@ class CommandExecutor:
 
                 if stdin_f:
                     if not is_first:
-                        raise ValueError("Input redirection '<' is only supported for the first command in a pipeline.")
+                        raise ValueError(
+                            "Input redirection '<' is only supported for the first command in a pipeline."
+                        )
                     f = open(stdin_f, "r")  # noqa: SIM115
                     opened_files.append(f)
                     stdin_dest = f
@@ -314,7 +334,7 @@ class CommandExecutor:
                 args=command_str,
                 returncode=returncode,
                 stdout=out or "",
-                stderr=final_err
+                stderr=final_err,
             )
 
         finally:
@@ -327,6 +347,7 @@ class CommandExecutor:
                     f.close()
                     if hasattr(f, "name") and "ai_cmd_stderr_" in f.name:
                         import os
+
                         if os.path.exists(f.name):
                             os.remove(f.name)
                 except Exception:

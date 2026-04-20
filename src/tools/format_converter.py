@@ -10,6 +10,7 @@ from src.tools._base import SearchResult, Tool, ToolResult
 
 logger = logging.getLogger(__name__)
 
+
 class FormatConverterTool(Tool):
     """Convert text between JSON and YAML."""
 
@@ -42,7 +43,9 @@ class FormatConverterTool(Tool):
         text = args.get("text", "")
 
         if src not in ("json", "yaml") or tgt not in ("json", "yaml"):
-            return ToolResult(tool_name=self.name, error="Formats must be 'json' or 'yaml'.")
+            return ToolResult(
+                tool_name=self.name, error="Formats must be 'json' or 'yaml'."
+            )
 
         if not text:
             return ToolResult(tool_name=self.name, error="'text' is required.")
@@ -62,7 +65,7 @@ class FormatConverterTool(Tool):
 
             return ToolResult(
                 tool_name=self.name,
-                results=[SearchResult(path=f"convert:{src}_to_{tgt}", snippet=result)]
+                results=[SearchResult(path=f"convert:{src}_to_{tgt}", snippet=result)],
             )
         except Exception as exc:
             logger.debug("Format conversion error: %s", exc)

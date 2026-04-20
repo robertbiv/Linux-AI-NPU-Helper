@@ -8,6 +8,7 @@ from src.tools._base import SearchResult, Tool, ToolResult
 
 logger = logging.getLogger(__name__)
 
+
 class QRCodeTool(Tool):
     """Generate ASCII QR codes from text."""
 
@@ -31,20 +32,24 @@ class QRCodeTool(Tool):
 
         try:
             import qrcode
+
             qr = qrcode.QRCode(border=2)
             qr.add_data(text)
             qr.make(fit=True)
 
             import io
+
             f = io.StringIO()
             qr.print_ascii(out=f)
             result = f.getvalue()
 
             return ToolResult(
                 tool_name=self.name,
-                results=[SearchResult(path="qrcode", snippet=result)]
+                results=[SearchResult(path="qrcode", snippet=result)],
             )
         except ImportError:
-            return ToolResult(tool_name=self.name, error="qrcode library not installed.")
+            return ToolResult(
+                tool_name=self.name, error="qrcode library not installed."
+            )
         except Exception as exc:
             return ToolResult(tool_name=self.name, error=f"QR generation failed: {exc}")

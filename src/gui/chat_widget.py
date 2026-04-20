@@ -7,7 +7,6 @@ widget that supports inline code-block rendering.
 
 The widget emits ``message_submitted(str)`` when the user presses Send or
 Enter so the parent can forward the text to the AI backend.
-
 ## Usage
 ::
 
@@ -44,6 +43,7 @@ try:
         QVBoxLayout,
         QWidget,
     )
+
     _HAS_QT = True
 except ImportError:
     _HAS_QT = False
@@ -57,7 +57,9 @@ if _HAS_QT:
     class _CodeBlock(QFrame):
         """Dark terminal-style code block widget."""
 
-        def __init__(self, code: str, label: str = "", parent: QWidget | None = None) -> None:
+        def __init__(
+            self, code: str, label: str = "", parent: QWidget | None = None
+        ) -> None:
             super().__init__(parent)
             self.setObjectName("codeBlock")
             self.setStyleSheet(
@@ -75,7 +77,9 @@ if _HAS_QT:
             if label:
                 header = QHBoxLayout()
                 lbl = QLabel(label)
-                lbl.setStyleSheet(f"color: {T.TEXT_CODE}; font-size: 11px; font-family: monospace;")
+                lbl.setStyleSheet(
+                    f"color: {T.TEXT_CODE}; font-size: 11px; font-family: monospace;"
+                )
                 header.addWidget(lbl)
                 header.addStretch()
                 layout.addLayout(header)
@@ -85,9 +89,7 @@ if _HAS_QT:
             text_widget.setTextInteractionFlags(Qt.TextSelectableByMouse)
             text_widget.setFont(QFont("Monospace", 10))
             text_widget.setStyleSheet(
-                f"color: {T.TEXT_CODE};"
-                f"background: transparent;"
-                f"line-height: 1.4;"
+                f"color: {T.TEXT_CODE};background: transparent;line-height: 1.4;"
             )
             layout.addWidget(text_widget)
 
@@ -96,11 +98,20 @@ if _HAS_QT:
     def _colorize_log_line(line: str) -> str:
         """Return HTML-coloured version of a log line."""
         if line.startswith("ERROR:"):
-            return f'<span style="color:{T.TEXT_CODE_ERR}; font-weight:bold">ERROR:</span>' + line[6:]
+            return (
+                f'<span style="color:{T.TEXT_CODE_ERR}; font-weight:bold">ERROR:</span>'
+                + line[6:]
+            )
         if line.startswith("INFO:"):
-            return f'<span style="color:{T.TEXT_BLUE}; font-weight:bold">INFO:</span>' + line[5:]
+            return (
+                f'<span style="color:{T.TEXT_BLUE}; font-weight:bold">INFO:</span>'
+                + line[5:]
+            )
         if line.startswith("ACTION:"):
-            return f'<span style="color:{T.GREEN}; font-weight:bold">ACTION:</span>' + line[7:]
+            return (
+                f'<span style="color:{T.GREEN}; font-weight:bold">ACTION:</span>'
+                + line[7:]
+            )
         return line
 
     # ── Message bubble ────────────────────────────────────────────────────────
@@ -111,7 +122,7 @@ if _HAS_QT:
         def __init__(
             self,
             content: str,
-            role: str,                       # "user" | "assistant"
+            role: str,  # "user" | "assistant"
             model_name: str = "",
             timestamp: str = "",
             parent: QWidget | None = None,
@@ -275,7 +286,9 @@ if _HAS_QT:
             lbl.setTextFormat(Qt.RichText)
             lbl.setText(html)
             lbl.setWordWrap(True)
-            lbl.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.LinksAccessibleByMouse)
+            lbl.setTextInteractionFlags(
+                Qt.TextSelectableByMouse | Qt.LinksAccessibleByMouse
+            )
             lbl.setStyleSheet(
                 f"color: {T.TEXT_PRIMARY}; font-size: 14px; background: transparent;"
                 f"line-height: 1.5;"
@@ -308,6 +321,7 @@ if _HAS_QT:
         def _copy_to_clipboard(self, text: str) -> None:
             try:
                 from PyQt5.QtWidgets import QApplication
+
                 QApplication.clipboard().setText(text)
             except Exception:
                 pass
@@ -338,7 +352,9 @@ if _HAS_QT:
 
             dot = QLabel("●")
             color = T.GREEN if online else T.RED
-            dot.setStyleSheet(f"color: {color}; font-size: 14px; background: transparent;")
+            dot.setStyleSheet(
+                f"color: {color}; font-size: 14px; background: transparent;"
+            )
             layout.addWidget(dot)
 
             lbl = QLabel(text)
@@ -435,7 +451,7 @@ if _HAS_QT:
             row.addWidget(attach_btn)
 
             self._input = QPlainTextEdit()
-            self._input.setAccessibleName('Chat Input')
+            self._input.setAccessibleName("Chat Input")
             self._input.setPlaceholderText("Message Neural Assistant…")
             self._input.setFixedHeight(42)
             self._input.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -467,9 +483,13 @@ if _HAS_QT:
 
         def eventFilter(self, obj: object, event: object) -> bool:
             from PyQt5.QtCore import QEvent
+
             if obj is self._input and event.type() == QEvent.KeyPress:
                 from PyQt5.QtCore import Qt as _Qt
-                if event.key() == _Qt.Key_Return and not (event.modifiers() & _Qt.ShiftModifier):
+
+                if event.key() == _Qt.Key_Return and not (
+                    event.modifiers() & _Qt.ShiftModifier
+                ):
                     self._on_send()
                     return True
             return super().eventFilter(obj, event)
@@ -491,7 +511,9 @@ if _HAS_QT:
         def append_user_message(self, text: str) -> None:
             """Add a user chat bubble to the conversation."""
             ts = datetime.now().strftime("%H:%M")
-            bubble = _MessageBubble(text, role="user", timestamp=ts, parent=self._msg_container)
+            bubble = _MessageBubble(
+                text, role="user", timestamp=ts, parent=self._msg_container
+            )
             self._insert_bubble(bubble)
 
         def append_assistant_message(
@@ -582,10 +604,10 @@ if _HAS_QT:
             """Inject a custom screenshot callable (for testing or custom UI).
 
             Args:
-            fn:
-                ``Callable[[], bytes | None]`` — called instead of the default
-                opacity-trick capture when ``ui.auto_send_screen`` is True.
-                Pass ``None`` to restore the default behaviour.
+                fn:
+                    ``Callable[[], bytes | None]`` — called instead of the default
+                    opacity-trick capture when ``ui.auto_send_screen`` is True.
+                    Pass ``None`` to restore the default behaviour.
             """
             self._screenshot_fn = fn
 
@@ -608,11 +630,13 @@ if _HAS_QT:
 
             try:
                 from PyQt5.QtWidgets import QApplication  # noqa: PLC0415
+
                 win = self.window()
                 win.setWindowOpacity(0.0)
                 QApplication.processEvents()
 
                 from src.tools.screenshot_tool import ScreenshotTool  # noqa: PLC0415
+
                 data = ScreenshotTool._capture(monitor=0, quality=75)
             except Exception as exc:  # noqa: BLE001
                 logger.debug("Screenshot failed: %s", exc)

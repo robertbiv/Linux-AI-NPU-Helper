@@ -21,11 +21,13 @@ def _parse_grep_output(text: str, limit: int) -> list[SearchResult]:
     # Performance optimization: Use finditer with MULTILINE instead of splitlines
     # to avoid creating millions of temporary string objects.
     for m in _GREP_LINE_RE.finditer(text):
-        results.append(SearchResult(
-            path=m.group(1),
-            line_number=int(m.group(2)),
-            snippet=m.group(3).strip(),
-        ))
+        results.append(
+            SearchResult(
+                path=m.group(1),
+                line_number=int(m.group(2)),
+                snippet=m.group(3).strip(),
+            )
+        )
         if len(results) >= limit:
             break
     return results
@@ -34,8 +36,8 @@ def _parse_grep_output(text: str, limit: int) -> list[SearchResult]:
 class SearchInFilesTool(Tool):
     """Search for text inside files.
 
-    Backend priority
-    ----------------
+    ## Backend priority
+
     1. ``rg`` (ripgrep) – fastest; respects ``.gitignore``; written in Rust.
     2. ``grep -r``      – always available; slower on large trees.
     """
@@ -76,14 +78,16 @@ class SearchInFilesTool(Tool):
         "required": ["query"],
     }
 
-    def __init__(self, default_search_path: str | Path | None = None,
-                 blocked_paths: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        default_search_path: str | Path | None = None,
+        blocked_paths: list[str] | None = None,
+    ) -> None:
         self._default_path = Path(default_search_path or Path.home())
         self._backend: str | None = None
         # Expand and resolve blocked paths at init time so the check is fast
         self._blocked: list[Path] = [
-            Path(p).expanduser().resolve()
-            for p in (blocked_paths or [])
+            Path(p).expanduser().resolve() for p in (blocked_paths or [])
         ]
 
     def _is_blocked(self, path: Path) -> bool:
@@ -92,14 +96,12 @@ class SearchInFilesTool(Tool):
             resolved = path.resolve()
         except OSError:
             return False
-        return any(
-            resolved == b or b in resolved.parents
-            for b in self._blocked
-        )
+        return any(resolved == b or b in resolved.parents for b in self._blocked)
 
     def _detect_backend(self) -> str:
         if self._backend is None:
             import shutil  # lazy — only when tool actually runs
+
             self._backend = "rg" if shutil.which("rg") else "grep"
             logger.debug("SearchInFilesTool backend: %s", self._backend)
         return self._backend
@@ -113,9 +115,7 @@ class SearchInFilesTool(Tool):
 
         # Security: refuse to search inside blocked paths
         if self._is_blocked(search_path):
-            logger.warning(
-                "SearchInFilesTool: search path %s is blocked.", search_path
-            )
+            logger.warning("SearchInFilesTool: search path %s is blocked.", search_path)
             return ToolResult(
                 tool_name=self.name,
                 error=f"Searching in {search_path} is not permitted for security reasons.",
@@ -160,16 +160,22 @@ class SearchInFilesTool(Tool):
         limit: int,
     ) -> list[SearchResult]:
         import subprocess  # lazy
-        cmd = ["rg", "--line-number", "--no-heading", "--max-count", "1",
-               "--max-filesize", "10M"]
+
+        cmd = [
+            "rg",
+            "--line-number",
+            "--no-heading",
+            "--max-count",
+            "1",
+            "--max-filesize",
+            "10M",
+        ]
         if not case_sensitive:
             cmd.append("--ignore-case")
         if file_pattern:
             cmd += ["--glob", file_pattern]
         cmd += ["--", query, str(search_path)]
-        proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=20
-        )
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
         return _parse_grep_output(proc.stdout, limit)
 
     @staticmethod
@@ -181,17 +187,15 @@ class SearchInFilesTool(Tool):
         limit: int,
     ) -> list[SearchResult]:
         import subprocess  # lazy
-        cmd = ["grep", "-r", "-n", "--binary-files=without-match",
-               "--max-count=1"]
+
+        cmd = ["grep", "-r", "-n", "--binary-files=without-match", "--max-count=1"]
         if not case_sensitive:
             cmd.append("-i")
         if file_pattern:
             cmd += ["--include", file_pattern]
         cmd += ["--", query, str(search_path)]
         try:
-            proc = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=30
-            )
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         except subprocess.TimeoutExpired:
             logger.warning("grep timed out; returning partial results.")
             return []

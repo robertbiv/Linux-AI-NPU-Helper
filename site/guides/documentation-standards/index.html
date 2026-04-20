@@ -488,43 +488,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
 
         <li class="md-nav__item">
-  <a href="#the-current-state" class="md-nav__link">
+  <a href="#the-standards" class="md-nav__link">
     <span class="md-ellipsis">
 
-        The Current State
+        The Standards
 
     </span>
   </a>
 
-    <nav class="md-nav" aria-label="The Current State">
-      <ul class="md-nav__list">
-
-          <li class="md-nav__item">
-  <a href="#configuration-vs-codebase-mismatch" class="md-nav__link">
-    <span class="md-ellipsis">
-
-        Configuration vs. Codebase Mismatch
-
-    </span>
-  </a>
-
-</li>
-
-      </ul>
-    </nav>
-
-</li>
-
-        <li class="md-nav__item">
-  <a href="#recommended-standards-the-better-way" class="md-nav__link">
-    <span class="md-ellipsis">
-
-        Recommended Standards (The "Better Way")
-
-    </span>
-  </a>
-
-    <nav class="md-nav" aria-label="Recommended Standards (The &#34;Better Way&#34;)">
+    <nav class="md-nav" aria-label="The Standards">
       <ul class="md-nav__list">
 
           <li class="md-nav__item">
@@ -1100,43 +1072,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
 
         <li class="md-nav__item">
-  <a href="#the-current-state" class="md-nav__link">
+  <a href="#the-standards" class="md-nav__link">
     <span class="md-ellipsis">
 
-        The Current State
+        The Standards
 
     </span>
   </a>
 
-    <nav class="md-nav" aria-label="The Current State">
-      <ul class="md-nav__list">
-
-          <li class="md-nav__item">
-  <a href="#configuration-vs-codebase-mismatch" class="md-nav__link">
-    <span class="md-ellipsis">
-
-        Configuration vs. Codebase Mismatch
-
-    </span>
-  </a>
-
-</li>
-
-      </ul>
-    </nav>
-
-</li>
-
-        <li class="md-nav__item">
-  <a href="#recommended-standards-the-better-way" class="md-nav__link">
-    <span class="md-ellipsis">
-
-        Recommended Standards (The "Better Way")
-
-    </span>
-  </a>
-
-    <nav class="md-nav" aria-label="Recommended Standards (The &#34;Better Way&#34;)">
+    <nav class="md-nav" aria-label="The Standards">
       <ul class="md-nav__list">
 
           <li class="md-nav__item">
@@ -1287,18 +1231,13 @@
 <h1 id="documentation-standards-and-formatting">Documentation Standards and Formatting<a class="headerlink" href="#documentation-standards-and-formatting" title="Permanent link">&para;</a></h1>
 <p>This guide outlines the documentation standards for the Linux AI NPU Assistant project. It serves as a reference for developers to ensure consistency across the codebase and the generated MkDocs site.</p>
 <hr />
-<h2 id="the-current-state">The Current State<a class="headerlink" href="#the-current-state" title="Permanent link">&para;</a></h2>
+<h2 id="the-standards">The Standards<a class="headerlink" href="#the-standards" title="Permanent link">&para;</a></h2>
 <p>The project uses <a href="https://www.mkdocs.org/">MkDocs</a> with the <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a> theme for site generation. Auto-generated API documentation is handled by the <code>mkdocstrings[python]</code> plugin.</p>
-<h3 id="configuration-vs-codebase-mismatch">Configuration vs. Codebase Mismatch<a class="headerlink" href="#configuration-vs-codebase-mismatch" title="Permanent link">&para;</a></h3>
-<p>Currently, there is a discrepancy between the project's configuration and some of the existing source code:</p>
 <ul>
 <li><strong>Configuration (<code>mkdocs.yml</code>)</strong>: The <code>mkdocstrings</code> plugin is configured to parse docstrings using the <strong>Google style</strong> (<code>docstring_style: google</code>).</li>
-<li><strong>Source Code</strong>: Some existing modules (e.g., <code>src.config</code>) use the <strong>NumPy style</strong> (e.g., <code>Parameters</code> and <code>----------</code> headers).</li>
+<li><strong>Source Code</strong>: All modules use the <strong>Google style</strong>.</li>
 </ul>
-<p>Because <code>mkdocstrings</code> is configured for Google style, NumPy-style docstrings may not render optimally in the generated documentation.</p>
-<hr />
-<h2 id="recommended-standards-the-better-way">Recommended Standards (The "Better Way")<a class="headerlink" href="#recommended-standards-the-better-way" title="Permanent link">&para;</a></h2>
-<p>To resolve the discrepancy and ensure clean, maintainable, and correctly rendered documentation, all new code and updates to existing code should adhere to the following standards:</p>
+<p>To ensure clean, maintainable, and correctly rendered documentation, all new code and updates to existing code should adhere to the following standards:</p>
 <h3 id="1-adopt-google-style-docstrings">1. Adopt Google-Style Docstrings<a class="headerlink" href="#1-adopt-google-style-docstrings" title="Permanent link">&para;</a></h3>
 <p>The <strong>Google style</strong> is recommended over the NumPy style because:</p>
 <ol>
