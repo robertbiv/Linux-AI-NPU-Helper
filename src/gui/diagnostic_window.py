@@ -106,10 +106,12 @@ if _HAS_QT:
         item.setFlags(item.flags() & ~Qt.ItemIsEditable)
         return item
 
-    def _make_status_table(rows: list[tuple[str, str, str]]) -> QTableWidget:
+    def _make_status_table(
+        rows: list[tuple[str, str, str]], accessible_name: str = "Diagnostic Status Table"
+    ) -> QTableWidget:
         """Create a read-only table of (label, status, detail) rows."""
         table = QTableWidget(len(rows), 3)
-        table.setAccessibleName("Diagnostic Status Table")
+        table.setAccessibleName(accessible_name)
         table.setHorizontalHeaderLabels(["Check", "Status", "Details"])
         table.horizontalHeader().setStretchLastSection(True)
         table.verticalHeader().setVisible(False)
@@ -201,6 +203,7 @@ if _HAS_QT:
             self._overview_tab = QWidget()
             ov_layout = QVBoxLayout(self._overview_tab)
             self._overview_table = QTableWidget()
+            self._overview_table.setAccessibleName("Overview Status Table")
             ov_layout.addWidget(self._overview_table)
             self._tabs.addTab(self._overview_tab, "Overview")
 
@@ -208,6 +211,7 @@ if _HAS_QT:
             self._security_tab = QWidget()
             sec_layout = QVBoxLayout(self._security_tab)
             self._security_table = QTableWidget()
+            self._security_table.setAccessibleName("Security Status Table")
             sec_layout.addWidget(self._security_table)
             self._tabs.addTab(self._security_tab, "Security")
 
@@ -215,6 +219,7 @@ if _HAS_QT:
             self._deps_tab = QWidget()
             deps_layout = QVBoxLayout(self._deps_tab)
             self._deps_table = QTableWidget()
+            self._deps_table.setAccessibleName("Dependencies Status Table")
             deps_layout.addWidget(self._deps_table)
             self._tabs.addTab(self._deps_tab, "Dependencies")
 
@@ -222,6 +227,7 @@ if _HAS_QT:
             self._tools_tab = QWidget()
             tools_layout = QVBoxLayout(self._tools_tab)
             self._tools_table = QTableWidget()
+            self._tools_table.setAccessibleName("Tools Status Table")
             tools_layout.addWidget(self._tools_table)
             self._tabs.addTab(self._tools_tab, "Tools")
 
@@ -353,7 +359,7 @@ if _HAS_QT:
                 ),
             ))
 
-            table = _make_status_table(rows)
+            table = _make_status_table(rows, accessible_name="Overview Status Table")
             # Replace existing table in layout
             layout = self._overview_tab.layout()
             old    = layout.itemAt(0)
@@ -367,7 +373,7 @@ if _HAS_QT:
                 (c["label"], c["status"], c["detail"])
                 for c in checks
             ]
-            table = _make_status_table(rows)
+            table = _make_status_table(rows, accessible_name="Security Status Table")
             layout = self._security_tab.layout()
             old    = layout.itemAt(0)
             if old and old.widget():
@@ -383,7 +389,7 @@ if _HAS_QT:
                 )
                 for d in deps
             ]
-            table = _make_status_table(rows)
+            table = _make_status_table(rows, accessible_name="Dependencies Status Table")
             layout = self._deps_tab.layout()
             old    = layout.itemAt(0)
             if old and old.widget():
@@ -399,7 +405,7 @@ if _HAS_QT:
                 )
                 for t in tools
             ]
-            table = _make_status_table(rows)
+            table = _make_status_table(rows, accessible_name="Tools Status Table")
             layout = self._tools_tab.layout()
             old    = layout.itemAt(0)
             if old and old.widget():

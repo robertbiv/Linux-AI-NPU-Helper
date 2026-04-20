@@ -1,7 +1,3 @@
-## 2024-04-17 - Add AccessibleName to PyQt buttons
-**Learning:** QToolButton and icon-only QPushButton in PyQt need setAccessibleName to be read properly by screen readers, even when setToolTip is provided. While some screen readers fallback to tooltips, setting accessible name is the standard and most robust way to ensure accessibility for icon-only buttons.
-**Action:** Add setAccessibleName to all icon-only buttons in the GUI, mirroring their tooltips, to ensure proper accessibility.
-
-## 2024-04-18 - Add AccessibleName to PyQt Item Widgets
-**Learning:** In PyQt5, container widgets that display items, such as `QListWidget` and `QTableWidget`, need an explicit `setAccessibleName()` called on the parent widget instance itself to ensure screen readers announce the overall purpose of the container when it receives focus, beyond just reading the individual items.
-**Action:** When adding accessibility to item-based widgets, set `setAccessibleName` on the main widget (e.g., `self._list.setAccessibleName("Available Models")` and `table.setAccessibleName("Diagnostic Status Table")`).
+## 2024-04-20 - Adding Accessibility Names to Placeholder Tables
+**Learning:** In PyQt applications, tables (like `QTableWidget`) might be replaced or populated dynamically. When a placeholder UI component is rendered initially and may receive keyboard focus before the actual data asynchronously completes loading, it's critical to attach an accessible name (`setAccessibleName()`) to the placeholder table itself. This ensures screen reader users don't encounter a completely unlabelled component if they interact with it quickly during load. Additionally, when lists or tables serve as navigational containers, ensuring they have visible `:focus` borders (like `1px solid {BLUE}`) helps keyboard users orient themselves within complex tabbed dialogs.
+**Action:** When creating new dynamically loaded widget panels with list/table containers in this design system, always assign a default `setAccessibleName` during `_build_ui` and explicitly apply `:focus` styles in `src/gui/npu_theme.py`.
