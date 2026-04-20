@@ -25,3 +25,6 @@
 ## 2025-03-01 - [Optimizing regex parsing of large text outputs]
 **Learning:** When parsing large multi-line text outputs (like results from `grep` or `rg`) for regex matches, calling `text.splitlines()` and iterating through every line to apply `.match()` creates immense memory allocation overhead.
 **Action:** Instead, append `re.MULTILINE` to the compiled regular expression and use `pattern.finditer(text)`. This allows the C-level regex engine to scan the single string lazily without allocating millions of temporary string objects. In benchmarks, this reduces parsing time by over 300x (e.g., from ~1.9s down to ~0.005s) when searching for limited results.
+### 2025-05-14
+- Caching desktop environment detection in `src/gui/theme.py` using `@lru_cache(maxsize=1)` resulted in a ~45x performance improvement (from 3.08μs to 0.07μs per call).
+- When caching functions that depend on environment variables, ensured tests clear the cache using `func.cache_clear()` to maintain test isolation.

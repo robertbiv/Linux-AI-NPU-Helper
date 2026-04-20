@@ -14,6 +14,10 @@ from src.gui.theme import (
 )
 
 class TestDetectDesktopEnvironment:
+    @pytest.fixture(autouse=True)
+    def clear_de_cache(self):
+        detect_desktop_environment.cache_clear()
+
     def test_gnome(self, monkeypatch):
         monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
         assert detect_desktop_environment() == "gnome"
