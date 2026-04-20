@@ -1,17 +1,19 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Web tool registration."""
+
 from src.tools._base import ToolRegistry
 
-def _register_web_tools(registry: ToolRegistry, cfg: dict) -> None:
-    from src.tools.web_search      import WebSearchTool
-    from src.tools.web_fetch       import WebFetchTool
 
-    web_cfg        = cfg.get("web_search", {})
+def _register_web_tools(registry: ToolRegistry, cfg: dict) -> None:
+    from src.tools.web_search import WebSearchTool
+    from src.tools.web_fetch import WebFetchTool
+
+    web_cfg = cfg.get("web_search", {})
     default_engine = web_cfg.get("engine", "duckduckgo")
     extra_engines: dict[str, str] = web_cfg.get("engines", {})
 
-    fetch_cfg      = cfg.get("web_fetch", {})
-    fetch_enabled  = bool(fetch_cfg.get("enabled", False))
+    fetch_cfg = cfg.get("web_fetch", {})
+    fetch_enabled = bool(fetch_cfg.get("enabled", False))
 
     registry.register_lazy(
         name=WebSearchTool.name,

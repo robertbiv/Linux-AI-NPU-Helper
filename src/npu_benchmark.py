@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 # ── Data model ────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class HardwareCapabilities:
     """Measured / estimated capabilities of the host hardware."""
@@ -100,13 +101,14 @@ class HardwareCapabilities:
         tops_str = f"{self.npu_tops:.0f} TOPS" if self.npu_tops else "NPU"
         tier_map = {
             "high": f"High-performance NPU ({tops_str}) — all catalog models supported.",
-            "mid":  f"Mid-range NPU ({tops_str}) — quantized models up to ~8 B recommended.",
-            "low":  f"Entry-level NPU ({tops_str}) — small quantized models (≤3 B) recommended.",
+            "mid": f"Mid-range NPU ({tops_str}) — quantized models up to ~8 B recommended.",
+            "low": f"Entry-level NPU ({tops_str}) — small quantized models (≤3 B) recommended.",
         }
         return tier_map[self.tier]
 
 
 # ── Probe helpers ─────────────────────────────────────────────────────────────
+
 
 def _read_sys(path: str) -> str:
     try:
@@ -150,16 +152,16 @@ def _read_cpuinfo() -> list[dict[str, str]]:
 # Known CPU model → NPU TOPS mappings (heuristic, lowercase substring match)
 _CPU_TOPS: list[tuple[str, float, str]] = [
     # pattern, TOPS, vendor
-    ("ryzen ai 9 hx",          50.0, "amd_ryzen_ai"),   # Strix Point
-    ("ryzen ai 7",             16.0, "amd_ryzen_ai"),   # Hawk Point
-    ("ryzen ai 5",             16.0, "amd_ryzen_ai"),   # Hawk Point
-    ("ryzen ai",               10.0, "amd_ryzen_ai"),   # Phoenix generic
-    ("core ultra 200v",        48.0, "intel_arc"),      # Lunar Lake
-    ("core ultra 2",           34.0, "intel_arc"),      # Arrow Lake
-    ("core ultra",             34.0, "intel_arc"),      # Meteor Lake
-    ("snapdragon x elite",     45.0, "qualcomm"),
-    ("snapdragon x plus",      45.0, "qualcomm"),
-    ("snapdragon x",           45.0, "qualcomm"),
+    ("ryzen ai 9 hx", 50.0, "amd_ryzen_ai"),  # Strix Point
+    ("ryzen ai 7", 16.0, "amd_ryzen_ai"),  # Hawk Point
+    ("ryzen ai 5", 16.0, "amd_ryzen_ai"),  # Hawk Point
+    ("ryzen ai", 10.0, "amd_ryzen_ai"),  # Phoenix generic
+    ("core ultra 200v", 48.0, "intel_arc"),  # Lunar Lake
+    ("core ultra 2", 34.0, "intel_arc"),  # Arrow Lake
+    ("core ultra", 34.0, "intel_arc"),  # Meteor Lake
+    ("snapdragon x elite", 45.0, "qualcomm"),
+    ("snapdragon x plus", 45.0, "qualcomm"),
+    ("snapdragon x", 45.0, "qualcomm"),
 ]
 
 # /sys paths that indicate AMD Ryzen AI NPU presence
@@ -191,12 +193,16 @@ def _detect_npu_from_onnx() -> bool:
     """Return True when a usable NPU execution provider is available."""
     try:
         import onnxruntime as ort  # type: ignore[import]
+
         available = ort.get_available_providers()
-        return any(p in available for p in (
-            "VitisAIExecutionProvider",
-            "OpenVINOExecutionProvider",
-            "QNNExecutionProvider"
-        ))
+        return any(
+            p in available
+            for p in (
+                "VitisAIExecutionProvider",
+                "OpenVINOExecutionProvider",
+                "QNNExecutionProvider",
+            )
+        )
     except ImportError:
         return False
 
@@ -222,6 +228,7 @@ def _gpu_model_from_sys() -> str:
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
+
 
 @lru_cache(maxsize=1)
 def probe_hardware() -> HardwareCapabilities:
@@ -257,9 +264,7 @@ def probe_hardware() -> HardwareCapabilities:
         except ValueError:
             pass
         # Try /sys for boost frequency
-        max_freq = _read_sys(
-            "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
-        )
+        max_freq = _read_sys("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq")
         if max_freq:
             try:
                 hw.cpu_freq_ghz = int(max_freq) / 1_000_000
@@ -295,9 +300,12 @@ def probe_hardware() -> HardwareCapabilities:
 
     logger.info(
         "Hardware probe: CPU=%r cores=%d RAM=%.1f GB NPU=%s TOPS=%.0f tier=%s",
-        hw.cpu_model, hw.cpu_cores, hw.ram_gb,
+        hw.cpu_model,
+        hw.cpu_cores,
+        hw.ram_gb,
         hw.npu_vendor if hw.npu_available else "none",
-        hw.npu_tops, hw.tier,
+        hw.npu_tops,
+        hw.tier,
     )
     return hw
 
@@ -319,14 +327,13 @@ def adjust_npu_fit(static_fit: str, hw: HardwareCapabilities) -> str:
     """Return a hardware-adjusted NPU fit rating.
 
     Args:
-    static_fit:
-        The pre-defined catalog rating (``"excellent"`` / ``"good"`` /
-        ``"fair"`` / ``"not_recommended"``).
-    hw:
-        :class:`HardwareCapabilities` for the current machine.
+        static_fit:
+            The pre-defined catalog rating (``"excellent"`` / ``"good"`` /
+            ``"fair"`` / ``"not_recommended"``).
+        hw:
+            :class:`HardwareCapabilities` for the current machine.
 
     Returns:
-    str
         Adjusted fit rating — may be better or worse than *static_fit*.
     """
     fit = static_fit

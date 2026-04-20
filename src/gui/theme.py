@@ -19,7 +19,6 @@ naturally with the user's desktop.
 The module is pure Python — Qt is imported lazily inside
 :func:`apply_to_app` only, so the rest of the codebase can import
 :mod:`src.gui.theme` without PyQt5 being installed.
-
 ## Example
 >>> from src.gui.theme import detect_desktop_environment, get_theme_for_de
 >>> de = detect_desktop_environment()
@@ -38,45 +37,48 @@ logger = logging.getLogger(__name__)
 
 # ── Data types ────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class ColourPalette:
     """RGB colour values for a Qt QPalette.
 
     All hex strings are in ``#RRGGBB`` format.
     """
-    window:          str = "#f0f0f0"   # QColorGroup::Window
-    window_text:     str = "#1a1a1a"   # QColorGroup::WindowText
-    base:            str = "#ffffff"   # QColorGroup::Base (input backgrounds)
-    alternate_base:  str = "#f5f5f5"   # QColorGroup::AlternateBase
-    button:          str = "#e0e0e0"   # QColorGroup::Button
-    button_text:     str = "#1a1a1a"   # QColorGroup::ButtonText
-    text:            str = "#1a1a1a"   # QColorGroup::Text
-    highlight:       str = "#3584e4"   # QColorGroup::Highlight (accent)
-    highlight_text:  str = "#ffffff"   # QColorGroup::HighlightedText
-    tooltip_base:    str = "#ffffcc"   # QColorGroup::ToolTipBase
-    tooltip_text:    str = "#1a1a1a"   # QColorGroup::ToolTipText
-    mid:             str = "#c8c8c8"   # QColorGroup::Mid
-    shadow:          str = "#808080"   # QColorGroup::Shadow
-    dark:            str = "#a0a0a0"   # QColorGroup::Dark
+
+    window: str = "#f0f0f0"  # QColorGroup::Window
+    window_text: str = "#1a1a1a"  # QColorGroup::WindowText
+    base: str = "#ffffff"  # QColorGroup::Base (input backgrounds)
+    alternate_base: str = "#f5f5f5"  # QColorGroup::AlternateBase
+    button: str = "#e0e0e0"  # QColorGroup::Button
+    button_text: str = "#1a1a1a"  # QColorGroup::ButtonText
+    text: str = "#1a1a1a"  # QColorGroup::Text
+    highlight: str = "#3584e4"  # QColorGroup::Highlight (accent)
+    highlight_text: str = "#ffffff"  # QColorGroup::HighlightedText
+    tooltip_base: str = "#ffffcc"  # QColorGroup::ToolTipBase
+    tooltip_text: str = "#1a1a1a"  # QColorGroup::ToolTipText
+    mid: str = "#c8c8c8"  # QColorGroup::Mid
+    shadow: str = "#808080"  # QColorGroup::Shadow
+    dark: str = "#a0a0a0"  # QColorGroup::Dark
 
 
 @dataclass
 class DarkColourPalette(ColourPalette):
     """Dark variant — active when the system prefers a dark colour scheme."""
-    window:          str = "#2d2d2d"
-    window_text:     str = "#e0e0e0"
-    base:            str = "#1e1e1e"
-    alternate_base:  str = "#282828"
-    button:          str = "#3c3c3c"
-    button_text:     str = "#e0e0e0"
-    text:            str = "#e0e0e0"
-    highlight:       str = "#3584e4"
-    highlight_text:  str = "#ffffff"
-    tooltip_base:    str = "#3c3c3c"
-    tooltip_text:    str = "#e0e0e0"
-    mid:             str = "#505050"
-    shadow:          str = "#1a1a1a"
-    dark:            str = "#404040"
+
+    window: str = "#2d2d2d"
+    window_text: str = "#e0e0e0"
+    base: str = "#1e1e1e"
+    alternate_base: str = "#282828"
+    button: str = "#3c3c3c"
+    button_text: str = "#e0e0e0"
+    text: str = "#e0e0e0"
+    highlight: str = "#3584e4"
+    highlight_text: str = "#ffffff"
+    tooltip_base: str = "#3c3c3c"
+    tooltip_text: str = "#e0e0e0"
+    mid: str = "#505050"
+    shadow: str = "#1a1a1a"
+    dark: str = "#404040"
 
 
 @dataclass
@@ -104,15 +106,16 @@ class Theme:
     extra_stylesheet:
         Additional QSS applied on top of the base style.
     """
-    de:               str          = "unknown"
-    style_name:       str          = "Fusion"
-    light:            ColourPalette = field(default_factory=ColourPalette)
-    dark:             ColourPalette = field(default_factory=DarkColourPalette)
-    accent_hex:       str          = "#3584e4"
-    font_family:      str          = ""
-    font_size_pt:     int          = 0
-    icon_theme:       str          = ""
-    extra_stylesheet: str          = ""
+
+    de: str = "unknown"
+    style_name: str = "Fusion"
+    light: ColourPalette = field(default_factory=ColourPalette)
+    dark: ColourPalette = field(default_factory=DarkColourPalette)
+    accent_hex: str = "#3584e4"
+    font_family: str = ""
+    font_size_pt: int = 0
+    icon_theme: str = ""
+    extra_stylesheet: str = ""
 
 
 # ── Desktop environment detection ─────────────────────────────────────────────
@@ -120,24 +123,24 @@ class Theme:
 #: DE name → canonical key mapping.  Values are lower-cased substrings that
 #: appear in the XDG_CURRENT_DESKTOP / DESKTOP_SESSION environment variables.
 _DE_MAP: dict[str, str] = {
-    "gnome":      "gnome",
-    "unity":      "gnome",          # Ubuntu Unity uses GNOME stack
-    "budgie":     "budgie",
-    "pop":        "gnome",          # Pop!_OS GNOME
-    "kde":        "kde",
-    "plasma":     "kde",
-    "lxqt":       "lxqt",
-    "xfce":       "xfce",
-    "mate":       "mate",
-    "cinnamon":   "cinnamon",
-    "pantheon":   "pantheon",
-    "deepin":     "deepin",
-    "dde":        "deepin",
+    "gnome": "gnome",
+    "unity": "gnome",  # Ubuntu Unity uses GNOME stack
+    "budgie": "budgie",
+    "pop": "gnome",  # Pop!_OS GNOME
+    "kde": "kde",
+    "plasma": "kde",
+    "lxqt": "lxqt",
+    "xfce": "xfce",
+    "mate": "mate",
+    "cinnamon": "cinnamon",
+    "pantheon": "pantheon",
+    "deepin": "deepin",
+    "dde": "deepin",
     "enlightenment": "enlightenment",
-    "sway":       "sway",
-    "hyprland":   "hyprland",
-    "i3":         "i3",
-    "openbox":    "openbox",
+    "sway": "sway",
+    "hyprland": "hyprland",
+    "i3": "i3",
+    "openbox": "openbox",
 }
 
 
@@ -151,7 +154,6 @@ def detect_desktop_environment() -> str:
     3. ``GDMSESSION``
 
     Returns:
-    str
         Lower-cased canonical DE name, e.g. ``"gnome"``, ``"kde"``,
         ``"xfce"``.  Returns ``"unknown"`` if detection fails.
     """
@@ -191,16 +193,23 @@ def _prefers_dark() -> bool:
 
 # ── Theme definitions ─────────────────────────────────────────────────────────
 
+
 def _gnome_theme() -> Theme:
     return Theme(
         de="gnome",
         style_name="Fusion",
         light=ColourPalette(
-            window="#f6f5f4", window_text="#1a1a1a",
-            base="#ffffff", alternate_base="#f0eeec",
-            button="#e0dedd", button_text="#1a1a1a",
-            highlight="#3584e4", highlight_text="#ffffff",
-            mid="#c8c5c2", shadow="#6c6966", dark="#aaa8a5",
+            window="#f6f5f4",
+            window_text="#1a1a1a",
+            base="#ffffff",
+            alternate_base="#f0eeec",
+            button="#e0dedd",
+            button_text="#1a1a1a",
+            highlight="#3584e4",
+            highlight_text="#ffffff",
+            mid="#c8c5c2",
+            shadow="#6c6966",
+            dark="#aaa8a5",
         ),
         dark=DarkColourPalette(
             highlight="#3584e4",
@@ -228,20 +237,32 @@ def _kde_theme() -> Theme:
     # Use empty style_name so Qt picks Breeze automatically when installed
     return Theme(
         de="kde",
-        style_name="",          # Let KDE/Breeze handle it natively
+        style_name="",  # Let KDE/Breeze handle it natively
         light=ColourPalette(
-            window="#eff0f1", window_text="#1d1d1d",
-            base="#fcfcfc", alternate_base="#f4f4f4",
-            button="#eff0f1", button_text="#1d1d1d",
-            highlight="#3daee9", highlight_text="#ffffff",
-            mid="#c8c9ca", shadow="#7d7d7d", dark="#acacac",
+            window="#eff0f1",
+            window_text="#1d1d1d",
+            base="#fcfcfc",
+            alternate_base="#f4f4f4",
+            button="#eff0f1",
+            button_text="#1d1d1d",
+            highlight="#3daee9",
+            highlight_text="#ffffff",
+            mid="#c8c9ca",
+            shadow="#7d7d7d",
+            dark="#acacac",
         ),
         dark=DarkColourPalette(
-            window="#31363b", window_text="#eff0f1",
-            base="#232629", alternate_base="#2c3034",
-            button="#31363b", button_text="#eff0f1",
-            highlight="#3daee9", highlight_text="#ffffff",
-            mid="#404040", shadow="#1d1d1d", dark="#3c3c3c",
+            window="#31363b",
+            window_text="#eff0f1",
+            base="#232629",
+            alternate_base="#2c3034",
+            button="#31363b",
+            button_text="#eff0f1",
+            highlight="#3daee9",
+            highlight_text="#ffffff",
+            mid="#404040",
+            shadow="#1d1d1d",
+            dark="#3c3c3c",
         ),
         accent_hex="#3daee9",
         icon_theme="breeze",
@@ -259,11 +280,17 @@ def _xfce_theme() -> Theme:
         de="xfce",
         style_name="Fusion",
         light=ColourPalette(
-            window="#d4cfca", window_text="#1a1a1a",
-            base="#ffffff", alternate_base="#eae8e5",
-            button="#d4cfca", button_text="#1a1a1a",
-            highlight="#2d7db3", highlight_text="#ffffff",
-            mid="#b5b0aa", shadow="#6d6863", dark="#a09b95",
+            window="#d4cfca",
+            window_text="#1a1a1a",
+            base="#ffffff",
+            alternate_base="#eae8e5",
+            button="#d4cfca",
+            button_text="#1a1a1a",
+            highlight="#2d7db3",
+            highlight_text="#ffffff",
+            mid="#b5b0aa",
+            shadow="#6d6863",
+            dark="#a09b95",
         ),
         dark=DarkColourPalette(highlight="#2d7db3"),
         accent_hex="#2d7db3",
@@ -276,10 +303,14 @@ def _mate_theme() -> Theme:
         de="mate",
         style_name="Fusion",
         light=ColourPalette(
-            window="#ebebeb", window_text="#1a1a1a",
-            base="#ffffff", alternate_base="#f4f4f4",
-            button="#e0e0e0", button_text="#1a1a1a",
-            highlight="#729fcf", highlight_text="#ffffff",
+            window="#ebebeb",
+            window_text="#1a1a1a",
+            base="#ffffff",
+            alternate_base="#f4f4f4",
+            button="#e0e0e0",
+            button_text="#1a1a1a",
+            highlight="#729fcf",
+            highlight_text="#ffffff",
         ),
         dark=DarkColourPalette(highlight="#729fcf"),
         accent_hex="#729fcf",
@@ -291,10 +322,14 @@ def _cinnamon_theme() -> Theme:
         de="cinnamon",
         style_name="Fusion",
         light=ColourPalette(
-            window="#f0f0f0", window_text="#1a1a1a",
-            base="#ffffff", alternate_base="#f5f5f5",
-            button="#dcdcdc", button_text="#1a1a1a",
-            highlight="#4caf50", highlight_text="#ffffff",
+            window="#f0f0f0",
+            window_text="#1a1a1a",
+            base="#ffffff",
+            alternate_base="#f5f5f5",
+            button="#dcdcdc",
+            button_text="#1a1a1a",
+            highlight="#4caf50",
+            highlight_text="#ffffff",
         ),
         dark=DarkColourPalette(highlight="#4caf50"),
         accent_hex="#4caf50",
@@ -307,10 +342,14 @@ def _pantheon_theme() -> Theme:
         de="pantheon",
         style_name="Fusion",
         light=ColourPalette(
-            window="#f2f2f2", window_text="#1a1a1a",
-            base="#ffffff", alternate_base="#f7f7f7",
-            button="#e0e0e0", button_text="#1a1a1a",
-            highlight="#0d52bf", highlight_text="#ffffff",
+            window="#f2f2f2",
+            window_text="#1a1a1a",
+            base="#ffffff",
+            alternate_base="#f7f7f7",
+            button="#e0e0e0",
+            button_text="#1a1a1a",
+            highlight="#0d52bf",
+            highlight_text="#ffffff",
         ),
         dark=DarkColourPalette(highlight="#0d52bf"),
         accent_hex="#0d52bf",
@@ -323,10 +362,14 @@ def _deepin_theme() -> Theme:
         de="deepin",
         style_name="Fusion",
         light=ColourPalette(
-            window="#f0f0f0", window_text="#1a1a1a",
-            base="#ffffff", alternate_base="#f5f5f5",
-            button="#e0e0e0", button_text="#1a1a1a",
-            highlight="#0081ff", highlight_text="#ffffff",
+            window="#f0f0f0",
+            window_text="#1a1a1a",
+            base="#ffffff",
+            alternate_base="#f5f5f5",
+            button="#e0e0e0",
+            button_text="#1a1a1a",
+            highlight="#0081ff",
+            highlight_text="#ffffff",
         ),
         dark=DarkColourPalette(highlight="#0081ff"),
         accent_hex="#0081ff",
@@ -347,20 +390,20 @@ def _fallback_theme() -> Theme:
 
 
 _DE_THEME_MAP: dict[str, "callable"] = {
-    "gnome":         _gnome_theme,
-    "budgie":        _budgie_theme,
-    "kde":           _kde_theme,
-    "lxqt":          _lxqt_theme,
-    "xfce":          _xfce_theme,
-    "mate":          _mate_theme,
-    "cinnamon":      _cinnamon_theme,
-    "pantheon":      _pantheon_theme,
-    "deepin":        _deepin_theme,
+    "gnome": _gnome_theme,
+    "budgie": _budgie_theme,
+    "kde": _kde_theme,
+    "lxqt": _lxqt_theme,
+    "xfce": _xfce_theme,
+    "mate": _mate_theme,
+    "cinnamon": _cinnamon_theme,
+    "pantheon": _pantheon_theme,
+    "deepin": _deepin_theme,
     "enlightenment": _tiling_wm_theme,
-    "sway":          _tiling_wm_theme,
-    "hyprland":      _tiling_wm_theme,
-    "i3":            _tiling_wm_theme,
-    "openbox":       _tiling_wm_theme,
+    "sway": _tiling_wm_theme,
+    "hyprland": _tiling_wm_theme,
+    "i3": _tiling_wm_theme,
+    "openbox": _tiling_wm_theme,
 }
 
 
@@ -368,11 +411,10 @@ def get_theme_for_de(de: str) -> Theme:
     """Return a :class:`Theme` for the given desktop environment name.
 
     Args:
-    de:
-        Canonical DE name as returned by :func:`detect_desktop_environment`.
+        de:
+            Canonical DE name as returned by :func:`detect_desktop_environment`.
 
     Returns:
-    Theme
         Fully populated theme object.  Falls back to Fusion if *de* is
         unrecognised.
     """
@@ -392,25 +434,24 @@ def get_current_theme() -> Theme:
 
 # ── Qt application ────────────────────────────────────────────────────────────
 
+
 def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
     """Apply *theme* to a ``QApplication`` instance.
 
     Imports PyQt5 lazily so this module is importable without Qt installed.
 
     Args:
-    app:
-        A ``PyQt5.QtWidgets.QApplication`` instance.
-    theme:
-        Theme to apply.  If ``None``, :func:`get_current_theme` is called
-        automatically.
+        app:
+            A ``PyQt5.QtWidgets.QApplication`` instance.
+        theme:
+            Theme to apply.  If ``None``, :func:`get_current_theme` is called
+            automatically.
 
     Returns:
-    Theme
         The theme that was applied (useful for inspection / testing).
 
     Raises:
-    ImportError
-        If PyQt5 is not installed.
+        RuntimeError: If PyQt5 is not installed.
     """
     try:
         from PyQt5.QtGui import QColor, QPalette
@@ -440,9 +481,14 @@ def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
             else:
                 logger.debug(
                     "Style %r not available (%s); falling back to Fusion.",
-                    chosen, available,
+                    chosen,
+                    available,
                 )
-                chosen = "Fusion" if "Fusion" in available else (available[0] if available else "")
+                chosen = (
+                    "Fusion"
+                    if "Fusion" in available
+                    else (available[0] if available else "")
+                )
         if chosen:
             app.setStyle(chosen)
 
@@ -499,6 +545,7 @@ def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
     if theme.icon_theme:
         try:
             from PyQt5.QtGui import QIcon
+
             QIcon.setThemeName(theme.icon_theme)
         except Exception:  # noqa: BLE001
             pass
@@ -509,6 +556,9 @@ def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
 
     logger.info(
         "Applied theme for DE=%r (style=%r, accent=%r, dark=%s)",
-        theme.de, theme.style_name, theme.accent_hex, _prefers_dark(),
+        theme.de,
+        theme.style_name,
+        theme.accent_hex,
+        _prefers_dark(),
     )
     return theme

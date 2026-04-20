@@ -24,23 +24,23 @@ logger = logging.getLogger(__name__)
 
 # Map shell executable stem → family name
 _SHELL_FAMILIES: dict[str, str] = {
-    "bash":   "bash",
-    "zsh":    "zsh",
-    "fish":   "fish",
-    "ksh":    "ksh",
-    "ksh93":  "ksh",
-    "mksh":   "ksh",
-    "pdksh":  "ksh",
-    "dash":   "sh",
-    "sh":     "sh",
-    "ash":    "sh",
-    "busybox":"sh",
-    "tcsh":   "csh",
-    "csh":    "csh",
+    "bash": "bash",
+    "zsh": "zsh",
+    "fish": "fish",
+    "ksh": "ksh",
+    "ksh93": "ksh",
+    "mksh": "ksh",
+    "pdksh": "ksh",
+    "dash": "sh",
+    "sh": "sh",
+    "ash": "sh",
+    "busybox": "sh",
+    "tcsh": "csh",
+    "csh": "csh",
     "elvish": "elvish",
-    "nushell":"nushell",
-    "nu":     "nushell",
-    "xonsh":  "xonsh",
+    "nushell": "nushell",
+    "nu": "nushell",
+    "xonsh": "xonsh",
 }
 
 
@@ -84,12 +84,15 @@ def _version(shell_path: str) -> str:
     """Try to get the shell version string."""
     import shutil
     import subprocess
+
     if not shutil.which(shell_path):
         return ""
     try:
         r = subprocess.run(
             [shell_path, "--version"],
-            capture_output=True, text=True, timeout=3,
+            capture_output=True,
+            text=True,
+            timeout=3,
         )
         first = (r.stdout or r.stderr).splitlines()
         return first[0].strip() if first else ""

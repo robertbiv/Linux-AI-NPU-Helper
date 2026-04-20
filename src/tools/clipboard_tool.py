@@ -73,7 +73,9 @@ class ClipboardTool(Tool):
             clipboard.setText(text)
             return ToolResult(
                 tool_name=self.name,
-                results=[SearchResult(path="clipboard", snippet="Text written to clipboard.")],
+                results=[
+                    SearchResult(path="clipboard", snippet="Text written to clipboard.")
+                ],
             )
         except Exception as exc:  # noqa: BLE001
             logger.debug("Qt Clipboard failed, trying fallback: %s", exc)
@@ -119,7 +121,9 @@ class ClipboardTool(Tool):
                 else:
                     cmd = ["xclip", "-selection", "clipboard", "-i"]
 
-                proc = subprocess.run(cmd, input=text, capture_output=True, text=True, timeout=5)
+                proc = subprocess.run(
+                    cmd, input=text, capture_output=True, text=True, timeout=5
+                )
                 if proc.returncode != 0:
                     return ToolResult(
                         tool_name=self.name,
@@ -127,7 +131,11 @@ class ClipboardTool(Tool):
                     )
                 return ToolResult(
                     tool_name=self.name,
-                    results=[SearchResult(path="clipboard", snippet="Text written to clipboard.")],
+                    results=[
+                        SearchResult(
+                            path="clipboard", snippet="Text written to clipboard."
+                        )
+                    ],
                 )
         except Exception as exc:  # noqa: BLE001
             return ToolResult(

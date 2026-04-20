@@ -14,7 +14,9 @@ class RegexTool(Tool):
     """Evaluate regular expressions locally."""
 
     name = "regex"
-    description = "Test regular expression matches or perform search/replace on text locally."
+    description = (
+        "Test regular expression matches or perform search/replace on text locally."
+    )
     parameters_schema = {
         "type": "object",
         "properties": {
@@ -63,7 +65,9 @@ class RegexTool(Tool):
                 if not matches:
                     snippet = "No matches found."
                 else:
-                    snippet = f"Found {len(matches)} matches:\n" + "\n".join(str(m) for m in matches[:50])
+                    snippet = f"Found {len(matches)} matches:\n" + "\n".join(
+                        str(m) for m in matches[:50]
+                    )
                     if len(matches) > 50:
                         snippet += "\n... (truncated)"
             else:

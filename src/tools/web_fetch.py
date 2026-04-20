@@ -113,8 +113,8 @@ def _html_to_text(html: str) -> str:
 class WebFetchTool(Tool):
     """Fetch a URL from the internet and return its text content.
 
-    Security model
-    --------------
+    ## Security model
+
     - **TLS always verified** — ``verify=True`` is non-negotiable; there is no
       way to disable certificate checking through config.
     - **SSRF protection** — requests to loopback (``127.x``, ``::1``,

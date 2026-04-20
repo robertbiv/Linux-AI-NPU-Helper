@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Maximum size for a text file that will be returned as a single string.
 # Files larger than this are streamed via :func:`stream_text_file`.
-_TEXT_CHUNK_SIZE = 8 * 1024          # 8 KiB per chunk
+_TEXT_CHUNK_SIZE = 8 * 1024  # 8 KiB per chunk
 _MAX_INLINE_TEXT_BYTES = 512 * 1024  # 512 KiB – warn above this
 
 # MIME prefixes treated as "image"
@@ -56,6 +56,7 @@ def classify_file(path: str | Path) -> str:
 
 
 # ── Text files ────────────────────────────────────────────────────────────────
+
 
 def read_text_file(path: str | Path, encoding: str = "utf-8") -> str:
     """Read a text file and return its entire contents as a string.
@@ -95,6 +96,7 @@ def stream_text_file(
 
 # ── Image files ───────────────────────────────────────────────────────────────
 
+
 def read_image_file(
     path: str | Path,
     jpeg_quality: int = 85,
@@ -106,16 +108,15 @@ def read_image_file(
     that large photos don't consume excessive memory or network bandwidth.
 
     Args:
-    path:
-        Path to any image format supported by Pillow.
-    jpeg_quality:
-        JPEG quality (1–95).  Lower values reduce memory and transfer size.
-    max_dimension:
-        If the image is larger than this in either dimension it is resized
-        while preserving aspect ratio before encoding.
+        path:
+            Path to any image format supported by Pillow.
+        jpeg_quality:
+            JPEG quality (1–95).  Lower values reduce memory and transfer size.
+        max_dimension:
+            If the image is larger than this in either dimension it is resized
+            while preserving aspect ratio before encoding.
 
     Returns:
-    bytes
         Raw JPEG bytes.  Delete the reference once forwarded to the AI.
     """
     import io  # stdlib – cheap
@@ -153,6 +154,7 @@ def read_image_file(
 
 # ── Unified loader ────────────────────────────────────────────────────────────
 
+
 def load_attachment(
     path: str | Path,
     jpeg_quality: int = 85,
@@ -165,7 +167,6 @@ def load_attachment(
     for binary files.
 
     Raises:
-    FileNotFoundError
         If *path* does not exist.
     """
     p = Path(path)
@@ -173,11 +174,14 @@ def load_attachment(
         raise FileNotFoundError(f"Attachment not found: {p}")
 
     kind = classify_file(p)
-    logger.debug("Loading attachment %s (kind=%s, size=%d B)", p, kind, p.stat().st_size)
+    logger.debug(
+        "Loading attachment %s (kind=%s, size=%d B)", p, kind, p.stat().st_size
+    )
 
     if kind == "image":
-        data: bytes | str = read_image_file(p, jpeg_quality=jpeg_quality,
-                                             max_dimension=max_image_dimension)
+        data: bytes | str = read_image_file(
+            p, jpeg_quality=jpeg_quality, max_dimension=max_image_dimension
+        )
     elif kind == "text":
         data = read_text_file(p)
     else:

@@ -5,8 +5,8 @@ The command is inserted into the terminal's readline / editing buffer so the
 user can see and edit it before pressing Enter.  The assistant **never**
 executes the command itself.
 
-Shell-specific pre-fill techniques
-------------------------------------
+## Shell-specific pre-fill techniques
+
 bash    ``read -e -i "cmd"`` — readline with initial text
 zsh     ``vared`` — ZLE variable editor with initial value
 fish    ``fish --init-command 'commandline "cmd"'`` — pre-fills the prompt
@@ -16,8 +16,8 @@ others  Display command prominently; plain ``read`` confirmation prompt
 The launcher detects the user's shell via :mod:`src.shell_detector` and
 selects the appropriate script template automatically.
 
-Supported terminal emulators (tried in order)
-----------------------------------------------
+## Supported terminal emulators (tried in order)
+
 x-terminal-emulator, gnome-terminal, konsole, xfce4-terminal,
 mate-terminal, lxterminal, tilix, kitty, alacritty, wezterm, xterm
 """
@@ -40,16 +40,16 @@ logger = logging.getLogger(__name__)
 
 _TERMINALS: list[tuple[str, str]] = [
     ("x-terminal-emulator", "dashe"),
-    ("gnome-terminal",      "dashdash"),
-    ("konsole",             "execute"),
-    ("xfce4-terminal",      "dashe"),
-    ("mate-terminal",       "dashe"),
-    ("lxterminal",          "dashe"),
-    ("tilix",               "dashe"),
-    ("kitty",               "dashdash"),
-    ("alacritty",           "dashdash"),
-    ("wezterm",             "dashdash"),
-    ("xterm",               "dashe"),
+    ("gnome-terminal", "dashdash"),
+    ("konsole", "execute"),
+    ("xfce4-terminal", "dashe"),
+    ("mate-terminal", "dashe"),
+    ("lxterminal", "dashe"),
+    ("tilix", "dashe"),
+    ("kitty", "dashdash"),
+    ("alacritty", "dashdash"),
+    ("wezterm", "dashdash"),
+    ("xterm", "dashe"),
 ]
 
 
@@ -68,8 +68,9 @@ def _find_terminal() -> tuple[str, str] | None:
     return None
 
 
-def _build_launch_cmd(terminal: str, style: str, script_path: str,
-                      shell_path: str) -> list[str]:
+def _build_launch_cmd(
+    terminal: str, style: str, script_path: str, shell_path: str
+) -> list[str]:
     shell_q = shlex.quote(shell_path)
     script_q = shlex.quote(script_path)
     if style == "dashdash":
@@ -89,11 +90,14 @@ printf '\033[1;33m  %s\033[0m\n\n' "$_CMD"
 """
 
 # bash: read -e (readline) with -i (initial text)
-_BASH_SCRIPT = """\
+_BASH_SCRIPT = (
+    """\
 #!/usr/bin/env bash
 set -euo pipefail
 _CMD={quoted}
-""" + _BANNER + """\
+"""
+    + _BANNER
+    + """\
 printf 'Edit if needed, then press \\033[1mEnter\\033[0m to run  (Ctrl-C to cancel):\\n\\n'
 read -r -e -p '$ ' -i "$_CMD" _CONFIRMED
 if [ -n "$_CONFIRMED" ]; then
@@ -101,16 +105,21 @@ if [ -n "$_CONFIRMED" ]; then
 fi
 exec bash -i
 """
+)
 
 # zsh: print -z natively pushes the string onto the ZLE editing buffer stack
-_ZSH_SCRIPT = """\
+_ZSH_SCRIPT = (
+    """\
 #!/usr/bin/env zsh
 _CMD={quoted}
-""" + _BANNER + """\
+"""
+    + _BANNER
+    + """\
 printf 'Edit if needed, then press \\e[1mEnter\\e[0m to run  (Ctrl-C to cancel):\\n\\n'
 print -z -- "$_CMD"
 exec zsh -i
 """
+)
 
 # fish: --init-command sets the commandline buffer before the prompt appears
 # We wrap in a shell script that execs fish with the right flags.
@@ -129,10 +138,13 @@ exec fish --init-command "
 """
 
 # ksh / mksh: read supports -e (readline) but not -i; display cmd and prompt
-_KSH_SCRIPT = """\
+_KSH_SCRIPT = (
+    """\
 #!/usr/bin/env ksh
 _CMD={quoted}
-""" + _BANNER + """\
+"""
+    + _BANNER
+    + """\
 printf 'Type or edit the command, then press \\033[1mEnter\\033[0m (Ctrl-C to cancel):\\n\\n'
 printf '$ %s' "$_CMD"
 read -r _CONFIRMED
@@ -143,12 +155,16 @@ fi
 printf '\\n[Press Enter to close]'
 read -r _DONE
 """
+)
 
 # Generic POSIX sh / dash / csh / others: just display and do a plain read
-_GENERIC_SCRIPT = """\
+_GENERIC_SCRIPT = (
+    """\
 #!/bin/sh
 _CMD={quoted}
-""" + _BANNER + """\
+"""
+    + _BANNER
+    + """\
 printf 'Copy-paste or retype the command, then press Enter (Ctrl-C to cancel):\\n\\n'
 printf '$ '
 read -r _CONFIRMED
@@ -161,12 +177,13 @@ if [ -n "$_CONFIRMED" ]; then
 fi
 exec sh -i
 """
+)
 
 _FAMILY_SCRIPTS: dict[str, str] = {
     "bash": _BASH_SCRIPT,
-    "zsh":  _ZSH_SCRIPT,
+    "zsh": _ZSH_SCRIPT,
     "fish": _FISH_WRAPPER,
-    "ksh":  _KSH_SCRIPT,
+    "ksh": _KSH_SCRIPT,
 }
 
 
@@ -180,6 +197,7 @@ def _pick_script(shell_family: str, quoted_cmd: str) -> tuple[str, str]:
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def open_with_command(command: str) -> tuple[bool, str]:
     """Open the user's default terminal pre-filled with *command*.
 
@@ -187,7 +205,7 @@ def open_with_command(command: str) -> tuple[bool, str]:
     Returns immediately (non-blocking).
 
     Returns:
-    (success, message)
+        (success, message)
     """
     import subprocess
 
@@ -205,14 +223,15 @@ def open_with_command(command: str) -> tuple[bool, str]:
     # Detect user's shell
     try:
         from src.shell_detector import detect as detect_shell
+
         shell_info = detect_shell()
         shell_family = shell_info.family
-        shell_path   = shell_info.path
-        shell_name   = shell_info.name
+        shell_path = shell_info.path
+        shell_name = shell_info.name
     except Exception:  # noqa: BLE001
         shell_family = "sh"
-        shell_path   = "/bin/sh"
-        shell_name   = "sh"
+        shell_path = "/bin/sh"
+        shell_name = "sh"
 
     quoted = shlex.quote(command)
     script_body, _runner = _pick_script(shell_family, quoted)
@@ -228,7 +247,9 @@ def open_with_command(command: str) -> tuple[bool, str]:
         # For fish we always use sh to run the wrapper script
         runner = shell_path if shell_family != "fish" else "/bin/sh"
         launch_cmd = _build_launch_cmd(terminal, style, script_path, runner)
-        logger.info("terminal_launcher: %s (shell=%s)", " ".join(launch_cmd), shell_family)
+        logger.info(
+            "terminal_launcher: %s (shell=%s)", " ".join(launch_cmd), shell_family
+        )
 
         subprocess.Popen(
             launch_cmd,

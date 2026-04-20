@@ -41,11 +41,11 @@ class HotkeyListener:
     """Background listener that triggers *callback* when the hotkey fires.
 
     Args:
-    hotkey:
-        Either the literal string ``"copilot"`` (scan for Copilot key via
-        evdev) or a pynput hotkey string such as ``"<ctrl>+<alt>+space"``.
-    callback:
-        Callable invoked (from a background thread) when the key fires.
+        hotkey:
+            Either the literal string ``"copilot"`` (scan for Copilot key via
+            evdev) or a pynput hotkey string such as ``"<ctrl>+<alt>+space"``.
+        callback:
+            Callable invoked (from a background thread) when the key fires.
     """
 
     def __init__(self, hotkey: str, callback: Callable[[], None]) -> None:

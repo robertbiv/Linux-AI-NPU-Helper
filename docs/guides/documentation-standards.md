@@ -4,24 +4,14 @@ This guide outlines the documentation standards for the Linux AI NPU Assistant p
 
 ---
 
-## The Current State
+## The Standards
 
 The project uses [MkDocs](https://www.mkdocs.org/) with the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme for site generation. Auto-generated API documentation is handled by the `mkdocstrings[python]` plugin.
 
-### Configuration vs. Codebase Mismatch
-
-Currently, there is a discrepancy between the project's configuration and some of the existing source code:
-
 -   **Configuration (`mkdocs.yml`)**: The `mkdocstrings` plugin is configured to parse docstrings using the **Google style** (`docstring_style: google`).
--   **Source Code**: Some existing modules (e.g., `src.config`) use the **NumPy style** (e.g., `Parameters` and `----------` headers).
+-   **Source Code**: All modules use the **Google style**.
 
-Because `mkdocstrings` is configured for Google style, NumPy-style docstrings may not render optimally in the generated documentation.
-
----
-
-## Recommended Standards (The "Better Way")
-
-To resolve the discrepancy and ensure clean, maintainable, and correctly rendered documentation, all new code and updates to existing code should adhere to the following standards:
+To ensure clean, maintainable, and correctly rendered documentation, all new code and updates to existing code should adhere to the following standards:
 
 ### 1. Adopt Google-Style Docstrings
 

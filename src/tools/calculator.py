@@ -17,6 +17,7 @@ def _safe_pow(a: Any, b: Any) -> Any:
         raise ValueError("Exponent too large")
     return operator.pow(a, b)
 
+
 # Allowed operators
 _OPERATORS = {
     ast.Add: operator.add,
@@ -32,9 +33,8 @@ _OPERATORS = {
 }
 
 # Allowed math functions and constants
-_MATH_NAMES = {
-    k: v for k, v in math.__dict__.items() if not k.startswith("_")
-}
+_MATH_NAMES = {k: v for k, v in math.__dict__.items() if not k.startswith("_")}
+
 
 def _eval_ast(node: ast.AST) -> Any:
     if isinstance(node, ast.Expression):
@@ -77,6 +77,7 @@ def _eval_ast(node: ast.AST) -> Any:
         raise AttributeError(f"Unsupported attribute: {node.attr}")
     else:
         raise TypeError(f"Unsupported AST node: {type(node)}")
+
 
 class CalculatorTool(Tool):
     """Evaluate mathematical expressions safely."""

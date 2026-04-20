@@ -249,10 +249,10 @@ if _HAS_QT:
         enabled.  Clicking 'Read full terms' opens the TOS URL in the browser.
 
         Args:
-        entry:
-            The catalog entry whose TOS should be displayed.
-        parent:
-            Optional parent widget.
+            entry:
+                The catalog entry whose TOS should be displayed.
+            parent:
+                Optional parent widget.
         """
 
         def __init__(self, entry: Any, parent: QWidget | None = None) -> None:
@@ -279,7 +279,7 @@ if _HAS_QT:
 
             # TOS summary
             summary_box = QTextEdit()
-            summary_box.setAccessibleName('Terms of Use Summary')
+            summary_box.setAccessibleName("Terms of Use Summary")
             summary_box.setReadOnly(True)
             summary_box.setPlainText(
                 self._entry.tos_summary
@@ -300,7 +300,9 @@ if _HAS_QT:
             self._chk = QCheckBox(
                 "I have read and accept the Terms of Use for this model"
             )
-            self._chk.setAccessibleName("I have read and accept the Terms of Use for this model")
+            self._chk.setAccessibleName(
+                "I have read and accept the Terms of Use for this model"
+            )
             self._chk.stateChanged.connect(self._on_check_changed)
             layout.addWidget(self._chk)
 
@@ -380,7 +382,9 @@ if _HAS_QT:
                 "fair": ("#856404", "#fff3cd"),
                 "not_recommended": ("#721c24", "#f8d7da"),
             }
-            fg, bg = fit_colors.get(self._entry.hardware_adjusted_npu_fit(), ("#333", "#eee"))
+            fg, bg = fit_colors.get(
+                self._entry.hardware_adjusted_npu_fit(), ("#333", "#eee")
+            )
             npu_lbl = QLabel(self._entry.hardware_adjusted_label())
             npu_lbl.setStyleSheet(
                 f"color: {fg}; background: {bg}; "
@@ -432,7 +436,9 @@ if _HAS_QT:
 
             self._btn_remove = QPushButton("🗑 Remove")
             self._btn_remove.setToolTip("Delete the installed model files from disk")
-            self._btn_remove.setAccessibleName("Delete the installed model files from disk")
+            self._btn_remove.setAccessibleName(
+                "Delete the installed model files from disk"
+            )
             self._btn_remove.clicked.connect(self._on_remove)
             btn_row.addWidget(self._btn_remove)
 
@@ -526,7 +532,9 @@ if _HAS_QT:
 
         def on_download_error(self, msg: str) -> None:
             self._progress_bar.hide()
-            self._status.setText(f"<span style='color:{_BADGE_FAIL}'>⛔ {html.escape(msg)}</span>")
+            self._status.setText(
+                f"<span style='color:{_BADGE_FAIL}'>⛔ {html.escape(msg)}</span>"
+            )
             self._status.setTextFormat(Qt.RichText)
             self.refresh_state()
 
@@ -547,10 +555,10 @@ if _HAS_QT:
         """Scrollable panel showing all catalog models with Download/Remove/Use buttons.
 
         Args:
-        settings_manager:
-            The application :class:`~src.settings.SettingsManager`.
-        parent:
-            Optional parent widget.
+            settings_manager:
+                The application :class:`~src.settings.SettingsManager`.
+            parent:
+                Optional parent widget.
         """
 
         model_activated = pyqtSignal(str)  # ONNX path chosen as active
@@ -746,7 +754,9 @@ if _HAS_QT:
 
             self._btn_browse = QPushButton("📂 Browse ONNX…")
             self._btn_browse.setToolTip("Open a file dialog to add an ONNX model file")
-            self._btn_browse.setAccessibleName("Open a file dialog to add an ONNX model file")
+            self._btn_browse.setAccessibleName(
+                "Open a file dialog to add an ONNX model file"
+            )
             self._btn_browse.clicked.connect(self._browse_onnx)
             btn_row.addWidget(self._btn_browse)
 
@@ -767,7 +777,9 @@ if _HAS_QT:
 
             self._btn_delete = QPushButton("🗑 Delete")
             self._btn_delete.setToolTip("Delete the installed model files from disk")
-            self._btn_delete.setAccessibleName("Delete the installed model files from disk")
+            self._btn_delete.setAccessibleName(
+                "Delete the installed model files from disk"
+            )
             self._btn_delete.setEnabled(False)
             self._btn_delete.clicked.connect(self._delete_model)
             btn_row.addWidget(self._btn_delete)
@@ -1057,10 +1069,10 @@ if _HAS_QT:
         """Tabbed model manager combining the backend browser and NPU catalog.
 
         Args:
-        manager:
-            The application :class:`~src.settings.SettingsManager`.
-        parent:
-            Optional parent widget.
+            manager:
+                The application :class:`~src.settings.SettingsManager`.
+            parent:
+                Optional parent widget.
         """
 
         def __init__(self, manager: Any, parent: QWidget | None = None) -> None:

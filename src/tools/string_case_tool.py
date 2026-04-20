@@ -9,6 +9,7 @@ from src.tools._base import SearchResult, Tool, ToolResult
 
 logger = logging.getLogger(__name__)
 
+
 class StringCaseTool(Tool):
     """Convert text between different string case styles."""
 
@@ -43,35 +44,37 @@ class StringCaseTool(Tool):
         try:
             # Normalize to words
             # First split by non-alphanumeric
-            words = re.split(r'[^a-zA-Z0-9]+', text)
+            words = re.split(r"[^a-zA-Z0-9]+", text)
             # Then handle existing camelCase/PascalCase
             processed_words = []
             for w in words:
                 if w:
-                    split_camel = re.sub(r'([a-z])([A-Z])', r'\1 \2', w).split()
+                    split_camel = re.sub(r"([a-z])([A-Z])", r"\1 \2", w).split()
                     processed_words.extend(split_camel)
 
             words = [w.lower() for w in processed_words if w]
 
             if not words:
-                return ToolResult(tool_name=self.name, error="No alphanumeric characters found.")
+                return ToolResult(
+                    tool_name=self.name, error="No alphanumeric characters found."
+                )
 
             if to_case == "camel":
-                result = words[0] + ''.join(w.capitalize() for w in words[1:])
+                result = words[0] + "".join(w.capitalize() for w in words[1:])
             elif to_case == "pascal":
-                result = ''.join(w.capitalize() for w in words)
+                result = "".join(w.capitalize() for w in words)
             elif to_case == "snake":
-                result = '_'.join(words)
+                result = "_".join(words)
             elif to_case == "kebab":
-                result = '-'.join(words)
+                result = "-".join(words)
             elif to_case == "constant":
-                result = '_'.join(w.upper() for w in words)
+                result = "_".join(w.upper() for w in words)
             else:
                 result = ""
 
             return ToolResult(
                 tool_name=self.name,
-                results=[SearchResult(path=f"case:{to_case}", snippet=result)]
+                results=[SearchResult(path=f"case:{to_case}", snippet=result)],
             )
         except Exception as exc:
             logger.debug("String case conversion error: %s", exc)

@@ -20,7 +20,6 @@ Toggle button
     Both modes expose a small **⤢ / ⤡** button in their header that
     switches to the other mode instantly while preserving all widget state
     (the AI conversation history, current page, etc.).
-
 ## Usage
 ::
 
@@ -58,21 +57,22 @@ try:
         QVBoxLayout,
         QWidget,
     )
+
     _HAS_QT = True
 except ImportError:
     _HAS_QT = False
     logger.warning("PyQt5 not installed — MainWindow unavailable.")
 
-APP_NAME    = "Neural Monolith"
+APP_NAME = "Neural Monolith"
 APP_VERSION = "V2.4.0-STABLE"
 
 # Mode identifiers
 MODE_COMPACT = "compact"
-MODE_FULL    = "full"
+MODE_FULL = "full"
 
 # Bottom-tab identifiers (compact mode only)
-TAB_CHAT     = "chat"
-TAB_DATA     = "data"
+TAB_CHAT = "chat"
+TAB_DATA = "data"
 TAB_SETTINGS = "settings"
 
 if _HAS_QT:
@@ -83,10 +83,12 @@ if _HAS_QT:
     class _CompactHeader(QFrame):
         """Top bar shown in compact (overlay) mode."""
 
-        expand_clicked  = pyqtSignal()
-        more_clicked    = pyqtSignal()
+        expand_clicked = pyqtSignal()
+        more_clicked = pyqtSignal()
 
-        def __init__(self, model_name: str = "Llama-3-NPU-8B", parent: QWidget | None = None) -> None:
+        def __init__(
+            self, model_name: str = "Llama-3-NPU-8B", parent: QWidget | None = None
+        ) -> None:
             super().__init__(parent)
             self.setObjectName("compactHeader")
             self.setFixedHeight(56)
@@ -183,9 +185,9 @@ if _HAS_QT:
         tab_selected = pyqtSignal(str)
 
         _TABS = [
-            ("💬", "CHAT",     TAB_CHAT),
-            ("⬖",  "DATA",     TAB_DATA),
-            ("⚙",  "SETTINGS", TAB_SETTINGS),
+            ("💬", "CHAT", TAB_CHAT),
+            ("⬖", "DATA", TAB_DATA),
+            ("⚙", "SETTINGS", TAB_SETTINGS),
         ]
 
         def __init__(self, parent: QWidget | None = None) -> None:
@@ -270,16 +272,19 @@ if _HAS_QT:
 
             # Chat page
             from src.gui.chat_widget import ChatWidget
+
             self._chat = ChatWidget(self._sm)
             self._chat_idx = self._stack.addWidget(self._chat)
 
             # Status page
             from src.gui.status_widget import StatusWidget
+
             self._status = StatusWidget()
             self._status_idx = self._stack.addWidget(self._status)
 
             # Settings page
             from src.gui.npu_settings_widget import NPUSettingsWidget
+
             self._settings_page = NPUSettingsWidget(self._sm)
             self._settings_idx = self._stack.addWidget(self._settings_page)
 
@@ -319,14 +324,14 @@ if _HAS_QT:
         or let the default (compact) apply.
 
         Args:
-        settings_manager:
-            The application :class:`~src.settings.SettingsManager`.
-        ai_assistant:
-            The application :class:`~src.ai_assistant.AIAssistant`.
-        start_mode:
-            ``"compact"`` (default) or ``"full"``.
-        parent:
-            Optional parent widget.
+            settings_manager:
+                The application :class:`~src.settings.SettingsManager`.
+            ai_assistant:
+                The application :class:`~src.ai_assistant.AIAssistant`.
+            start_mode:
+                ``"compact"`` (default) or ``"full"``.
+            parent:
+                Optional parent widget.
         """
 
         def __init__(
@@ -360,6 +365,7 @@ if _HAS_QT:
 
             # Build full window widget
             from src.gui.full_window import FullWindow
+
             self._full_widget = FullWindow(
                 settings_manager=settings_manager,
                 ai_assistant=ai_assistant,
@@ -386,9 +392,7 @@ if _HAS_QT:
             # keeps it above other windows.  Qt.Tool is intentionally NOT set here:
             # it would hide the window from the taskbar, but DEs that support
             # taskbar icons (GNOME, KDE, XFCE, etc.) should be able to show it.
-            self.setWindowFlags(
-                Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-            )
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
             self.setFixedSize(420, 680)
             self._position_compact()
             self.show()
@@ -477,6 +481,7 @@ if _HAS_QT:
                 f.setBold(True)
                 painter.setFont(f)
                 from PyQt5.QtCore import Qt as _Qt  # noqa: PLC0415
+
                 painter.drawText(px.rect(), _Qt.AlignCenter, "✦")
                 painter.end()
 
@@ -500,7 +505,7 @@ if _HAS_QT:
             screen = QApplication.primaryScreen().availableGeometry()
             margin = 20
             self.move(
-                screen.right()  - self.width()  - margin,
+                screen.right() - self.width() - margin,
                 screen.bottom() - self.height() - margin,
             )
 
@@ -508,7 +513,7 @@ if _HAS_QT:
             """Centre the full window on the primary screen."""
             screen = QApplication.primaryScreen().availableGeometry()
             self.move(
-                screen.center().x() - self.width()  // 2,
+                screen.center().x() - self.width() // 2,
                 screen.center().y() - self.height() // 2,
             )
 
@@ -524,12 +529,12 @@ def open_main_window(
     installed).
 
     Args:
-    settings_manager:
-        Optional :class:`~src.settings.SettingsManager`.
-    ai_assistant:
-        Optional :class:`~src.ai_assistant.AIAssistant`.
-    start_mode:
-        ``"compact"`` (default) or ``"full"``.
+        settings_manager:
+            Optional :class:`~src.settings.SettingsManager`.
+        ai_assistant:
+            Optional :class:`~src.ai_assistant.AIAssistant`.
+        start_mode:
+            ``"compact"`` (default) or ``"full"``.
     """
     if not _HAS_QT:
         logger.error("PyQt5 is required for the GUI. Install with: pip install PyQt5")
