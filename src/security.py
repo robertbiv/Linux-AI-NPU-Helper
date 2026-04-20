@@ -374,8 +374,7 @@ def mask_secret(value: str) -> str:
     is replaced with ``***``.  Values shorter than 8 characters are fully
     masked.
 
-    Examples
-    --------
+    Examples:
     >>> mask_secret("sk-abc123xyz")
     'sk***yz'
     >>> mask_secret("short")

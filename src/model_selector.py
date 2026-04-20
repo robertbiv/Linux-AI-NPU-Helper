@@ -394,8 +394,7 @@ class ModelSelector:
         list[ModelCatalogEntry]
             Catalog entries rated ``"excellent"`` or ``"good"``.
 
-        Example
-        -------
+        Example:
         ::
 
             for entry in ModelSelector.get_npu_suggestions():
@@ -413,7 +412,7 @@ class ModelSelector:
             Vision-capable catalog entries sorted by NPU fit.
 
         Example
-        -------
+
         ::
 
             for entry in ModelSelector.get_vision_model_suggestions():

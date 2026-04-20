@@ -48,15 +48,15 @@ class ScreenshotTool(Tool):
     appear in the screenshot.  A saved copy is also written to
     ``$XDG_RUNTIME_DIR/npu-assistant-screenshots/``.
 
-    Parameters accepted in *args*
-    monitor : int
-        Monitor index.  ``0`` = virtual desktop (all monitors), ``1`` =
-        primary physical monitor.  Default ``0``.
-    jpeg_quality : int
-        JPEG compression quality 1–95.  Default ``75``.
-    save : bool
-        When ``true`` (default) persist the JPEG to disk in addition to
-        returning the base64 string.
+    Args:
+        monitor:
+            Monitor index.  ``0`` = virtual desktop (all monitors), ``1`` =
+            primary physical monitor.  Default ``0``.
+        jpeg_quality:
+            JPEG compression quality 1–95.  Default ``75``.
+        save:
+            When ``true`` (default) persist the JPEG to disk in addition to
+            returning the base64 string.
     """
 
     name = "screenshot"
