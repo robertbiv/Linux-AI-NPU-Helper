@@ -94,7 +94,7 @@ _BASH_SCRIPT = (
     """\
 #!/usr/bin/env bash
 set -euo pipefail
-_CMD={quoted}
+_CMD="${LINUX_AI_COMMAND:-}"
 """
     + _BANNER
     + """\
@@ -111,7 +111,7 @@ exec bash -i
 _ZSH_SCRIPT = (
     """\
 #!/usr/bin/env zsh
-_CMD={quoted}
+_CMD="${LINUX_AI_COMMAND:-}"
 """
     + _BANNER
     + """\
@@ -125,11 +125,10 @@ exec zsh -i
 # We wrap in a shell script that execs fish with the right flags.
 _FISH_WRAPPER = """\
 #!/bin/sh
-_CMD={quoted}
 exec fish --init-command "
   function _ai_prefill
-    commandline -- '$_CMD'
-    commandline --cursor (string length -- '$_CMD')
+    commandline -- \\\"\\$LINUX_AI_COMMAND\\\"
+    commandline --cursor (string length -- \\\"\\$LINUX_AI_COMMAND\\\")
     functions --erase _ai_prefill
   end
   bind \\r '_ai_prefill; commandline -f execute'
@@ -141,7 +140,7 @@ exec fish --init-command "
 _KSH_SCRIPT = (
     """\
 #!/usr/bin/env ksh
-_CMD={quoted}
+_CMD="${LINUX_AI_COMMAND:-}"
 """
     + _BANNER
     + """\
@@ -161,18 +160,18 @@ read -r _DONE
 _GENERIC_SCRIPT = (
     """\
 #!/bin/sh
-_CMD={quoted}
+_CMD="${LINUX_AI_COMMAND:-}"
 """
     + _BANNER
     + """\
 printf 'Copy-paste or retype the command, then press Enter (Ctrl-C to cancel):\\n\\n'
 printf '$ '
 read -r _CONFIRMED
-_CONFIRMED="${{_CONFIRMED:-$_CMD}}"
+_CONFIRMED="${_CONFIRMED:-$_CMD}"
 if [ -n "$_CONFIRMED" ]; then
     _TMP=$(mktemp)
-    echo "$_CONFIRMED" > "$_TMP"
-    echo "rm -f '$_TMP'" >> "$_TMP"
+    printf '%s\\n' "$_CONFIRMED" > "$_TMP"
+    printf "rm -f '%s'\\n" "$_TMP" >> "$_TMP"
     ENV="$_TMP" exec sh -i
 fi
 exec sh -i
@@ -187,10 +186,10 @@ _FAMILY_SCRIPTS: dict[str, str] = {
 }
 
 
-def _pick_script(shell_family: str, quoted_cmd: str) -> tuple[str, str]:
+def _pick_script(shell_family: str) -> tuple[str, str]:
     """Return (script_body, shell_executable_for_running_script)."""
-    template = _FAMILY_SCRIPTS.get(shell_family, _GENERIC_SCRIPT)
-    return template.format(quoted=quoted_cmd), "sh"
+    script_body = _FAMILY_SCRIPTS.get(shell_family, _GENERIC_SCRIPT)
+    return script_body, "sh"
 
 
 # ---------------------------------------------------------------------------
@@ -233,8 +232,7 @@ def open_with_command(command: str) -> tuple[bool, str]:
         shell_path = "/bin/sh"
         shell_name = "sh"
 
-    quoted = shlex.quote(command)
-    script_body, _runner = _pick_script(shell_family, quoted)
+    script_body, _runner = _pick_script(shell_family)
 
     try:
         fd, script_path = tempfile.mkstemp(suffix=".sh", prefix="ai_helper_")
@@ -251,12 +249,17 @@ def open_with_command(command: str) -> tuple[bool, str]:
             "terminal_launcher: %s (shell=%s)", " ".join(launch_cmd), shell_family
         )
 
+        # Pass the command via environment variable to avoid shell injection
+        env = os.environ.copy()
+        env["LINUX_AI_COMMAND"] = command
+
         subprocess.Popen(
             launch_cmd,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             close_fds=True,
             start_new_session=True,
+            env=env,
         )
         _schedule_delete(script_path, delay=5.0)
         return True, f"Opened terminal ({shell_name}) with command: {command}"
