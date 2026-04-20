@@ -104,8 +104,8 @@ class SettingsManager:
         """Load settings from JSON file, deep-merging over defaults."""
         if self._path is None or not self._path.exists():
             return
-        check_path_permissions(self._path, label="settings file")
         try:
+            check_path_permissions(self._path, label="settings file")
             raw = json.loads(self._path.read_text(encoding="utf-8"))
             if not isinstance(raw, dict):
                 logger.warning("Settings file is not a JSON object; ignoring.")

@@ -208,3 +208,13 @@ class TestSettingsManager:
         sm = SettingsManager(path=p)
         # Should not raise; just use defaults
         assert sm.get("backend") == "ollama"
+
+    def test_path_permission_error_ignored(self, tmp_path, mocker):
+        p = tmp_path / "settings.json"
+        p.write_text("{}")
+        mock_check = mocker.patch("src.settings.check_path_permissions")
+        mock_check.side_effect = OSError("Permission denied")
+
+        sm = SettingsManager(path=p)
+        # Should not raise; defaults used
+        assert sm.get("backend") == "ollama"
