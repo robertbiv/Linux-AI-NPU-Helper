@@ -3,10 +3,12 @@ from unittest.mock import patch, MagicMock
 from src.tools.find_files import FindFilesTool, _has_hidden_component
 from pathlib import Path
 
+
 def test_has_hidden_component():
     assert _has_hidden_component("/home/user/.hidden/file.txt")
     assert _has_hidden_component("/home/user/dir/.hidden")
     assert not _has_hidden_component("/home/user/dir/file.txt")
+
 
 @patch("shutil.which")
 def test_detect_backend(mock_which):
@@ -23,6 +25,7 @@ def test_detect_backend(mock_which):
     mock_which.side_effect = lambda cmd: False
     assert tool._detect_backend() == "find"
 
+
 @patch("src.tools.find_files.FindFilesTool._run_locate")
 @patch("src.tools.find_files.FindFilesTool._detect_backend", return_value="locate")
 def test_run_locate_backend(mock_detect, mock_run_locate):
@@ -36,6 +39,7 @@ def test_run_locate_backend(mock_detect, mock_run_locate):
     assert result.truncated is True
     assert result.results[0].path == "/default/file1.txt"
 
+
 @patch("src.tools.find_files.FindFilesTool._run_find")
 @patch("src.tools.find_files.FindFilesTool._detect_backend", return_value="find")
 def test_run_find_backend(mock_detect, mock_run_find):
@@ -47,17 +51,23 @@ def test_run_find_backend(mock_detect, mock_run_find):
     assert not result.error
     assert len(result.results) == 1
 
+
 def test_run_missing_pattern():
     tool = FindFilesTool()
     result = tool.run({})
     assert result.error == "'pattern' is required."
 
+
 @patch("src.tools.find_files.FindFilesTool._detect_backend", return_value="locate")
-@patch("src.tools.find_files.FindFilesTool._run_locate", side_effect=Exception("locate failed"))
+@patch(
+    "src.tools.find_files.FindFilesTool._run_locate",
+    side_effect=Exception("locate failed"),
+)
 def test_run_exception(mock_run, mock_detect):
     tool = FindFilesTool()
     result = tool.run({"pattern": "*.txt"})
     assert "locate failed" in result.error
+
 
 @patch("subprocess.run")
 def test_run_locate_impl(mock_run):
@@ -68,6 +78,7 @@ def test_run_locate_impl(mock_run):
     result = FindFilesTool._run_locate("locate", "*.txt", Path("/test"), 10)
     assert result == ["/test/file1.txt"]
 
+
 @patch("subprocess.run")
 def test_run_find_impl(mock_run):
     mock_proc = MagicMock()
@@ -77,7 +88,11 @@ def test_run_find_impl(mock_run):
     result = FindFilesTool._run_find("*.txt", Path("/test"), 10, False)
     assert result == ["/test/file1.txt"]
 
-@patch("subprocess.run", side_effect=__import__("subprocess").TimeoutExpired(cmd="find", timeout=30))
+
+@patch(
+    "subprocess.run",
+    side_effect=__import__("subprocess").TimeoutExpired(cmd="find", timeout=30),
+)
 def test_run_find_impl_timeout(mock_run):
     result = FindFilesTool._run_find("*.txt", Path("/test"), 10, False)
     assert result == []

@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import shutil
@@ -10,11 +9,13 @@ from src.tools.app import AppTool, _launch_app
 import src.tools.app as app_mod
 from src.tools._base import ToolResult, SearchResult
 
+
 @pytest.fixture
 def mock_desktop_dir(tmp_path):
     d = tmp_path / "applications"
     d.mkdir()
     return d
+
 
 def test_launch_app_safe(mock_desktop_dir, monkeypatch):
     # Setup a safe desktop file
@@ -39,10 +40,13 @@ def test_launch_app_safe(mock_desktop_dir, monkeypatch):
             assert kwargs.get("shell") in (False, None)
             assert kwargs.get("start_new_session") is True
 
+
 def test_launch_app_injection_prevention(mock_desktop_dir, monkeypatch):
     # Setup a malicious desktop file
     malicious_file = mock_desktop_dir / "malicious.desktop"
-    malicious_file.write_text("[Desktop Entry]\nName=MaliciousApp\nExec=ls; touch /tmp/pwned\n")
+    malicious_file.write_text(
+        "[Desktop Entry]\nName=MaliciousApp\nExec=ls; touch /tmp/pwned\n"
+    )
 
     monkeypatch.setattr(app_mod, "_DESKTOP_DIRS", [mock_desktop_dir])
     monkeypatch.setattr(app_mod, "_desktop_cache", None)
@@ -60,6 +64,7 @@ def test_launch_app_injection_prevention(mock_desktop_dir, monkeypatch):
             assert args[0] == ["ls;", "touch", "/tmp/pwned"]
             assert kwargs.get("shell") in (False, None)
 
+
 def test_app_tool_open(mock_desktop_dir, monkeypatch):
     safe_file = mock_desktop_dir / "safe.desktop"
     safe_file.write_text("[Desktop Entry]\nName=SafeApp\nExec=ls -l\n")
@@ -75,9 +80,12 @@ def test_app_tool_open(mock_desktop_dir, monkeypatch):
             assert not result.error
             assert "Launched 'SafeApp'" in result.results[0].snippet
 
+
 def test_app_tool_search(mock_desktop_dir, monkeypatch):
     safe_file = mock_desktop_dir / "safe.desktop"
-    safe_file.write_text("[Desktop Entry]\nName=SafeApp\nComment=A safe application\nExec=ls -l\n")
+    safe_file.write_text(
+        "[Desktop Entry]\nName=SafeApp\nComment=A safe application\nExec=ls -l\n"
+    )
 
     monkeypatch.setattr(app_mod, "_DESKTOP_DIRS", [mock_desktop_dir])
     monkeypatch.setattr(app_mod, "_desktop_cache", None)
@@ -89,12 +97,16 @@ def test_app_tool_search(mock_desktop_dir, monkeypatch):
         assert len(result.results) > 0
         assert "SafeApp" in result.results[0].snippet
 
+
 def test_app_tool_install(monkeypatch):
     tool = AppTool()
-    with patch("src.terminal_launcher.open_with_command", return_value=(True, "Success")):
+    with patch(
+        "src.terminal_launcher.open_with_command", return_value=(True, "Success")
+    ):
         result = tool.run({"action": "install", "name": "firefox"})
         assert not result.error
         assert "firefox" in result.results[0].snippet
+
 
 def test_launch_app_posix_args_fix(mock_desktop_dir, monkeypatch):
     """Verify the fix for subprocess args splitting on POSIX systems."""
@@ -128,8 +140,10 @@ def test_launch_app_posix_args_fix(mock_desktop_dir, monkeypatch):
             assert args[0] == ["ls", "-l"]
             assert kwargs.get("shell") is False
 
+
 def test_launch_app_plain_binary_args(monkeypatch):
     """Verify that plain binary execution also splits arguments."""
+
     def mock_which(cmd):
         if cmd == "ls":
             return "/usr/bin/ls"

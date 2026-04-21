@@ -14,14 +14,14 @@ from src.tools import (
     SearchResult,
     build_default_registry,
 )
-from src.tools.find_files      import FindFilesTool
+from src.tools.find_files import FindFilesTool
 from src.tools.search_in_files import SearchInFilesTool
-from src.tools.web_search      import WebSearchTool
-from src.tools.web_fetch       import WebFetchTool
-from src.tools.man_reader      import ManPageTool, _extract_sections, _strip_man_formatting
-from src.tools.system_control  import SystemControlTool
-from src.tools.app             import AppTool
-from src.tools.system_info     import SystemInfoTool
+from src.tools.web_search import WebSearchTool
+from src.tools.web_fetch import WebFetchTool
+from src.tools.man_reader import ManPageTool, _extract_sections, _strip_man_formatting
+from src.tools.system_control import SystemControlTool
+from src.tools.app import AppTool
+from src.tools.system_info import SystemInfoTool
 
 
 # ── _strip_man_formatting ─────────────────────────────────────────────────────
@@ -140,8 +140,9 @@ class TestManPageTool:
     @patch("shutil.which", return_value="/usr/bin/man")
     @patch("subprocess.run")
     def test_unknown_command_returns_error(self, mock_run, _which):
-        mock_run.return_value = _make_completed_process("", returncode=1,
-                                                        stderr="No manual entry for notacommand")
+        mock_run.return_value = _make_completed_process(
+            "", returncode=1, stderr="No manual entry for notacommand"
+        )
         tool = ManPageTool()
         result = tool.run({"command": "notacommand"})
         assert result.error
@@ -200,8 +201,9 @@ class TestToolPermissions:
         assert "disabled" in blocked.error
 
     def test_disallowed_takes_precedence_over_allowed(self):
-        perms = ToolPermissions(allowed=["dangerous_tool"],
-                                disallowed=["dangerous_tool"])
+        perms = ToolPermissions(
+            allowed=["dangerous_tool"], disallowed=["dangerous_tool"]
+        )
         blocked = perms.check("dangerous_tool", {})
         assert blocked is not None
 
@@ -222,16 +224,18 @@ class TestToolPermissions:
 
     def test_requires_approval_calls_callback_true(self):
         callback = MagicMock(return_value=True)
-        perms = ToolPermissions(requires_approval=["web_search"],
-                                approve_callback=callback)
+        perms = ToolPermissions(
+            requires_approval=["web_search"], approve_callback=callback
+        )
         result = perms.check("web_search", {"query": "test"})
         assert result is None
         callback.assert_called_once_with("web_search", {"query": "test"})
 
     def test_requires_approval_calls_callback_false(self):
         callback = MagicMock(return_value=False)
-        perms = ToolPermissions(requires_approval=["web_search"],
-                                approve_callback=callback)
+        perms = ToolPermissions(
+            requires_approval=["web_search"], approve_callback=callback
+        )
         result = perms.check("web_search", {"query": "test"})
         assert result is not None
         assert "not approved" in result.error
@@ -257,8 +261,7 @@ class TestToolRegistry:
         tool = MagicMock(spec=["name", "run", "schema_text"])
         tool.name = tool_name
         tool.schema_text.return_value = f"  {tool_name}() — test"
-        tool.run.return_value = ToolResult(tool_name=tool_name,
-                                           results=[], error="")
+        tool.run.return_value = ToolResult(tool_name=tool_name, results=[], error="")
         registry.register(tool)
         return registry, tool
 
@@ -279,7 +282,7 @@ class TestToolRegistry:
 
     def test_dispatch_invalid_json_returns_error(self):
         registry, _ = self._registry_with_mock_tool("find_files")
-        result = registry.dispatch('[TOOL: find_files {not valid json}]')
+        result = registry.dispatch("[TOOL: find_files {not valid json}]")
         assert result is not None
         assert "JSON" in result.error
 
@@ -302,8 +305,8 @@ class TestToolRegistry:
         )
         calls = registry.find_calls(text)
         assert len(calls) == 2
-        assert 'find_files' in calls[0]
-        assert 'web_search' in calls[1]
+        assert "find_files" in calls[0]
+        assert "web_search" in calls[1]
 
     def test_system_prompt_excludes_disallowed(self):
         perms = ToolPermissions(disallowed=["web_search"])
@@ -404,28 +407,32 @@ class TestBuildDefaultRegistry:
         assert "read_man_page" not in registry.names()
 
     def test_permissions_wired_from_config(self):
-        registry = build_default_registry({
-            "disallowed": ["web_search"],
-            "requires_approval": [],
-        })
+        registry = build_default_registry(
+            {
+                "disallowed": ["web_search"],
+                "requires_approval": [],
+            }
+        )
         result = registry.dispatch('[TOOL: web_search {"query": "hi"}]')
         assert result is not None
         assert result.error
 
     def test_custom_web_search_engine(self):
-        registry = build_default_registry({
-            "web_search": {
-                "engine": "brave",
-                "engines": {"brave": "https://search.brave.com/search?q={query}"},
+        registry = build_default_registry(
+            {
+                "web_search": {
+                    "engine": "brave",
+                    "engines": {"brave": "https://search.brave.com/search?q={query}"},
+                }
             }
-        })
+        )
         tool = registry.get("web_search")
         assert tool is not None
         assert tool._default_engine == "brave"  # type: ignore[attr-defined]
 
     def test_man_reader_max_chars_passed(self):
-        registry = build_default_registry({
-            "man_reader": {"enabled": True, "max_chars": 1234}
-        })
+        registry = build_default_registry(
+            {"man_reader": {"enabled": True, "max_chars": 1234}}
+        )
         tool = registry.get("read_man_page")
         assert tool._max_chars == 1234  # type: ignore[attr-defined]
