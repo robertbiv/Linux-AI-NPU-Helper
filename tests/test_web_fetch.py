@@ -1,6 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.tools.web_fetch import WebFetchTool, _is_private_ip, _html_to_text
+from src.tools.web_fetch import (
+    WebFetchTool,
+    WebFetchConfig,
+    _is_private_ip,
+    _html_to_text,
+)
+
 
 
 def test_is_private_ip():
@@ -43,14 +49,14 @@ def test_web_fetch_tool_run_private_ip():
 
 
 def test_web_fetch_tool_allowlist():
-    tool = WebFetchTool(domain_allowlist=["allowed.com"])
+    tool = WebFetchTool(config=WebFetchConfig(domain_allowlist=["allowed.com"]))
     res = tool.run({"url": "http://blocked.com"})
     assert res.error
     assert "not in the allowed list" in res.error
 
 
 def test_web_fetch_tool_blocklist():
-    tool = WebFetchTool(domain_blocklist=["blocked.com"])
+    tool = WebFetchTool(config=WebFetchConfig(domain_blocklist=["blocked.com"]))
     res = tool.run({"url": "http://blocked.com"})
     assert res.error
     assert "blocked by configuration" in res.error
