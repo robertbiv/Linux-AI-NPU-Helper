@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from typing import Any
 
 from src.tools._base import SearchResult, Tool, ToolResult
@@ -110,6 +111,17 @@ def _html_to_text(html: str) -> str:
     return parser.get_text()
 
 
+@dataclass
+class WebFetchConfig:
+    max_response_chars: int = 8_000
+    allowed_content_types: list[str] | None = None
+    domain_allowlist: list[str] | None = None
+    domain_blocklist: list[str] | None = None
+    max_redirects: int = 5
+    connect_timeout: float = 5.0
+    read_timeout: float = 15.0
+
+
 class WebFetchTool(Tool):
     """Fetch a URL from the internet and return its text content.
 
@@ -163,31 +175,23 @@ class WebFetchTool(Tool):
         "required": ["url"],
     }
 
-    def __init__(
-        self,
-        max_response_chars: int = 8_000,
-        allowed_content_types: list[str] | None = None,
-        domain_allowlist: list[str] | None = None,
-        domain_blocklist: list[str] | None = None,
-        max_redirects: int = 5,
-        connect_timeout: float = 5.0,
-        read_timeout: float = 15.0,
-    ) -> None:
-        self._max_chars = min(max_response_chars, _FETCH_ABSOLUTE_MAX)
+    def __init__(self, config: WebFetchConfig | None = None) -> None:
+        cfg = config or WebFetchConfig()
+        self._max_chars = min(cfg.max_response_chars, _FETCH_ABSOLUTE_MAX)
         self._allowed_types: frozenset[str] = (
-            frozenset(t.lower() for t in allowed_content_types)
-            if allowed_content_types is not None
+            frozenset(t.lower() for t in cfg.allowed_content_types)
+            if cfg.allowed_content_types is not None
             else _SAFE_CONTENT_TYPES
         )
         self._domain_allowlist: frozenset[str] = frozenset(
-            d.lower().lstrip("*.") for d in (domain_allowlist or [])
+            d.lower().lstrip("*.") for d in (cfg.domain_allowlist or [])
         )
         self._domain_blocklist: frozenset[str] = frozenset(
-            d.lower().lstrip("*.") for d in (domain_blocklist or [])
+            d.lower().lstrip("*.") for d in (cfg.domain_blocklist or [])
         )
-        self._max_redirects = max_redirects
-        self._connect_timeout = connect_timeout
-        self._read_timeout = read_timeout
+        self._max_redirects = cfg.max_redirects
+        self._connect_timeout = cfg.connect_timeout
+        self._read_timeout = cfg.read_timeout
 
     def _validate_url(self, url: str) -> ToolResult | None:
         """Validate URL to ensure it is safe and allowed."""

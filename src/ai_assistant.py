@@ -344,6 +344,13 @@ class AIAssistant:
         url = f"{base_url}/chat/completions"
         # Privacy guard: block external hosts unless explicitly permitted
         assert_local_url(url, self._config.network.get("allow_external", False))
+
+        if api_key and not url.startswith("https://"):
+            raise ValueError(
+                "API keys cannot be sent over insecure HTTP connections. "
+                "Please use https:// in your base URL."
+            )
+
         # Backend resource efficiency: close socket after response.
         headers: dict[str, str] = {
             "Authorization": f"Bearer {api_key}",

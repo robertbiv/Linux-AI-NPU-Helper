@@ -33,6 +33,8 @@
 **Learning:** Parsing large system files like `/proc/meminfo` and `/proc/cpuinfo` line-by-line using `splitlines()` within a loop is a significant performance bottleneck due to excessive string object allocations for every line. Profiling showed that using `splitlines()` can be up to 6x slower than using native string operations.
 **Action:** Instead of `splitlines()`, use native string operations like `.find()` and slicing for targeted field extraction (e.g. `_query_memory()`), or use `re.finditer` with `re.MULTILINE` (e.g. `_query_cpu()`) to allow the C-level engine to lazily scan the string without allocating massive amounts of temporary line strings.
 
+2024-05-24
+For caching repetitive dependency checks like module presence and version retrieval, replacing list iterations with an `@functools.lru_cache(maxsize=None)` decorator yields significant performance improvements (e.g. 1500x speedup). This prevents repetitive execution of `importlib.import_module` and `getattr` which ultimately probe `sys.modules` overhead.
 # 2025-02-28
 - **Optimization Context:** The `_find_pkg_manager` function in `src/tools/app.py` repeatedly checks for available package managers using `shutil.which` inside a loop.
 - **Problem:** Because this check touches the filesystem repeatedly during app/package searches and the available package manager is highly unlikely to change during runtime, this incurs unnecessary overhead.

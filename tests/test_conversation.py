@@ -1,4 +1,5 @@
 """Tests for src/conversation.py."""
+
 from __future__ import annotations
 import json
 import threading
@@ -13,7 +14,7 @@ class TestMessage:
         m = Message(role="user", content="hello", has_image=True)
         d = m.to_dict()
         m2 = Message.from_dict(d)
-        assert m2.role    == "user"
+        assert m2.role == "user"
         assert m2.content == "hello"
         assert m2.has_image is True
 
@@ -68,14 +69,14 @@ class TestConversationHistory:
         h.add("user", "hi")
         h.add("assistant", "hello")
         msgs = h.to_openai_messages(include_system=False)
-        assert msgs[0]["role"]    == "user"
-        assert msgs[1]["role"]    == "assistant"
+        assert msgs[0]["role"] == "user"
+        assert msgs[1]["role"] == "assistant"
 
     def test_to_openai_messages_with_system(self, tmp_path):
         h = ConversationHistory(persist_path=None, system_prompt="sys")
         h.add("user", "hi")
         msgs = h.to_openai_messages(include_system=True)
-        assert msgs[0]["role"]    == "system"
+        assert msgs[0]["role"] == "system"
         assert msgs[0]["content"] == "sys"
 
     def test_to_openai_max_context(self, tmp_path):
@@ -119,17 +120,21 @@ class TestConversationHistory:
         assert len(h) == 0
 
     def test_thread_safe_add(self, tmp_path):
-        h      = ConversationHistory(persist_path=None)
+        h = ConversationHistory(persist_path=None)
         errors = []
+
         def add_msgs():
             try:
                 for _ in range(20):
                     h.add("user", "x")
             except Exception as e:
                 errors.append(e)
+
         threads = [threading.Thread(target=add_msgs) for _ in range(5)]
-        for t in threads: t.start()
-        for t in threads: t.join()
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
         assert not errors
         assert len(h) <= 200  # default max
 

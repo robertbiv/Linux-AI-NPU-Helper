@@ -1,6 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.screen_capture import capture, _capture_mss, _capture_scrot, capture_region, image_to_base64, load_image_as_jpeg
+from src.screen_capture import (
+    capture,
+    _capture_mss,
+    _capture_scrot,
+    capture_region,
+    image_to_base64,
+    load_image_as_jpeg,
+)
 import io
 
 import sys
@@ -14,18 +21,22 @@ sys.modules["PIL"] = pil_mock
 sys.modules["PIL.Image"] = pil_image_mock
 sys.modules["mss"] = MagicMock()
 
+
 @patch("src.screen_capture._capture_scrot")
 def test_capture_scrot(mock_scrot):
     capture(method="scrot", jpeg_quality=90)
     mock_scrot.assert_called_once_with(90)
+
 
 @patch("src.screen_capture._capture_mss")
 def test_capture_mss_default(mock_mss):
     capture()
     mock_mss.assert_called_once_with(0, 75)
 
+
 def test_image_to_base64():
     assert image_to_base64(b"test") == "dGVzdA=="
+
 
 @patch("subprocess.run")
 @patch("tempfile.NamedTemporaryFile")
@@ -41,8 +52,12 @@ def test__capture_scrot_impl(mock_temp, mock_run):
         mock_run.assert_called_once()
         mock_img.save.assert_called_once()
 
+
 def test__capture_mss_impl():
-    with patch("mss.mss") as mock_mss_cls, patch("PIL.Image.frombytes") as mock_frombytes:
+    with (
+        patch("mss.mss") as mock_mss_cls,
+        patch("PIL.Image.frombytes") as mock_frombytes,
+    ):
         mock_sct = MagicMock()
         mock_sct.monitors = [{"width": 100}]
         mock_raw = MagicMock()
@@ -59,8 +74,12 @@ def test__capture_mss_impl():
         mock_sct.grab.assert_called_once_with({"width": 100})
         mock_img.save.assert_called_once()
 
+
 def test__capture_mss_impl_out_of_range():
-    with patch("mss.mss") as mock_mss_cls, patch("PIL.Image.frombytes") as mock_frombytes:
+    with (
+        patch("mss.mss") as mock_mss_cls,
+        patch("PIL.Image.frombytes") as mock_frombytes,
+    ):
         mock_sct = MagicMock()
         mock_sct.monitors = [{"width": 100}]
         mock_raw = MagicMock()
@@ -77,8 +96,12 @@ def test__capture_mss_impl_out_of_range():
         mock_sct.grab.assert_called_once_with({"width": 100})
         mock_img.save.assert_called_once()
 
+
 def test_capture_region():
-    with patch("mss.mss") as mock_mss_cls, patch("PIL.Image.frombytes") as mock_frombytes:
+    with (
+        patch("mss.mss") as mock_mss_cls,
+        patch("PIL.Image.frombytes") as mock_frombytes,
+    ):
         mock_sct = MagicMock()
         mock_raw = MagicMock()
         mock_raw.size = (100, 100)
@@ -91,8 +114,11 @@ def test_capture_region():
 
         capture_region(10, 20, 30, 40)
 
-        mock_sct.grab.assert_called_once_with({"top": 20, "left": 10, "width": 30, "height": 40})
+        mock_sct.grab.assert_called_once_with(
+            {"top": 20, "left": 10, "width": 30, "height": 40}
+        )
         mock_img.save.assert_called_once()
+
 
 def test_load_image_as_jpeg():
     with patch("PIL.Image.open") as mock_img_open:

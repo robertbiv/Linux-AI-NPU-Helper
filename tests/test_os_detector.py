@@ -21,8 +21,9 @@ from src.os_detector import (
 class TestDetectInit:
     def test_detect_init_oserror(self):
         """Test that OSError when resolving /proc/1/exe falls back gracefully."""
-        with patch("src.os_detector.Path") as mock_path, patch(
-            "src.os_detector.shutil.which", return_value=None
+        with (
+            patch("src.os_detector.Path") as mock_path,
+            patch("src.os_detector.shutil.which", return_value=None),
         ):
             mock_path.return_value.resolve.side_effect = OSError
             mock_path.return_value.exists.return_value = False
@@ -60,12 +61,18 @@ class TestDetectPackageManager:
 
     def test_unknown_distro_falls_back_to_path(self):
         import shutil
-        with patch.object(shutil, "which", side_effect=lambda x: "/usr/bin/apt" if x == "apt" else None):
+
+        with patch.object(
+            shutil,
+            "which",
+            side_effect=lambda x: "/usr/bin/apt" if x == "apt" else None,
+        ):
             pm = _detect_package_manager("unknown", "")
             assert pm == "apt"
 
     def test_completely_unknown_returns_empty(self):
         import shutil
+
         with patch.object(shutil, "which", return_value=None):
             pm = _detect_package_manager("unknowndistro", "")
             assert pm == ""
@@ -165,7 +172,6 @@ class TestDetect:
         info = detect()
         assert info.kernel != ""
 
-
     def test_read_os_release_manual_fallback_and_malformed_lines(self):
         detect.cache_clear()
         malformed_content = """
@@ -174,9 +180,11 @@ class TestDetect:
 INVALID_LINE_NO_EQUALS
 VALID_KEY="valid_value"
 """
-        with patch("platform.freedesktop_os_release", side_effect=OSError), \
-             patch.object(Path, "exists", return_value=True), \
-             patch.object(Path, "read_text", return_value=malformed_content):
+        with (
+            patch("platform.freedesktop_os_release", side_effect=OSError),
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "read_text", return_value=malformed_content),
+        ):
             result = _read_os_release()
 
         assert result == {"VALID_KEY": "valid_value"}
@@ -222,8 +230,10 @@ VALID_KEY="valid_value"
             "NAME": "CentOS",
             "VERSION_ID": "7",
         }
-        with patch("src.os_detector._read_os_release", return_value={}), \
-             patch("src.os_detector._read_legacy_release", return_value=mock_legacy):
+        with (
+            patch("src.os_detector._read_os_release", return_value={}),
+            patch("src.os_detector._read_legacy_release", return_value=mock_legacy),
+        ):
             detect.cache_clear()
             info = detect()
         assert info.id == "centos"

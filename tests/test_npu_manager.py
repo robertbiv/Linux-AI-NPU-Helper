@@ -1,4 +1,5 @@
 """Extensive tests for src/npu_manager.py."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,6 +11,7 @@ from src.npu_manager import NPUSession, NPUManager
 
 # ── NPUSession ────────────────────────────────────────────────────────────────
 
+
 class TestNPUSession:
     """Test NPUSession with a mocked onnxruntime."""
 
@@ -17,7 +19,10 @@ class TestNPUSession:
         """Return a mock onnxruntime module."""
         ort = MagicMock()
         ort.get_available_providers.return_value = available_providers or [
-            "VitisAIExecutionProvider", "OpenVINOExecutionProvider", "QNNExecutionProvider", "CPUExecutionProvider"
+            "VitisAIExecutionProvider",
+            "OpenVINOExecutionProvider",
+            "QNNExecutionProvider",
+            "CPUExecutionProvider",
         ]
         mock_session = MagicMock()
         mock_input = MagicMock()
@@ -155,6 +160,7 @@ class TestNPUSession:
 
 # ── NPUManager ────────────────────────────────────────────────────────────────
 
+
 class TestNPUManager:
     def _cfg(self, model_path="", auto_install=False):
         return {
@@ -234,6 +240,7 @@ class TestNPUManager:
 
     def test_load_model_auto_path_installs(self, tmp_path):
         from src.npu_model_installer import _MIN_ONNX_SIZE_BYTES, ONNX_FILENAME
+
         onnx_file = tmp_path / ONNX_FILENAME
         onnx_file.write_bytes(b"\x00" * (_MIN_ONNX_SIZE_BYTES + 1))
 
@@ -350,9 +357,11 @@ class TestNPUManager:
 
 # ── Integration: load_model path resolution ────────────────────────────────────
 
+
 class TestNPUManagerAutoResolve:
     def test_auto_resolve_already_installed(self, tmp_path):
         from src.npu_model_installer import _MIN_ONNX_SIZE_BYTES, ONNX_FILENAME
+
         onnx = tmp_path / ONNX_FILENAME
         onnx.write_bytes(b"\x00" * (_MIN_ONNX_SIZE_BYTES + 1))
 
