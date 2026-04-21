@@ -59,6 +59,16 @@ class TestGetSetNested:
         _set_nested(d, "a.b", 99)
         assert d["a"]["b"] == 99
 
+    def test_get_nested_not_dict(self):
+        d = {"a": "not_dict"}
+        with pytest.raises(KeyError, match="Cannot descend into non-dict at 'b'"):
+            _get_nested(d, "a.b")
+
+    def test_set_nested_not_dict(self):
+        d = {"a": "not_dict"}
+        _set_nested(d, "a.b", 42)
+        assert d["a"]["b"] == 42
+
 
 class TestSettingsManager:
     def test_get_default(self, tmp_path):
@@ -218,3 +228,41 @@ class TestSettingsManager:
         sm = SettingsManager(path=p)
         # Should not raise; defaults used
         assert sm.get("backend") == "ollama"
+
+    def test_bad_json_type_ignored_logged(self, tmp_path, caplog):
+        p = tmp_path / "settings.json"
+        p.write_text('["a", "b", "c"]')
+
+        sm = SettingsManager(path=p)
+        assert "Settings file is not a JSON object; ignoring." in caplog.text
+        # Should use defaults
+        assert sm.get("backend") == "ollama"
+
+    def test_path_permission_error_logged(self, tmp_path, mocker, caplog):
+        p = tmp_path / "settings.json"
+        p.write_text("{}")
+        mock_check = mocker.patch("src.settings.check_path_permissions")
+        mock_check.side_effect = OSError("Permission denied")
+
+        sm = SettingsManager(path=p)
+
+        assert "Could not load settings: Permission denied" in caplog.text
+
+    def test_save_oserror_logged(self, tmp_path, mocker, caplog):
+        p = tmp_path / "settings.json"
+        sm = SettingsManager(path=p)
+
+        mock_secure_write = mocker.patch("src.settings.secure_write")
+        mock_secure_write.side_effect = OSError("Disk full")
+
+        sm.save()
+        assert "Could not save settings: Disk full" in caplog.text
+
+    def test_update_section_replace(self, tmp_path):
+        p = tmp_path / "settings.json"
+        sm = SettingsManager(path=p)
+        sm.set("ollama", "not_a_dict")
+        assert sm.get("ollama") == "not_a_dict"
+
+        sm.update_section("ollama", {"model": "llama3"})
+        assert sm.get("ollama.model") == "llama3"
