@@ -442,8 +442,9 @@ class DiagnosticReporter:
 
     # ── Dependencies ──────────────────────────────────────────────────────────
 
+    @staticmethod
     @functools.lru_cache(maxsize=None)
-    def check_dependencies(self) -> list[dict[str, Any]]:
+    def check_dependencies() -> list[dict[str, Any]]:
         """Check availability of optional runtime dependencies.
 
         Returns:
