@@ -79,6 +79,7 @@ if _HAS_QT:
             self._page_id = page_id
             self.setCheckable(True)
             self.setText(f"  {icon}   {label}")
+            self.setAccessibleName(label)
             self.setFixedHeight(44)
             self.setStyleSheet(
                 f"QPushButton {{"
