@@ -187,7 +187,12 @@ _FAMILY_SCRIPTS: dict[str, str] = {
 
 
 def _pick_script(shell_family: str) -> tuple[str, str]:
-    """Return (script_body, shell_executable_for_running_script)."""
+    """Return (script_body, shell_executable_for_running_script).
+
+    Note:
+        The script_body uses the LINUX_AI_COMMAND environment variable securely
+        to prevent command injection, instead of string formatting.
+    """
     script_body = _FAMILY_SCRIPTS.get(shell_family, _GENERIC_SCRIPT)
     return script_body, "sh"
 
