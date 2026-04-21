@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import logging
 import os
+import functools
 import re
 from pathlib import Path
 from typing import Any
@@ -129,6 +130,9 @@ def _desktop_field(text: str, key: str, default: str = "") -> str:
     return m.group(1).strip() if m else default
 
 
+# The package manager binary path rarely changes during app execution;
+# caching the result via @lru_cache is a safe and simple optimization.
+@functools.lru_cache(maxsize=1)
 def _find_pkg_manager() -> tuple[str, list[str]] | None:
     """Return (executable, search_cmd_prefix) for the first available PM."""
     import shutil  # lazy
