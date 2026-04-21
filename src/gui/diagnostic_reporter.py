@@ -26,6 +26,7 @@ import logging
 import shutil
 import stat
 import sys
+import functools
 import time
 from pathlib import Path
 from typing import Any
@@ -441,6 +442,7 @@ class DiagnosticReporter:
 
     # ── Dependencies ──────────────────────────────────────────────────────────
 
+    @functools.lru_cache(maxsize=None)
     def check_dependencies(self) -> list[dict[str, Any]]:
         """Check availability of optional runtime dependencies.
 
