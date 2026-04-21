@@ -43,17 +43,15 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 try:
-    from PyQt5.QtCore import Qt, QRectF, QTimer
-    from PyQt5.QtGui import QColor, QFont, QPainter, QPen, QBrush
+    from PyQt5.QtCore import Qt, QRectF
+    from PyQt5.QtGui import QColor, QFont, QPainter, QBrush
     from PyQt5.QtWidgets import (
         QFrame,
         QHBoxLayout,
         QLabel,
         QProgressBar,
-        QPushButton,
         QScrollArea,
         QSizePolicy,
-        QSpacerItem,
         QVBoxLayout,
         QWidget,
     )
@@ -291,6 +289,34 @@ if _HAS_QT:
             layout.setContentsMargins(14, 14, 14, 14)
             layout.setSpacing(14)
 
+            self._setup_title(layout)
+            self._setup_engine_status_card(layout)
+            self._setup_metric_cards(layout)
+            self._setup_throughput_chart_card(layout)
+            self._setup_inference_latency_card(layout)
+            self._setup_active_kernels_card(layout)
+            self._setup_neural_model_context_card(layout)
+            layout.addStretch()
+
+            # Seed with defaults
+            self._refresh_kernels(
+                [
+                    {"cmd": "EXEC", "name": "lora_fusion_v4.bin", "status": "READY"},
+                    {
+                        "cmd": "LOAD",
+                        "name": "quantization_int8_map...",
+                        "status": "...",
+                    },
+                    {"cmd": "STAT", "name": "stream_buffer_clear", "status": "OK"},
+                    {"cmd": "SYNC", "name": "neural_engine_sync...", "status": "0ms"},
+                ]
+            )
+            self._refresh_ctx_tags(["X-VECTOR ON", "FP16 ACCEL"])
+
+            scroll.setWidget(page)
+            outer.addWidget(scroll)
+
+        def _setup_title(self, layout: QVBoxLayout) -> None:
             # ── Title ──────────────────────────────────────────────────────
             layout.addWidget(_section_label("System Architecture"))
 
@@ -301,6 +327,7 @@ if _HAS_QT:
             )
             layout.addWidget(title_lbl)
 
+        def _setup_engine_status_card(self, layout: QVBoxLayout) -> None:
             # ── Engine status card ─────────────────────────────────────────
             engine_card = QFrame()
             engine_card.setObjectName("engineCard")
@@ -339,6 +366,7 @@ if _HAS_QT:
             ec_row.addStretch()
             layout.addWidget(engine_card)
 
+        def _setup_metric_cards(self, layout: QVBoxLayout) -> None:
             # ── Metric cards ───────────────────────────────────────────────
             self._card_clock = _MetricCard(
                 "Clock Speed",
@@ -371,6 +399,7 @@ if _HAS_QT:
             )
             layout.addWidget(self._card_thermal)
 
+        def _setup_throughput_chart_card(self, layout: QVBoxLayout) -> None:
             # ── Throughput chart card ──────────────────────────────────────
             tp_card = QFrame()
             tp_card.setObjectName("tpCard")
@@ -413,6 +442,7 @@ if _HAS_QT:
             tp_layout.addWidget(self._throughput_chart)
             layout.addWidget(tp_card)
 
+        def _setup_inference_latency_card(self, layout: QVBoxLayout) -> None:
             # ── Inference latency card ─────────────────────────────────────
             lat_card = QFrame()
             lat_card.setObjectName("latCard")
@@ -451,6 +481,7 @@ if _HAS_QT:
 
             layout.addWidget(lat_card)
 
+        def _setup_active_kernels_card(self, layout: QVBoxLayout) -> None:
             # ── Active kernels card ────────────────────────────────────────
             kern_card = QFrame()
             kern_card.setObjectName("kernCard")
@@ -485,6 +516,7 @@ if _HAS_QT:
             kern_layout.addLayout(self._kern_container)
             layout.addWidget(kern_card)
 
+        def _setup_neural_model_context_card(self, layout: QVBoxLayout) -> None:
             # ── Neural model context card ──────────────────────────────────
             ctx_card = QFrame()
             ctx_card.setObjectName("ctxCard")
@@ -516,25 +548,6 @@ if _HAS_QT:
             ctx_layout.addLayout(self._ctx_tags_row)
 
             layout.addWidget(ctx_card)
-            layout.addStretch()
-
-            # Seed with defaults
-            self._refresh_kernels(
-                [
-                    {"cmd": "EXEC", "name": "lora_fusion_v4.bin", "status": "READY"},
-                    {
-                        "cmd": "LOAD",
-                        "name": "quantization_int8_map...",
-                        "status": "...",
-                    },
-                    {"cmd": "STAT", "name": "stream_buffer_clear", "status": "OK"},
-                    {"cmd": "SYNC", "name": "neural_engine_sync...", "status": "0ms"},
-                ]
-            )
-            self._refresh_ctx_tags(["X-VECTOR ON", "FP16 ACCEL"])
-
-            scroll.setWidget(page)
-            outer.addWidget(scroll)
 
         # ── Public update API ─────────────────────────────────────────────────
 
