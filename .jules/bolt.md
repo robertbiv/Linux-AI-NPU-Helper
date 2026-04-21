@@ -28,3 +28,7 @@
 ### 2025-05-14
 - Caching desktop environment detection in `src/gui/theme.py` using `@lru_cache(maxsize=1)` resulted in a ~45x performance improvement (from 3.08μs to 0.07μs per call).
 - When caching functions that depend on environment variables, ensured tests clear the cache using `func.cache_clear()` to maintain test isolation.
+
+## 2025-05-14 - [Optimizing proc parsing in system_info.py]
+**Learning:** Parsing large system files like `/proc/meminfo` and `/proc/cpuinfo` line-by-line using `splitlines()` within a loop is a significant performance bottleneck due to excessive string object allocations for every line. Profiling showed that using `splitlines()` can be up to 6x slower than using native string operations.
+**Action:** Instead of `splitlines()`, use native string operations like `.find()` and slicing for targeted field extraction (e.g. `_query_memory()`), or use `re.finditer` with `re.MULTILINE` (e.g. `_query_cpu()`) to allow the C-level engine to lazily scan the string without allocating massive amounts of temporary line strings.
