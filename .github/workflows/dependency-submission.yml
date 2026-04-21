@@ -1,0 +1,29 @@
+name: Dependency Submission
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  submit-pypi:
+    name: submit-pypi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Generate Requirements
+        run: pip install pip-tools && pip-compile requirements.txt -o requirements.out
+      - name: Dependency Submission
+        uses: actions/component-detection-dependency-submission-action@v3.0.0
+        with:
+          detectorsFilter: PipReport
+          detectorCategories: Python
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
