@@ -485,6 +485,66 @@ class ConversationHistory:
         secure_write(out, text)
         logger.info("Exported %d messages (plaintext) → %s", len(data), out)
 
+    @staticmethod
+    def _decrypt_import_text(raw_text: str, password: str | None, path: Path) -> str:
+        """Handle decryption logic for imported history."""
+        stripped = raw_text.strip()
+        looks_encrypted = not (stripped.startswith("[") or stripped.startswith("{"))
+
+        if looks_encrypted:
+            if password is None:
+                raise ValueError(
+                    "This file appears to be encrypted. "
+                    "Please provide the password used when it was saved."
+                )
+            # Try salt file next to the import file first, then the default dir.
+            key = _derive_key_from_password(password, path.parent, create_salt=False)
+            if key is None:
+                key = _derive_key_from_password(
+                    password, _DEFAULT_HISTORY_DIR, create_salt=False
+                )
+            if key is None:
+                # No salt on disk — try the current session key (same password
+                # re-derived with a fresh salt is not useful, but the user may
+                # be importing a file whose salt was next to the *original*
+                # history file on another machine).
+                raise ValueError(
+                    "Cannot derive decryption key: no salt file (history.salt) "
+                    "was found alongside the import file.  Copy 'history.salt' "
+                    "from the original machine into the same directory as the "
+                    "exported file and try again."
+                )
+            try:
+                return decrypt_data(raw_text, key)
+            except Exception as exc:
+                raise ValueError(
+                    f"Decryption failed — wrong password or corrupted file. ({exc})"
+                ) from exc
+        elif password is not None and not looks_encrypted:
+            # Plain JSON provided with a password → ignore the password
+            # (backward-compat: the file might have been exported unencrypted).
+            logger.debug(
+                "import_history: file appears to be plain JSON; "
+                "the provided password will be ignored."
+            )
+        return raw_text
+
+    @staticmethod
+    def _parse_import_data(raw_text: str) -> list[Message]:
+        """Parse raw JSON text into a list of Message objects."""
+        try:
+            data = json.loads(raw_text)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid history file format: {exc}") from exc
+
+        imported: list[Message] = []
+        for d in data:
+            try:
+                imported.append(Message.from_dict(d))
+            except (KeyError, TypeError) as exc:
+                logger.warning("Skipped malformed message during import: %s", exc)
+        return imported
+
     def import_history(
         self,
         import_path: Path | str,
@@ -522,60 +582,8 @@ class ConversationHistory:
             raise FileNotFoundError(f"Import file not found: {path}")
 
         raw_text = path.read_text(encoding="utf-8")
-        stripped = raw_text.strip()
-
-        # Detect encrypted files: Fernet tokens start with 'gAAAAA' (base64)
-        # and are never valid JSON.
-        looks_encrypted = not (stripped.startswith("[") or stripped.startswith("{"))
-
-        if looks_encrypted:
-            if password is None:
-                raise ValueError(
-                    "This file appears to be encrypted. "
-                    "Please provide the password used when it was saved."
-                )
-            # Try salt file next to the import file first, then the default dir.
-            key = _derive_key_from_password(password, path.parent, create_salt=False)
-            if key is None:
-                key = _derive_key_from_password(
-                    password, _DEFAULT_HISTORY_DIR, create_salt=False
-                )
-            if key is None:
-                # No salt on disk — try the current session key (same password
-                # re-derived with a fresh salt is not useful, but the user may
-                # be importing a file whose salt was next to the *original*
-                # history file on another machine).
-                raise ValueError(
-                    "Cannot derive decryption key: no salt file (history.salt) "
-                    "was found alongside the import file.  Copy 'history.salt' "
-                    "from the original machine into the same directory as the "
-                    "exported file and try again."
-                )
-            try:
-                raw_text = decrypt_data(raw_text, key)
-            except Exception as exc:
-                raise ValueError(
-                    f"Decryption failed — wrong password or corrupted file. ({exc})"
-                ) from exc
-        elif password is not None and not looks_encrypted:
-            # Plain JSON provided with a password → ignore the password
-            # (backward-compat: the file might have been exported unencrypted).
-            logger.debug(
-                "import_history: file appears to be plain JSON; "
-                "the provided password will be ignored."
-            )
-
-        try:
-            data = json.loads(raw_text)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"Invalid history file format: {exc}") from exc
-
-        imported: list[Message] = []
-        for d in data:
-            try:
-                imported.append(Message.from_dict(d))
-            except (KeyError, TypeError) as exc:
-                logger.warning("Skipped malformed message during import: %s", exc)
+        raw_text = self._decrypt_import_text(raw_text, password, path)
+        imported = self._parse_import_data(raw_text)
 
         with self._lock:
             if merge:
