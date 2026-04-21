@@ -1,4 +1,5 @@
 """Tests for src/file_handler.py."""
+
 from __future__ import annotations
 
 import logging
@@ -14,8 +15,9 @@ from src.file_handler import (
     read_image_file,
     load_attachment,
     _MAX_INLINE_TEXT_BYTES,
-    _TEXT_CHUNK_SIZE
+    _TEXT_CHUNK_SIZE,
 )
+
 
 class TestClassifyFile:
     def test_classify_image(self, tmp_path):
@@ -77,6 +79,7 @@ class TestClassifyFile:
         # which is not in _EXTRA_TEXT_TYPES and doesn't start with image/ or text/
         assert classify_file(p) == "binary"
 
+
 class TestReadTextFile:
     def test_read_small_file(self, tmp_path):
         p = tmp_path / "small.txt"
@@ -103,6 +106,7 @@ class TestReadTextFile:
             args, _ = mock_logger.warning.call_args
             assert "consider using stream_text_file()" in args[0]
 
+
 class TestStreamTextFile:
     def test_stream_chunks(self, tmp_path):
         p = tmp_path / "stream.txt"
@@ -125,6 +129,7 @@ class TestStreamTextFile:
         assert len(chunks[1]) == 100
         assert "".join(chunks) == content
 
+
 class TestReadImageFile:
     def test_read_image_success(self, tmp_path):
         mock_pil = MagicMock()
@@ -144,7 +149,9 @@ class TestReadImageFile:
         p = tmp_path / "test.jpg"
         p.write_bytes(b"input data")
 
-        with patch.dict("sys.modules", {"PIL": mock_pil, "PIL.Image": mock_image_module}):
+        with patch.dict(
+            "sys.modules", {"PIL": mock_pil, "PIL.Image": mock_image_module}
+        ):
             data = read_image_file(p)
             assert data == b"fake jpeg data"
             mock_img.close.assert_called_once()
@@ -164,7 +171,9 @@ class TestReadImageFile:
         p = tmp_path / "test.jpg"
         p.write_bytes(b"input data")
 
-        with patch.dict("sys.modules", {"PIL": mock_pil, "PIL.Image": mock_image_module}):
+        with patch.dict(
+            "sys.modules", {"PIL": mock_pil, "PIL.Image": mock_image_module}
+        ):
             read_image_file(p, max_dimension=1000)
 
             # Check resize was called. 4000x2000 -> 1000x500
@@ -180,6 +189,7 @@ class TestReadImageFile:
             with pytest.raises(RuntimeError) as excinfo:
                 read_image_file(p)
             assert "Pillow is not installed" in str(excinfo.value)
+
 
 class TestLoadAttachment:
     def test_load_attachment_text(self, tmp_path):

@@ -1,4 +1,5 @@
 """Tests for src/settings.py — SettingsManager."""
+
 from __future__ import annotations
 import json
 import threading
@@ -13,9 +14,9 @@ class TestDeepMerge:
         assert result == {"a": 1, "b": 99}
 
     def test_nested_override(self):
-        base     = {"a": {"x": 1, "y": 2}}
+        base = {"a": {"x": 1, "y": 2}}
         override = {"a": {"y": 99}}
-        result   = _deep_merge(base, override)
+        result = _deep_merge(base, override)
         assert result["a"] == {"x": 1, "y": 99}
 
     def test_adds_new_key(self):
@@ -109,13 +110,13 @@ class TestSettingsManager:
         assert "model" in section
 
     def test_all_returns_deep_copy(self, tmp_path):
-        sm   = SettingsManager(path=None)
+        sm = SettingsManager(path=None)
         data = sm.all()
         data["backend"] = "modified"
         assert sm.get("backend") == "ollama"  # original unchanged
 
     def test_persistence(self, tmp_path):
-        p  = tmp_path / "settings.json"
+        p = tmp_path / "settings.json"
         sm = SettingsManager(path=p)
         sm.set("backend", "openai")
         assert p.exists()
@@ -123,13 +124,13 @@ class TestSettingsManager:
         assert sm2.get("backend") == "openai"
 
     def test_file_mode_is_600(self, tmp_path):
-        p  = tmp_path / "settings.json"
+        p = tmp_path / "settings.json"
         sm = SettingsManager(path=p)
         sm.set("backend", "openai")
         assert (p.stat().st_mode & 0o777) == 0o600
 
     def test_reload(self, tmp_path):
-        p  = tmp_path / "settings.json"
+        p = tmp_path / "settings.json"
         sm = SettingsManager(path=p)
         sm.set("backend", "openai")
         # Overwrite file externally
@@ -140,14 +141,14 @@ class TestSettingsManager:
         assert sm.get("backend") == "ollama"
 
     def test_listener_called_on_set(self, tmp_path):
-        sm      = SettingsManager(path=None)
-        calls   = []
+        sm = SettingsManager(path=None)
+        calls = []
         sm.add_listener(lambda k, v: calls.append((k, v)))
         sm.set("backend", "openai", save=False)
         assert calls == [("backend", "openai")]
 
     def test_listener_called_on_set_many(self, tmp_path):
-        sm    = SettingsManager(path=None)
+        sm = SettingsManager(path=None)
         calls = []
         sm.add_listener(lambda k, v: calls.append(k))
         sm.set_many({"backend": "openai", "ollama.model": "x"})
@@ -155,9 +156,9 @@ class TestSettingsManager:
         assert "ollama.model" in calls
 
     def test_remove_listener(self, tmp_path):
-        sm    = SettingsManager(path=None)
+        sm = SettingsManager(path=None)
         calls = []
-        fn    = lambda k, v: calls.append(k)
+        fn = lambda k, v: calls.append(k)
         sm.add_listener(fn)
         sm.remove_listener(fn)
         sm.set("backend", "openai", save=False)
@@ -200,16 +201,20 @@ class TestSettingsManager:
         assert cfg.backend == "openai"
 
     def test_thread_safety(self, tmp_path):
-        sm     = SettingsManager(path=None)
+        sm = SettingsManager(path=None)
         errors = []
+
         def writer(n):
             try:
                 sm.set("ollama.timeout", n, save=False)
             except Exception as e:
                 errors.append(e)
+
         threads = [threading.Thread(target=writer, args=(i,)) for i in range(50)]
-        for t in threads: t.start()
-        for t in threads: t.join()
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
         assert not errors
 
     def test_bad_json_file_ignored(self, tmp_path):

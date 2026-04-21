@@ -1,4 +1,5 @@
 """Tests for src/model_selector.py."""
+
 from __future__ import annotations
 import pytest
 from unittest.mock import MagicMock, patch
@@ -77,7 +78,7 @@ class TestNpuWarning:
         cfg.backend = backend
         cfg.ollama = {"base_url": "http://localhost:11434", "model": model}
         cfg.openai = {"base_url": "http://localhost:1234/v1", "model": model}
-        cfg.npu    = {"model_path": ""}
+        cfg.npu = {"model_path": ""}
         cfg.network = {"allow_external": False}
         cfg.get = MagicMock(return_value={})
         return cfg
@@ -144,7 +145,7 @@ class TestNpuWarning:
 
         with patch("src.npu_benchmark.probe_hardware") as mock_probe:
             hw = MagicMock()
-            hw.ram_gb = 32.0 # Lots of ram, normally ok up to 16gb
+            hw.ram_gb = 32.0  # Lots of ram, normally ok up to 16gb
 
             # Low NPU TOPS (<10), limit 3.0 GB
             hw.npu_tops = 5.0
@@ -156,16 +157,16 @@ class TestNpuWarning:
             hw.npu_tops = 20.0
             mock_probe.return_value = hw
             w = sel.npu_warning(mid_model)
-            assert w is None or "capabilities" not in w # Should be fine now
+            assert w is None or "capabilities" not in w  # Should be fine now
 
 
 class TestGetCurrentModel:
     def _make_config(self, backend, model):
         cfg = MagicMock()
         cfg.backend = backend
-        cfg.ollama  = {"model": model}
-        cfg.openai  = {"model": model}
-        cfg.npu     = {"model_path": model}
+        cfg.ollama = {"model": model}
+        cfg.openai = {"model": model}
+        cfg.npu = {"model_path": model}
         return cfg
 
     def test_ollama(self):
@@ -191,10 +192,10 @@ class TestSetModel:
     def _make_config(self, backend):
         cfg = MagicMock()
         cfg.backend = backend
-        cfg._data   = {
+        cfg._data = {
             "ollama": {"model": "old"},
             "openai": {"model": "old"},
-            "npu":    {"model_path": "old"},
+            "npu": {"model_path": "old"},
         }
         return cfg
 
@@ -218,9 +219,13 @@ class TestListModels:
     def _make_config(self, backend="ollama"):
         cfg = MagicMock()
         cfg.backend = backend
-        cfg.ollama  = {"base_url": "http://localhost:11434", "model": "llava"}
-        cfg.openai  = {"base_url": "http://localhost:1234/v1", "model": "x", "api_key": ""}
-        cfg.npu     = {"model_path": "/path/to/model.onnx"}
+        cfg.ollama = {"base_url": "http://localhost:11434", "model": "llava"}
+        cfg.openai = {
+            "base_url": "http://localhost:1234/v1",
+            "model": "x",
+            "api_key": "",
+        }
+        cfg.npu = {"model_path": "/path/to/model.onnx"}
         cfg.network = {"allow_external": False}
         return cfg
 
@@ -267,21 +272,34 @@ class TestModelSummary:
     def _make_config(self):
         cfg = MagicMock()
         cfg.backend = "ollama"
-        cfg.ollama  = {"base_url": "http://localhost:11434", "model": "llava"}
+        cfg.ollama = {"base_url": "http://localhost:11434", "model": "llava"}
         cfg.network = {"allow_external": False}
-        cfg.get     = MagicMock(return_value={})
+        cfg.get = MagicMock(return_value={})
         return cfg
 
     def test_summary_keys(self):
         sel = ModelSelector(self._make_config())
-        m   = ModelInfo(name="llama3:8b", size_bytes=4*1024**3, family="llama", quantization="q4_k_m")
-        s   = sel.model_summary(m)
-        for key in ("name","size_gb","family","quantization","is_vision","npu_ok","npu_warning"):
+        m = ModelInfo(
+            name="llama3:8b",
+            size_bytes=4 * 1024**3,
+            family="llama",
+            quantization="q4_k_m",
+        )
+        s = sel.model_summary(m)
+        for key in (
+            "name",
+            "size_gb",
+            "family",
+            "quantization",
+            "is_vision",
+            "npu_ok",
+            "npu_warning",
+        ):
             assert key in s, f"Missing key {key!r}"
 
     def test_summary_npu_ok_for_onnx(self):
         sel = ModelSelector(self._make_config())
-        m   = ModelInfo(name="/path/model.onnx")
-        s   = sel.model_summary(m)
+        m = ModelInfo(name="/path/model.onnx")
+        s = sel.model_summary(m)
         assert s["npu_ok"] is True
         assert s["npu_warning"] == ""
