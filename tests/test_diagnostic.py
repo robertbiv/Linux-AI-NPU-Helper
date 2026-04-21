@@ -1,37 +1,41 @@
 """Tests for src/gui/diagnostic_reporter.py."""
+
 from __future__ import annotations
 from unittest.mock import MagicMock, patch
 from src.gui.diagnostic_reporter import (
     DiagnosticReporter,
-    STATUS_OK, STATUS_WARN, STATUS_FAIL, STATUS_SKIP,
+    STATUS_OK,
+    STATUS_WARN,
+    STATUS_FAIL,
+    STATUS_SKIP,
 )
 
 
 def _make_config(backend="ollama", allow_external=False):
     cfg = MagicMock()
     cfg.backend = backend
-    cfg.ollama  = {"base_url": "http://localhost:11434", "model": "llava"}
-    cfg.openai  = {"base_url": "http://localhost:1234/v1", "model": "x", "api_key": ""}
-    cfg.npu     = {"model_path": ""}
+    cfg.ollama = {"base_url": "http://localhost:11434", "model": "llava"}
+    cfg.openai = {"base_url": "http://localhost:1234/v1", "model": "x", "api_key": ""}
+    cfg.npu = {"model_path": ""}
     cfg.network = {"allow_external": allow_external}
-    cfg.get     = MagicMock(return_value={})
+    cfg.get = MagicMock(return_value={})
     return cfg
 
 
 class TestCheckBackend:
     def test_npu_ok_without_http(self):
         cfg = _make_config("npu")
-        r   = DiagnosticReporter(cfg).check_backend()
+        r = DiagnosticReporter(cfg).check_backend()
         assert r["status"] == STATUS_OK
         assert r["url"] == "in-process"
 
     def test_unknown_backend_fail(self):
         cfg = _make_config("unknown_backend")
-        r   = DiagnosticReporter(cfg).check_backend()
+        r = DiagnosticReporter(cfg).check_backend()
         assert r["status"] == STATUS_FAIL
 
     def test_ollama_ok_on_200(self):
-        cfg      = _make_config("ollama")
+        cfg = _make_config("ollama")
         fake_req = MagicMock()
         fake_req.status_code = 200
         with patch("requests.get", return_value=fake_req):
@@ -64,7 +68,8 @@ class TestCheckNpu:
         mock_ort = MagicMock()
         mock_ort.__version__ = "1.18.0"
         mock_ort.get_available_providers.return_value = [
-            "VitisAIExecutionProvider", "CPUExecutionProvider"
+            "VitisAIExecutionProvider",
+            "CPUExecutionProvider",
         ]
         with patch.dict("sys.modules", {"onnxruntime": mock_ort}):
             r = DiagnosticReporter(_make_config()).check_npu()
@@ -75,7 +80,8 @@ class TestCheckNpu:
         mock_ort = MagicMock()
         mock_ort.__version__ = "1.18.0"
         mock_ort.get_available_providers.return_value = [
-            "OpenVINOExecutionProvider", "CPUExecutionProvider"
+            "OpenVINOExecutionProvider",
+            "CPUExecutionProvider",
         ]
         with patch.dict("sys.modules", {"onnxruntime": mock_ort}):
             r = DiagnosticReporter(_make_config()).check_npu()
@@ -86,7 +92,8 @@ class TestCheckNpu:
         mock_ort = MagicMock()
         mock_ort.__version__ = "1.18.0"
         mock_ort.get_available_providers.return_value = [
-            "QNNExecutionProvider", "CPUExecutionProvider"
+            "QNNExecutionProvider",
+            "CPUExecutionProvider",
         ]
         with patch.dict("sys.modules", {"onnxruntime": mock_ort}):
             r = DiagnosticReporter(_make_config()).check_npu()
@@ -111,14 +118,14 @@ class TestCheckTools:
 
     def test_with_registry(self):
         mock_desc = MagicMock()
-        mock_desc.is_loaded      = False
+        mock_desc.is_loaded = False
         mock_desc.unload_after_use = True
-        mock_desc.description    = "Test tool"
+        mock_desc.description = "Test tool"
         mock_reg = MagicMock()
-        mock_reg._descriptors    = {"my_tool": mock_desc}
+        mock_reg._descriptors = {"my_tool": mock_desc}
         r = DiagnosticReporter(_make_config(), registry=mock_reg).check_tools()
         assert len(r) == 1
-        assert r[0]["name"]   == "my_tool"
+        assert r[0]["name"] == "my_tool"
         assert r[0]["status"] == STATUS_OK
         assert r[0]["loaded"] is False
 
@@ -126,13 +133,13 @@ class TestCheckTools:
 class TestCheckSecurity:
     def test_allow_external_warns(self):
         cfg = _make_config(allow_external=True)
-        r   = DiagnosticReporter(cfg).check_security()
+        r = DiagnosticReporter(cfg).check_security()
         assert r["issues"] > 0
         assert r["status"] == STATUS_WARN
 
     def test_no_external_ok(self):
         cfg = _make_config(allow_external=False)
-        r   = DiagnosticReporter(cfg).check_security()
+        r = DiagnosticReporter(cfg).check_security()
         network_check = next(c for c in r["checks"] if "network" in c["label"].lower())
         assert network_check["status"] == STATUS_OK
 
@@ -152,7 +159,11 @@ class TestCheckSecurity:
         assert r["issues"] > 0
 
         # Check if at least one file check has STATUS_WARN with the expected detail
-        fail_checks = [c for c in r["checks"] if c["status"] == STATUS_WARN and "mock error" in c.get("detail", "")]
+        fail_checks = [
+            c
+            for c in r["checks"]
+            if c["status"] == STATUS_WARN and "mock error" in c.get("detail", "")
+        ]
         assert len(fail_checks) > 0
 
 
@@ -164,7 +175,11 @@ class TestCheckNetwork:
 
     def test_external_url_fail_when_not_allowed(self):
         cfg = _make_config("openai")
-        cfg.openai = {"base_url": "https://api.openai.com/v1", "model": "x", "api_key": ""}
+        cfg.openai = {
+            "base_url": "https://api.openai.com/v1",
+            "model": "x",
+            "api_key": "",
+        }
         r = DiagnosticReporter(cfg).check_network()
         assert r["status"] == STATUS_FAIL
 
@@ -183,7 +198,9 @@ class TestCheckSettings:
     def test_with_settings_manager(self):
         mock_sm = MagicMock()
         mock_sm._listeners = [1, 2, 3]
-        r = DiagnosticReporter(_make_config(), settings_manager=mock_sm).check_settings()
+        r = DiagnosticReporter(
+            _make_config(), settings_manager=mock_sm
+        ).check_settings()
         assert r["listener_count"] == 3
 
 
@@ -207,7 +224,9 @@ class TestCheckSystem:
         mock_info.is_immutable = False
         mock_os_detect.return_value = mock_info
 
-        with patch("src.shell_detector.detect", side_effect=Exception("Mock shell error")):
+        with patch(
+            "src.shell_detector.detect", side_effect=Exception("Mock shell error")
+        ):
             r = DiagnosticReporter(_make_config()).check_system()
 
         assert r["shell"] == ""
@@ -237,8 +256,19 @@ class TestFullReport:
     def test_structure(self):
         with patch("requests.get", side_effect=Exception("offline")):
             r = DiagnosticReporter(_make_config()).full_report()
-        for key in ("timestamp","app_version","overall_status","backend",
-                    "npu","tools","security","settings","system","network","dependencies"):
+        for key in (
+            "timestamp",
+            "app_version",
+            "overall_status",
+            "backend",
+            "npu",
+            "tools",
+            "security",
+            "settings",
+            "system",
+            "network",
+            "dependencies",
+        ):
             assert key in r
 
     def test_overall_fail_when_backend_fails(self):
@@ -251,5 +281,6 @@ class TestFullReport:
         with patch("requests.get", side_effect=Exception("offline")):
             r = DiagnosticReporter(_make_config()).full_report()
         import datetime
+
         # Should parse without error
         datetime.datetime.fromisoformat(r["timestamp"])

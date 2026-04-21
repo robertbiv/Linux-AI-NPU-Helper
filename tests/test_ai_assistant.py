@@ -30,7 +30,7 @@ def _make_config(
         "timeout": 5,
     }
     cfg.openai = {
-        "base_url": "http://localhost:1234/v1",
+        "base_url": "https://localhost:1234/v1",
         "api_key": "sk-test",
         "model": openai_model,
         "timeout": 5,
@@ -367,6 +367,14 @@ class TestAskOpenAI:
             list(assistant.ask("hello"))
         _, kwargs = mock_post.call_args
         assert kwargs.get("verify") is True
+
+    def test_api_key_over_http_raises_error(self):
+        cfg = _make_config(backend="openai", stream=False)
+        # Force HTTP instead of HTTPS
+        cfg.openai["base_url"] = "http://localhost:1234/v1"
+        assistant = AIAssistant(cfg)
+        with pytest.raises(ValueError, match="insecure HTTP connections"):
+            list(assistant.ask("hello"))
 
     def test_done_sentinel_skipped(self):
         cfg = _make_config(backend="openai", stream=True)

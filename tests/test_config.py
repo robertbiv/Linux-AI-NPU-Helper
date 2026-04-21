@@ -1,4 +1,5 @@
 """Tests for src/config.py."""
+
 from __future__ import annotations
 from src.config import load
 from src.utils import _deep_merge
@@ -101,7 +102,7 @@ class TestLoadFromFile:
 class TestConfigProperties:
     def test_repr(self):
         cfg = load(path=None)
-        r   = repr(cfg)
+        r = repr(cfg)
         assert "Config" in r
         assert "backend" in r
 

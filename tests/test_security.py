@@ -30,6 +30,7 @@ from src.security import (
 
 # ── is_local_url ──────────────────────────────────────────────────────────────
 
+
 class TestIsLocalUrl:
     def test_localhost(self):
         assert is_local_url("http://localhost:11434") is True
@@ -61,6 +62,7 @@ class TestIsLocalUrl:
 
 # ── assert_local_url ──────────────────────────────────────────────────────────
 
+
 class TestAssertLocalUrl:
     def test_local_passes(self):
         assert_local_url("http://localhost:11434", allow_external=False)  # no raise
@@ -75,6 +77,7 @@ class TestAssertLocalUrl:
 
 
 # ── sanitize_ai_response ──────────────────────────────────────────────────────
+
 
 class TestSanitizeAiResponse:
     def test_strips_null_bytes(self):
@@ -106,6 +109,7 @@ class TestSanitizeAiResponse:
 
 
 # ── secure_write ──────────────────────────────────────────────────────────────
+
 
 class TestSecureWrite:
     def test_creates_file_with_content(self, tmp_path):
@@ -139,17 +143,21 @@ class TestSecureWrite:
 
     def test_cleanup_unlink_oserror(self, tmp_path):
         p = tmp_path / "fail.txt"
-        with patch.object(Path, "replace", side_effect=OSError("Mock replace error")), \
-             patch.object(Path, "unlink", side_effect=OSError("Mock unlink error")):
+        with (
+            patch.object(Path, "replace", side_effect=OSError("Mock replace error")),
+            patch.object(Path, "unlink", side_effect=OSError("Mock unlink error")),
+        ):
             with pytest.raises(OSError, match="Mock replace error"):
                 secure_write(p, "data")
 
 
 # ── check_path_permissions ────────────────────────────────────────────────────
 
+
 class TestCheckPathPermissions:
     def test_no_warning_on_owner_only(self, tmp_path, caplog):
         import logging
+
         p = tmp_path / "safe.txt"
         p.write_text("x")
         p.chmod(0o600)
@@ -159,6 +167,7 @@ class TestCheckPathPermissions:
 
     def test_warns_on_world_readable(self, tmp_path, caplog):
         import logging
+
         p = tmp_path / "unsafe.txt"
         p.write_text("x")
         p.chmod(0o644)
@@ -171,16 +180,20 @@ class TestCheckPathPermissions:
 
     def test_oserror_on_stat(self, tmp_path, caplog):
         import logging
+
         p = tmp_path / "dummy.txt"
         p.write_text("x")
-        with patch.object(Path, "exists", return_value=True), \
-             patch.object(Path, "stat", side_effect=OSError("Mocked error")):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "stat", side_effect=OSError("Mocked error")),
+        ):
             with caplog.at_level(logging.DEBUG):
                 check_path_permissions(p, label="test file")
         assert "Could not check permissions of" in caplog.text
 
 
 # ── RateLimiter ───────────────────────────────────────────────────────────────
+
 
 class TestRateLimiter:
     def test_disabled_never_raises(self):
@@ -233,6 +246,7 @@ class TestRateLimiter:
 
 # ── validate_tool_args ────────────────────────────────────────────────────────
 
+
 class TestValidateToolArgs:
     def test_strips_null_bytes_from_strings(self):
         result = validate_tool_args({"query": "hello\x00world"})
@@ -281,6 +295,7 @@ class TestValidateToolArgs:
 
 # ── mask_secret ───────────────────────────────────────────────────────────────
 
+
 class TestMaskSecret:
     def test_masks_long_key(self):
         masked = mask_secret("sk-abc123xyz")
@@ -303,17 +318,21 @@ class TestMaskSecret:
 
 # ── get_api_key_from_env ──────────────────────────────────────────────────────
 
+
 class TestGetApiKeyFromEnv:
     def test_returns_env_value(self, monkeypatch):
         monkeypatch.setenv("MY_API_KEY", "secret-value")
         from src.security import get_api_key_from_env
+
         assert get_api_key_from_env("MY_API_KEY") == "secret-value"
 
     def test_returns_empty_when_unset(self):
         from src.security import get_api_key_from_env
+
         # Use a name that is definitely not set
         assert get_api_key_from_env("__DEFINITELY_NOT_SET_XYZ__") == ""
 
     def test_empty_env_var_name(self):
         from src.security import get_api_key_from_env
+
         assert get_api_key_from_env("") == ""

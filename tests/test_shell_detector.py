@@ -23,12 +23,19 @@ from src.shell_detector import (
 
 class TestShellInfo:
     def test_supports_readline_prefill(self):
-        assert ShellInfo("/bin/bash", "bash", "bash").supports_readline_prefill() is True
+        assert (
+            ShellInfo("/bin/bash", "bash", "bash").supports_readline_prefill() is True
+        )
         assert ShellInfo("/bin/zsh", "zsh", "zsh").supports_readline_prefill() is True
-        assert ShellInfo("/bin/fish", "fish", "fish").supports_readline_prefill() is True
+        assert (
+            ShellInfo("/bin/fish", "fish", "fish").supports_readline_prefill() is True
+        )
         assert ShellInfo("/bin/ksh", "ksh", "ksh").supports_readline_prefill() is True
         assert ShellInfo("/bin/sh", "sh", "sh").supports_readline_prefill() is False
-        assert ShellInfo("/usr/bin/nu", "nu", "nushell").supports_readline_prefill() is False
+        assert (
+            ShellInfo("/usr/bin/nu", "nu", "nushell").supports_readline_prefill()
+            is False
+        )
 
     def test_str_representation(self):
         info = ShellInfo("/bin/bash", "bash", "bash", "5.2.26")
@@ -52,23 +59,29 @@ class TestHelpers:
         assert _family("unknown-shell") == "unknown"
 
     def test_version(self):
-        with patch("shutil.which", return_value="/bin/bash"), \
-             patch("subprocess.run") as mock_run:
-
+        with (
+            patch("shutil.which", return_value="/bin/bash"),
+            patch("subprocess.run") as mock_run,
+        ):
             mock_run.return_value = MagicMock(
                 stdout="GNU bash, version 5.2.26(1)-release (x86_64-pc-linux-gnu)\n",
                 stderr="",
-                returncode=0
+                returncode=0,
             )
-            assert _version("/bin/bash") == "GNU bash, version 5.2.26(1)-release (x86_64-pc-linux-gnu)"
+            assert (
+                _version("/bin/bash")
+                == "GNU bash, version 5.2.26(1)-release (x86_64-pc-linux-gnu)"
+            )
 
     def test_version_not_found(self):
         with patch("shutil.which", return_value=None):
             assert _version("/nonexistent/shell") == ""
 
     def test_version_error(self):
-        with patch("shutil.which", return_value="/bin/bash"), \
-             patch("subprocess.run", side_effect=subprocess.SubprocessError):
+        with (
+            patch("shutil.which", return_value="/bin/bash"),
+            patch("subprocess.run", side_effect=subprocess.SubprocessError),
+        ):
             assert _version("/bin/bash") == ""
 
     def test_from_path(self):
@@ -88,70 +101,77 @@ class TestDetect:
         detect.cache_clear()
 
     def test_detect_from_env(self):
-        with patch.dict(os.environ, {"SHELL": "/usr/bin/zsh"}), \
-             patch("src.shell_detector.Path.exists", return_value=True), \
-             patch("src.shell_detector._version", return_value="5.9"):
-
+        with (
+            patch.dict(os.environ, {"SHELL": "/usr/bin/zsh"}),
+            patch("src.shell_detector.Path.exists", return_value=True),
+            patch("src.shell_detector._version", return_value="5.9"),
+        ):
             info = detect()
             assert info.path == "/usr/bin/zsh"
             assert info.family == "zsh"
 
     def test_detect_from_env_empty(self):
-        with patch.dict(os.environ, {"SHELL": "   "}), \
-             patch("src.shell_detector._from_parent_proc", return_value=None), \
-             patch("src.shell_detector._from_user_db", return_value=None), \
-             patch("src.shell_detector._version", return_value=""):
-
+        with (
+            patch.dict(os.environ, {"SHELL": "   "}),
+            patch("src.shell_detector._from_parent_proc", return_value=None),
+            patch("src.shell_detector._from_user_db", return_value=None),
+            patch("src.shell_detector._version", return_value=""),
+        ):
             info = detect()
             assert info.path == "/bin/sh"
             assert info.family == "sh"
 
     def test_detect_from_env_not_exists(self):
-        with patch.dict(os.environ, {"SHELL": "/nonexistent/shell"}), \
-             patch("src.shell_detector.Path.exists", return_value=False), \
-             patch("src.shell_detector._from_parent_proc", return_value=None), \
-             patch("src.shell_detector._from_user_db", return_value=None), \
-             patch("src.shell_detector._version", return_value=""):
-
+        with (
+            patch.dict(os.environ, {"SHELL": "/nonexistent/shell"}),
+            patch("src.shell_detector.Path.exists", return_value=False),
+            patch("src.shell_detector._from_parent_proc", return_value=None),
+            patch("src.shell_detector._from_user_db", return_value=None),
+            patch("src.shell_detector._version", return_value=""),
+        ):
             info = detect()
             assert info.path == "/bin/sh"
             assert info.family == "sh"
 
     def test_detect_from_parent_proc(self):
-        with patch.dict(os.environ, {"SHELL": ""}), \
-             patch("src.shell_detector._from_parent_proc", return_value="/usr/bin/fish"), \
-             patch("src.shell_detector._version", return_value="3.6.0"):
-
+        with (
+            patch.dict(os.environ, {"SHELL": ""}),
+            patch("src.shell_detector._from_parent_proc", return_value="/usr/bin/fish"),
+            patch("src.shell_detector._version", return_value="3.6.0"),
+        ):
             info = detect()
             assert info.path == "/usr/bin/fish"
             assert info.family == "fish"
 
     def test_detect_from_user_db(self):
-        with patch.dict(os.environ, {"SHELL": ""}), \
-             patch("src.shell_detector._from_parent_proc", return_value=None), \
-             patch("src.shell_detector._from_user_db", return_value="/usr/bin/bash"), \
-             patch("src.shell_detector.Path.exists", return_value=True), \
-             patch("src.shell_detector._version", return_value="5.2"):
-
+        with (
+            patch.dict(os.environ, {"SHELL": ""}),
+            patch("src.shell_detector._from_parent_proc", return_value=None),
+            patch("src.shell_detector._from_user_db", return_value="/usr/bin/bash"),
+            patch("src.shell_detector.Path.exists", return_value=True),
+            patch("src.shell_detector._version", return_value="5.2"),
+        ):
             info = detect()
             assert info.path == "/usr/bin/bash"
             assert info.family == "bash"
 
     def test_detect_fallback(self):
-        with patch.dict(os.environ, {"SHELL": ""}), \
-             patch("src.shell_detector._from_parent_proc", return_value=None), \
-             patch("src.shell_detector._from_user_db", return_value=None), \
-             patch("src.shell_detector._version", return_value=""):
-
+        with (
+            patch.dict(os.environ, {"SHELL": ""}),
+            patch("src.shell_detector._from_parent_proc", return_value=None),
+            patch("src.shell_detector._from_user_db", return_value=None),
+            patch("src.shell_detector._version", return_value=""),
+        ):
             info = detect()
             assert info.path == "/bin/sh"
             assert info.family == "sh"
 
     def test_detect_is_cached(self):
-        with patch.dict(os.environ, {"SHELL": "/bin/bash"}), \
-             patch.object(Path, "exists", return_value=True), \
-             patch("src.shell_detector._version", return_value="5.2") as mock_version:
-
+        with (
+            patch.dict(os.environ, {"SHELL": "/bin/bash"}),
+            patch.object(Path, "exists", return_value=True),
+            patch("src.shell_detector._version", return_value="5.2") as mock_version,
+        ):
             first = detect()
             second = detect()
 
@@ -161,15 +181,19 @@ class TestDetect:
     def test_from_user_db_success(self):
         mock_entry = MagicMock()
         mock_entry.pw_shell = "/bin/zsh"
-        with patch("os.getuid", return_value=1000), \
-             patch("pwd.getpwuid", return_value=mock_entry):
+        with (
+            patch("os.getuid", return_value=1000),
+            patch("pwd.getpwuid", return_value=mock_entry),
+        ):
             assert _from_user_db() == "/bin/zsh"
 
     def test_from_user_db_empty(self):
         mock_entry = MagicMock()
         mock_entry.pw_shell = ""
-        with patch("os.getuid", return_value=1000), \
-             patch("pwd.getpwuid", return_value=mock_entry):
+        with (
+            patch("os.getuid", return_value=1000),
+            patch("pwd.getpwuid", return_value=mock_entry),
+        ):
             assert _from_user_db() is None
 
     def test_from_user_db_exception(self):
@@ -181,9 +205,10 @@ class TestDetect:
             assert _from_parent_proc() is None
 
     def test_from_parent_proc(self):
-        with patch("os.getppid", return_value=123), \
-             patch("src.shell_detector.Path") as mock_path:
-
+        with (
+            patch("os.getppid", return_value=123),
+            patch("src.shell_detector.Path") as mock_path,
+        ):
             # mock_path(f"/proc/123/exe") returns mock_exe
             mock_exe = MagicMock()
             # mock_exe.resolve() returns resolved_path
@@ -197,9 +222,10 @@ class TestDetect:
             assert _from_parent_proc() == "/usr/bin/zsh"
 
     def test_from_parent_proc_unknown_shell(self):
-        with patch("os.getppid", return_value=123), \
-             patch("src.shell_detector.Path") as mock_path:
-
+        with (
+            patch("os.getppid", return_value=123),
+            patch("src.shell_detector.Path") as mock_path,
+        ):
             mock_exe = MagicMock()
             resolved_path = MagicMock()
             resolved_path.name = "not-a-shell"

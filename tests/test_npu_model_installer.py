@@ -1,4 +1,5 @@
 """Extensive tests for src/npu_model_installer.py."""
+
 from __future__ import annotations
 
 import hashlib
@@ -29,6 +30,7 @@ from src.npu_model_installer import (
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+
 def _make_fake_onnx(path: Path, size: int | None = None) -> Path:
     """Write a dummy file larger than min_size_bytes for the default entry."""
     if size is None:
@@ -57,6 +59,7 @@ def _make_entry(**kwargs) -> ModelCatalogEntry:
 
 
 # ── MODEL_CATALOG ─────────────────────────────────────────────────────────────
+
 
 class TestModelCatalog:
     def test_catalog_non_empty(self):
@@ -198,7 +201,9 @@ class TestGetVisionModels:
         entries = get_vision_models()
         _order = {"excellent": 0, "good": 1, "fair": 2, "not_recommended": 3}
         for i in range(len(entries) - 1):
-            assert _order.get(entries[i].npu_fit, 99) <= _order.get(entries[i+1].npu_fit, 99)
+            assert _order.get(entries[i].npu_fit, 99) <= _order.get(
+                entries[i + 1].npu_fit, 99
+            )
 
 
 class TestGetNpuSuggestions:
@@ -224,6 +229,7 @@ class TestGetNpuSuggestions:
 
 
 # ── ModelCatalogEntry ─────────────────────────────────────────────────────────
+
 
 class TestModelCatalogEntry:
     def test_hf_base_url_construction(self):
@@ -254,6 +260,7 @@ class TestModelCatalogEntry:
 
 # ── install_dir_for ───────────────────────────────────────────────────────────
 
+
 class TestInstallDirFor:
     def test_uses_models_root(self):
         e = _make_entry(key="my-key")
@@ -267,6 +274,7 @@ class TestInstallDirFor:
 
 
 # ── NPUModelInstaller ─────────────────────────────────────────────────────────
+
 
 class TestInstallDir:
     def test_custom_install_dir(self, tmp_path):
@@ -349,7 +357,9 @@ class TestInstall:
             else:
                 dest.write_bytes(b"fake")
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             result = inst.install()
 
         assert result == inst.model_path()
@@ -363,7 +373,9 @@ class TestInstall:
         def fake_download(url, dest, cb):
             dest.write_bytes(b"\x00" * 200)
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             inst.install(progress_callback=messages.append)
 
         assert len(messages) > 0
@@ -384,7 +396,9 @@ class TestInstall:
             download_calls.append(dest.name)
             dest.write_bytes(b"fake")
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             inst.install()
 
         assert entry.onnx_filename not in download_calls
@@ -398,7 +412,9 @@ class TestInstall:
         def fake_download(url, dest, cb):
             pass  # Don't create the file
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             with pytest.raises(InstallError, match="not created|too small"):
                 inst.install()
 
@@ -409,7 +425,9 @@ class TestInstall:
         def fake_download(url, dest, cb):
             dest.write_bytes(b"\x00" * 10)  # Too small (≤ 100)
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             with pytest.raises(InstallError):
                 inst.install()
 
@@ -421,7 +439,9 @@ class TestInstall:
         def fake_download(url, dest, cb):
             dest.write_bytes(b"\x00" * 200)
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             inst.install()
 
         assert install_dir.exists()
@@ -446,11 +466,26 @@ class TestModelInfo:
         entry = _make_entry()
         inst = NPUModelInstaller(tmp_path, entry=entry)
         info = inst.model_info()
-        for key in ("key", "name", "publisher", "description", "is_vision",
-                    "npu_fit", "npu_fit_label", "size_description",
-                    "license_spdx", "license_url", "hf_repo_url", "notes",
-                    "install_dir", "onnx_file", "is_installed",
-                    "size_bytes", "size_gb", "is_default"):
+        for key in (
+            "key",
+            "name",
+            "publisher",
+            "description",
+            "is_vision",
+            "npu_fit",
+            "npu_fit_label",
+            "size_description",
+            "license_spdx",
+            "license_url",
+            "hf_repo_url",
+            "notes",
+            "install_dir",
+            "onnx_file",
+            "is_installed",
+            "size_bytes",
+            "size_gb",
+            "is_default",
+        ):
             assert key in info, f"Missing key: {key!r}"
 
     def test_not_installed_reflects_state(self, tmp_path):
@@ -470,7 +505,9 @@ class TestModelInfo:
 
     def test_is_vision_from_entry(self, tmp_path):
         entry = _make_entry(is_vision=True)
-        assert NPUModelInstaller(tmp_path, entry=entry).model_info()["is_vision"] is True
+        assert (
+            NPUModelInstaller(tmp_path, entry=entry).model_info()["is_vision"] is True
+        )
 
     def test_npu_fit_from_entry(self, tmp_path):
         entry = _make_entry(npu_fit="excellent")
@@ -566,6 +603,7 @@ class TestSetDirPermissions:
 
 # ── install_model_from_catalog ────────────────────────────────────────────────
 
+
 class TestInstallModelFromCatalog:
     def test_calls_install_on_entry(self, tmp_path):
         entry = _make_entry(min_size_bytes=100)
@@ -573,7 +611,9 @@ class TestInstallModelFromCatalog:
         def fake_download(url, dest, cb):
             dest.write_bytes(b"\x00" * 200)
 
-        with patch.object(NPUModelInstaller, "_download_file", side_effect=fake_download):
+        with patch.object(
+            NPUModelInstaller, "_download_file", side_effect=fake_download
+        ):
             result = install_model_from_catalog(entry)
 
         assert result.name == entry.onnx_filename
@@ -588,10 +628,13 @@ class TestInstallModelFromCatalog:
 
 # ── ensure_default_model ──────────────────────────────────────────────────────
 
+
 class TestEnsureDefaultModel:
     @patch("src.npu_model_installer.install_model_from_catalog")
     @patch("src.npu_model_installer.get_default_entry")
-    def test_returns_none_on_install_error(self, mock_get_entry, mock_install, tmp_path):
+    def test_returns_none_on_install_error(
+        self, mock_get_entry, mock_install, tmp_path
+    ):
         mock_install.side_effect = InstallError("download failed")
         result = ensure_default_model(install_dir=tmp_path)
         assert result is None
@@ -647,6 +690,7 @@ class TestEnsureDefaultModel:
 
 # ── _cb helper ────────────────────────────────────────────────────────────────
 
+
 class TestCbHelper:
     def test_calls_callback(self):
         messages = []
@@ -659,10 +703,12 @@ class TestCbHelper:
     def test_callback_exception_swallowed(self):
         def bad_cb(msg):
             raise RuntimeError("boom")
+
         _cb(bad_cb, "test")
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
+
 
 class TestConstants:
     def test_default_install_dir_is_path(self):
@@ -683,6 +729,7 @@ class TestConstants:
 
 
 # ── ModelCatalogEntry TOS fields ──────────────────────────────────────────────
+
 
 class TestRequiresTos:
     def test_entry_with_tos(self):
@@ -731,10 +778,12 @@ class TestRequiresTos:
 
 # ── No preinstall — model_path default ────────────────────────────────────────
 
+
 class TestNoPreinstall:
     def test_default_model_path_is_empty(self):
         """Config default must be '' (no auto-install) not 'auto'."""
         from src.config import _DEFAULTS
+
         npu_cfg = _DEFAULTS.get("npu", {})
         assert npu_cfg.get("model_path") == "", (
             "npu.model_path default should be '' (no preinstall); "
@@ -743,6 +792,7 @@ class TestNoPreinstall:
 
     def test_auto_install_disabled_by_default(self):
         from src.config import _DEFAULTS
+
         npu_cfg = _DEFAULTS.get("npu", {})
         assert npu_cfg.get("auto_install_default_model") is False, (
             "auto_install_default_model should default to False"

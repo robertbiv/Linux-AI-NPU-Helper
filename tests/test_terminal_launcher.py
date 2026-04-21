@@ -24,7 +24,9 @@ class TestTerminalLauncherHelpers:
     @patch("shutil.which")
     def test_find_terminal(self, mock_which):
         # Test finding a terminal
-        mock_which.side_effect = lambda x: "/usr/bin/gnome-terminal" if x == "gnome-terminal" else None
+        mock_which.side_effect = lambda x: (
+            "/usr/bin/gnome-terminal" if x == "gnome-terminal" else None
+        )
 
         result = _find_terminal()
         assert result == ("/usr/bin/gnome-terminal", "dashdash")
@@ -42,21 +44,23 @@ class TestTerminalLauncherHelpers:
         assert _find_terminal() is None
 
     def test_build_launch_cmd(self):
-        assert _build_launch_cmd("gnome-terminal", "dashdash", "/tmp/script.sh", "/bin/bash") == [
-            "gnome-terminal", "--", "/bin/bash", "/tmp/script.sh"
-        ]
+        assert _build_launch_cmd(
+            "gnome-terminal", "dashdash", "/tmp/script.sh", "/bin/bash"
+        ) == ["gnome-terminal", "--", "/bin/bash", "/tmp/script.sh"]
 
-        assert _build_launch_cmd("konsole", "execute", "/tmp/script.sh", "/bin/bash") == [
-            "konsole", "--command=/bin/bash /tmp/script.sh"
-        ]
+        assert _build_launch_cmd(
+            "konsole", "execute", "/tmp/script.sh", "/bin/bash"
+        ) == ["konsole", "--command=/bin/bash /tmp/script.sh"]
 
         assert _build_launch_cmd("xterm", "dashe", "/tmp/script.sh", "/bin/bash") == [
-            "xterm", "-e", "/bin/bash /tmp/script.sh"
+            "xterm",
+            "-e",
+            "/bin/bash /tmp/script.sh",
         ]
 
     def test_pick_script(self):
         body, runner = _pick_script("bash")
-        assert 'LINUX_AI_COMMAND' in body
+        assert "LINUX_AI_COMMAND" in body
         assert runner == "sh"
 
 
@@ -104,8 +108,15 @@ class TestOpenWithCommand:
         mock_popen.assert_called_once()
 
         launch_cmd = mock_popen.call_args[0][0]
-        assert launch_cmd == ["/usr/bin/gnome-terminal", "--", "/bin/bash", "/tmp/ai_helper_test.sh"]
-        mock_schedule_delete.assert_called_once_with("/tmp/ai_helper_test.sh", delay=5.0)
+        assert launch_cmd == [
+            "/usr/bin/gnome-terminal",
+            "--",
+            "/bin/bash",
+            "/tmp/ai_helper_test.sh",
+        ]
+        mock_schedule_delete.assert_called_once_with(
+            "/tmp/ai_helper_test.sh", delay=5.0
+        )
 
     @patch("src.terminal_launcher._find_terminal")
     @patch("src.terminal_launcher.tempfile.mkstemp")
@@ -127,7 +138,9 @@ class TestOpenWithCommand:
         mock_find_terminal.return_value = ("/usr/bin/xterm", "dashe")
         mock_mkstemp.return_value = (123, "/tmp/ai_helper_test.sh")
 
-        with patch("src.shell_detector.detect", side_effect=Exception("Detection failed")):
+        with patch(
+            "src.shell_detector.detect", side_effect=Exception("Detection failed")
+        ):
             success, msg = open_with_command("ls")
 
         assert success is True
@@ -203,7 +216,12 @@ class TestOpenWithCommand:
 
         launch_cmd = mock_popen.call_args[0][0]
         # Fish shell uses /bin/sh to run its wrapper
-        assert launch_cmd == ["/usr/bin/gnome-terminal", "--", "/bin/sh", "/tmp/ai_helper_test.sh"]
+        assert launch_cmd == [
+            "/usr/bin/gnome-terminal",
+            "--",
+            "/bin/sh",
+            "/tmp/ai_helper_test.sh",
+        ]
 
     @patch("src.terminal_launcher._find_terminal")
     @patch("src.terminal_launcher.tempfile.mkstemp")
