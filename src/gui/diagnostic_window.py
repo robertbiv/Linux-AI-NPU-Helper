@@ -109,7 +109,8 @@ if _HAS_QT:
         return item
 
     def _make_status_table(
-        rows: list[tuple[str, str, str]], accessible_name: str = "Diagnostic Status Table"
+        rows: list[tuple[str, str, str]],
+        accessible_name: str = "Diagnostic Status Table",
     ) -> QTableWidget:
         """Create a read-only table of (label, status, detail) rows."""
         table = QTableWidget(len(rows), 3)
@@ -406,7 +407,9 @@ if _HAS_QT:
                 )
                 for d in deps
             ]
-            table = _make_status_table(rows, accessible_name="Dependencies Status Table")
+            table = _make_status_table(
+                rows, accessible_name="Dependencies Status Table"
+            )
             layout = self._deps_tab.layout()
             old = layout.itemAt(0)
             if old and old.widget():
