@@ -107,8 +107,8 @@ class ScreenshotTool(Tool):
 
         Args:
             args:
-                Dict with optional keys: ``monitor`` (int), ``jpeg_quality`` (int),
-                ``save`` (bool).
+                Dict with optional keys: ``monitor``, ``jpeg_quality``,
+                ``save``.
         """
         monitor = int(args.get("monitor", 0))
         quality = int(args.get("jpeg_quality", 75))

@@ -1,4 +1,5 @@
 """Tests for src/gui/theme.py — DE detection and theme selection."""
+
 from __future__ import annotations
 import os
 import pytest
@@ -12,6 +13,7 @@ from src.gui.theme import (
     DarkColourPalette,
     Theme,
 )
+
 
 class TestDetectDesktopEnvironment:
     @pytest.fixture(autouse=True)
@@ -145,9 +147,22 @@ class TestGetThemeForDe:
         assert t.style_name == "Fusion"
 
     def test_all_des_return_theme(self):
-        for de in ["gnome", "kde", "xfce", "mate", "cinnamon",
-                   "pantheon", "deepin", "lxqt", "budgie", "sway",
-                   "hyprland", "i3", "openbox", "unknown"]:
+        for de in [
+            "gnome",
+            "kde",
+            "xfce",
+            "mate",
+            "cinnamon",
+            "pantheon",
+            "deepin",
+            "lxqt",
+            "budgie",
+            "sway",
+            "hyprland",
+            "i3",
+            "openbox",
+            "unknown",
+        ]:
             t = get_theme_for_de(de)
             assert isinstance(t, Theme), f"Expected Theme for DE={de}"
             assert t.accent_hex.startswith("#"), f"Bad accent for DE={de}"
@@ -179,21 +194,27 @@ class TestPrefersDark:
 class TestColourPalette:
     def test_defaults_are_hex(self):
         p = ColourPalette()
-        for f in ["window","window_text","base","highlight"]:
+        for f in ["window", "window_text", "base", "highlight"]:
             val = getattr(p, f)
             assert val.startswith("#"), f"Field {f}={val!r} is not a hex colour"
 
     def test_dark_palette_darker_window(self):
         light = ColourPalette()
-        dark  = DarkColourPalette()
+        dark = DarkColourPalette()
+
         # Dark window should be darker (lower RGB sum) than light window
         def rgb_sum(h: str) -> int:
             h = h.lstrip("#")
-            return int(h[0:2],16) + int(h[2:4],16) + int(h[4:6],16)
+            return int(h[0:2], 16) + int(h[2:4], 16) + int(h[4:6], 16)
+
         assert rgb_sum(dark.window) < rgb_sum(light.window)
 
 
 class TestGetCurrentTheme:
+    @pytest.fixture(autouse=True)
+    def clear_de_cache(self):
+        detect_desktop_environment.cache_clear()
+
     def test_returns_theme(self, monkeypatch):
         monkeypatch.setenv("XDG_CURRENT_DESKTOP", "GNOME")
         t = get_current_theme()

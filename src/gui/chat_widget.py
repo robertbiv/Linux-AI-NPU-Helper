@@ -370,7 +370,7 @@ if _HAS_QT:
         """Full chat page widget.
 
         Signals:
-        message_submitted(str):
+        message_submitted:
             Emitted when the user sends a new message.
         """
 

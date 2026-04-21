@@ -18,7 +18,6 @@ def _safe_pow(a: Any, b: Any) -> Any:
     return operator.pow(a, b)
 
 
-
 def _safe_factorial(n: Any) -> Any:
     if isinstance(n, int) and n > 10000:
         raise ValueError("Argument too large for factorial")
