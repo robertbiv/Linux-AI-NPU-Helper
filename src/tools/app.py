@@ -141,6 +141,7 @@ def _find_pkg_manager() -> tuple[str, list[str]] | None:
 
 def _launch_app(name: str) -> tuple[bool, str]:
     """Try to open an application by name.  Returns (success, message)."""
+    import shlex  # lazy
     import shutil  # lazy
     import subprocess  # lazy
 
@@ -152,6 +153,7 @@ def _launch_app(name: str) -> tuple[bool, str]:
             try:
                 r = subprocess.run(
                     ["gtk-launch", did],
+                    shell=False,
                     capture_output=True,
                     timeout=5,
                 )
@@ -161,8 +163,6 @@ def _launch_app(name: str) -> tuple[bool, str]:
                 pass
 
     # 2. Exec= field from .desktop file
-    import shlex  # lazy
-
     for hit in _load_desktop_cache():
         if hit["name"].lower() != name.lower():
             continue
@@ -184,18 +184,25 @@ def _launch_app(name: str) -> tuple[bool, str]:
             logger.debug("Exec launch failed: %s", exc)
 
     # 3. Plain binary
-    binary = shutil.which(name)
-    if binary:
-        try:
-            subprocess.Popen(
-                [binary],
-                start_new_session=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            return True, f"Launched '{name}'."
-        except Exception as exc:  # noqa: BLE001
-            return False, str(exc)
+    try:
+        tokens = shlex.split(name)
+    except ValueError:
+        tokens = [name]
+
+    if tokens:
+        binary = shutil.which(tokens[0])
+        if binary:
+            try:
+                subprocess.Popen(
+                    [binary] + tokens[1:],
+                    shell=False,
+                    start_new_session=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                return True, f"Launched '{name}'."
+            except Exception as exc:  # noqa: BLE001
+                return False, str(exc)
 
     return False, (
         f"Could not find application '{name}'. "
