@@ -6,7 +6,7 @@ from src.tools._base import ToolRegistry
 
 def _register_web_tools(registry: ToolRegistry, cfg: dict) -> None:
     from src.tools.web_search import WebSearchTool
-    from src.tools.web_fetch import WebFetchTool
+    from src.tools.web_fetch import WebFetchTool, WebFetchConfig
 
     web_cfg = cfg.get("web_search", {})
     default_engine = web_cfg.get("engine", "duckduckgo")
@@ -30,12 +30,14 @@ def _register_web_tools(registry: ToolRegistry, cfg: dict) -> None:
             description=WebFetchTool.description,
             schema=WebFetchTool.parameters_schema,
             factory=lambda: WebFetchTool(
-                max_response_chars=int(fetch_cfg.get("max_response_chars", 8_000)),
-                allowed_content_types=fetch_cfg.get("allowed_content_types"),
-                domain_allowlist=fetch_cfg.get("domain_allowlist"),
-                domain_blocklist=fetch_cfg.get("domain_blocklist"),
-                max_redirects=int(fetch_cfg.get("max_redirects", 5)),
-                connect_timeout=float(fetch_cfg.get("connect_timeout", 5.0)),
-                read_timeout=float(fetch_cfg.get("read_timeout", 15.0)),
+                config=WebFetchConfig(
+                    max_response_chars=int(fetch_cfg.get("max_response_chars", 8_000)),
+                    allowed_content_types=fetch_cfg.get("allowed_content_types"),
+                    domain_allowlist=fetch_cfg.get("domain_allowlist"),
+                    domain_blocklist=fetch_cfg.get("domain_blocklist"),
+                    max_redirects=int(fetch_cfg.get("max_redirects", 5)),
+                    connect_timeout=float(fetch_cfg.get("connect_timeout", 5.0)),
+                    read_timeout=float(fetch_cfg.get("read_timeout", 15.0)),
+                )
             ),
         )

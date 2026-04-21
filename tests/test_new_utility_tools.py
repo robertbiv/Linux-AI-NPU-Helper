@@ -3,18 +3,29 @@ from src.tools.format_converter import FormatConverterTool
 from src.tools.qrcode_tool import QRCodeTool
 from src.tools.string_case_tool import StringCaseTool
 
+
 def test_format_converter_json_to_yaml():
     tool = FormatConverterTool()
-    res = tool.run({"source_format": "json", "target_format": "yaml", "text": '{"a": 1, "b": "test"}'})
+    res = tool.run(
+        {
+            "source_format": "json",
+            "target_format": "yaml",
+            "text": '{"a": 1, "b": "test"}',
+        }
+    )
     assert not res.error
     assert "a: 1" in res.results[0].snippet
     assert "b: test" in res.results[0].snippet
 
+
 def test_format_converter_yaml_to_json():
     tool = FormatConverterTool()
-    res = tool.run({"source_format": "yaml", "target_format": "json", "text": "a: 1\nb: test"})
+    res = tool.run(
+        {"source_format": "yaml", "target_format": "json", "text": "a: 1\nb: test"}
+    )
     assert not res.error
     assert '"a": 1' in res.results[0].snippet
+
 
 def test_string_case_tool():
     tool = StringCaseTool()
@@ -38,6 +49,7 @@ def test_string_case_tool():
     # Constant
     res = tool.run({"text": "helloWorld", "to_case": "constant"})
     assert res.results[0].snippet == "HELLO_WORLD"
+
 
 def test_qrcode_tool_missing_lib():
     tool = QRCodeTool()

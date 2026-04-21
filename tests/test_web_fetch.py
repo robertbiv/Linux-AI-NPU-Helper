@@ -1,6 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from src.tools.web_fetch import WebFetchTool, _is_private_ip, _html_to_text
+from src.tools.web_fetch import (
+    WebFetchTool,
+    WebFetchConfig,
+    _is_private_ip,
+    _html_to_text,
+)
+
 
 def test_is_private_ip():
     assert _is_private_ip("localhost") is True
@@ -11,6 +17,7 @@ def test_is_private_ip():
     assert _is_private_ip("8.8.8.8") is False
     assert _is_private_ip("example.com") is False
 
+
 def test_html_to_text():
     html = "<html><head><title>Title</title><script>js</script></head><body><p>Hello <b>world</b>!</p></body></html>"
     text = _html_to_text(html)
@@ -18,11 +25,13 @@ def test_html_to_text():
     assert "js" not in text
     assert "Title" not in text
 
+
 def test_web_fetch_tool_run_missing_url():
     tool = WebFetchTool()
     res = tool.run({})
     assert res.error
     assert "required" in res.error
+
 
 def test_web_fetch_tool_run_invalid_url():
     tool = WebFetchTool()
@@ -30,23 +39,27 @@ def test_web_fetch_tool_run_invalid_url():
     assert res.error
     assert "Only http:// and https://" in res.error
 
+
 def test_web_fetch_tool_run_private_ip():
     tool = WebFetchTool()
     res = tool.run({"url": "http://127.0.0.1/test"})
     assert res.error
     assert "blocked for security" in res.error
 
+
 def test_web_fetch_tool_allowlist():
-    tool = WebFetchTool(domain_allowlist=["allowed.com"])
+    tool = WebFetchTool(config=WebFetchConfig(domain_allowlist=["allowed.com"]))
     res = tool.run({"url": "http://blocked.com"})
     assert res.error
     assert "not in the allowed list" in res.error
 
+
 def test_web_fetch_tool_blocklist():
-    tool = WebFetchTool(domain_blocklist=["blocked.com"])
+    tool = WebFetchTool(config=WebFetchConfig(domain_blocklist=["blocked.com"]))
     res = tool.run({"url": "http://blocked.com"})
     assert res.error
     assert "blocked by configuration" in res.error
+
 
 @patch("requests.Session")
 def test_web_fetch_tool_run_success(mock_session_cls):
@@ -63,6 +76,7 @@ def test_web_fetch_tool_run_success(mock_session_cls):
     assert not res.error
     assert "hello world" in res.results[0].snippet
 
+
 @patch("requests.Session")
 def test_web_fetch_tool_run_unsupported_type(mock_session_cls):
     mock_session = MagicMock()
@@ -76,9 +90,11 @@ def test_web_fetch_tool_run_unsupported_type(mock_session_cls):
     assert res.error
     assert "not in the allowed list" in res.error
 
+
 @patch("requests.Session")
 def test_web_fetch_tool_run_exception(mock_session_cls):
     import requests
+
     mock_session = MagicMock()
     mock_session.get.side_effect = requests.exceptions.RequestException("network error")
     mock_session_cls.return_value = mock_session

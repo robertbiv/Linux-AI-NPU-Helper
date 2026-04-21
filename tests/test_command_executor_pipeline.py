@@ -9,9 +9,13 @@ _SAFETY = {
     "blocked_commands": [r"rm\s+-rf\s+/"],
 }
 
+
 def test_execute_pipeline_simple():
     ex = CommandExecutor(_SAFETY)
-    with patch("subprocess.Popen") as mock_popen, patch("tempfile.mkstemp") as mock_temp:
+    with (
+        patch("subprocess.Popen") as mock_popen,
+        patch("tempfile.mkstemp") as mock_temp,
+    ):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
         mock_proc.communicate.return_value = ("output\n", b"")
@@ -30,9 +34,13 @@ def test_execute_pipeline_simple():
             args, kwargs = mock_popen.call_args
             assert args[0] == ["echo", "hello"]
 
+
 def test_execute_pipeline_pipe():
     ex = CommandExecutor(_SAFETY)
-    with patch("subprocess.Popen") as mock_popen, patch("tempfile.mkstemp") as mock_temp:
+    with (
+        patch("subprocess.Popen") as mock_popen,
+        patch("tempfile.mkstemp") as mock_temp,
+    ):
         mock_proc1 = MagicMock()
         mock_proc1.stdout = MagicMock()
         mock_proc1.poll.return_value = 0
@@ -58,10 +66,12 @@ def test_execute_pipeline_pipe():
             assert args1[0] == ["echo", "hello"]
             assert args2[0] == ["grep", "h"]
 
+
 def test_execute_pipeline_invalid_operator():
     ex = CommandExecutor(_SAFETY)
     with pytest.raises(ValueError, match="is not supported for security"):
         ex._execute_pipeline("echo hello && echo world")
+
 
 def test_execute_pipeline_syntax_error():
     ex = CommandExecutor(_SAFETY)
@@ -74,9 +84,15 @@ def test_execute_pipeline_syntax_error():
     with pytest.raises(ValueError, match="expected file"):
         ex._execute_pipeline("echo hello >")
 
+
 def test_execute_pipeline_io_redirection():
     ex = CommandExecutor(_SAFETY)
-    with patch("subprocess.Popen") as mock_popen, patch("tempfile.mkstemp") as mock_temp, patch("os.fdopen") as mock_fdopen, patch("builtins.open") as mock_open:
+    with (
+        patch("subprocess.Popen") as mock_popen,
+        patch("tempfile.mkstemp") as mock_temp,
+        patch("os.fdopen") as mock_fdopen,
+        patch("builtins.open") as mock_open,
+    ):
         mock_proc = MagicMock()
         mock_proc.returncode = 0
         mock_proc.communicate.return_value = ("", b"")
@@ -97,9 +113,14 @@ def test_execute_pipeline_io_redirection():
         mock_open.assert_any_call("out.txt", "w")
         mock_popen.assert_called_once()
 
+
 def test_execute_pipeline_timeout():
     ex = CommandExecutor(_SAFETY)
-    with patch("subprocess.Popen") as mock_popen, patch("tempfile.mkstemp") as mock_temp, patch("os.fdopen") as mock_fdopen:
+    with (
+        patch("subprocess.Popen") as mock_popen,
+        patch("tempfile.mkstemp") as mock_temp,
+        patch("os.fdopen") as mock_fdopen,
+    ):
         mock_proc = MagicMock()
         mock_proc.communicate.side_effect = subprocess.TimeoutExpired("cmd", 1)
         mock_popen.return_value = mock_proc
@@ -111,9 +132,14 @@ def test_execute_pipeline_timeout():
         with pytest.raises(subprocess.TimeoutExpired):
             ex._execute_pipeline("sleep 10", timeout=1)
 
+
 def test_execute_pipeline_not_found():
     ex = CommandExecutor(_SAFETY)
-    with patch("subprocess.Popen") as mock_popen, patch("tempfile.mkstemp") as mock_temp, patch("os.fdopen") as mock_fdopen:
+    with (
+        patch("subprocess.Popen") as mock_popen,
+        patch("tempfile.mkstemp") as mock_temp,
+        patch("os.fdopen") as mock_fdopen,
+    ):
         mock_popen.side_effect = FileNotFoundError()
 
         mock_temp.return_value = (123, "/tmp/fake")
@@ -123,10 +149,12 @@ def test_execute_pipeline_not_found():
         with pytest.raises(ValueError, match="Command not found"):
             ex._execute_pipeline("nonexistentcmd")
 
+
 def test_execute_pipeline_shlex_error():
     ex = CommandExecutor(_SAFETY)
     with pytest.raises(ValueError, match="Failed to parse"):
         ex._execute_pipeline("echo 'unterminated")
+
 
 def test_execute_pipeline_empty():
     ex = CommandExecutor(_SAFETY)

@@ -43,18 +43,21 @@ def _grab(widget, name):
 @pytest.fixture
 def settings_manager(tmp_path):
     from src.settings import SettingsManager
+
     return SettingsManager(path=tmp_path / "settings.json")
 
 
 @pytest.fixture
 def history_plain(tmp_path):
     from src.conversation import ConversationHistory
+
     return ConversationHistory(persist_path=tmp_path / "history.json", encrypt=False)
 
 
 @pytest.fixture
 def history_enc(tmp_path):
     from src.conversation import ConversationHistory
+
     return ConversationHistory(persist_path=tmp_path / "history.json", encrypt=True)
 
 
@@ -64,6 +67,7 @@ def history_enc(tmp_path):
 class TestCompactMode:
     def test_window_size(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         assert win.width() == 420
@@ -74,11 +78,14 @@ class TestCompactMode:
     def test_no_qt_tool_flag(self, qapp, settings_manager):
         from PyQt5.QtCore import Qt
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         # Qt.Tool == 11 == Qt.Window(1) | 0xa; check the window TYPE not raw flags
         wtype = win.windowType()
-        assert wtype != Qt.Tool, f"Window type is Qt.Tool ({wtype}); taskbar icon will be hidden"
+        assert wtype != Qt.Tool, (
+            f"Window type is Qt.Tool ({wtype}); taskbar icon will be hidden"
+        )
         assert win.windowFlags() & Qt.FramelessWindowHint
         assert win.windowFlags() & Qt.WindowStaysOnTopHint
         win.close()
@@ -86,6 +93,7 @@ class TestCompactMode:
     def test_taskbar_icon_set(self, qapp, settings_manager):
         from PyQt5.QtWidgets import QApplication
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         assert not QApplication.windowIcon().isNull()
@@ -94,6 +102,7 @@ class TestCompactMode:
 
     def test_expand_button(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         win._compact_widget._header.expand_clicked.emit()
@@ -103,6 +112,7 @@ class TestCompactMode:
 
     def test_chat_tab(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         tab_bar = win._compact_widget._tab_bar
@@ -112,6 +122,7 @@ class TestCompactMode:
 
     def test_data_tab(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         tab_bar = win._compact_widget._tab_bar
@@ -121,6 +132,7 @@ class TestCompactMode:
 
     def test_settings_tab(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         tab_bar = win._compact_widget._tab_bar
@@ -135,14 +147,18 @@ class TestCompactMode:
 class TestFullMode:
     def test_min_size(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
-        assert win.minimumWidth() >= 900 or win.width() >= 700  # offscreen may not resize
+        assert (
+            win.minimumWidth() >= 900 or win.width() >= 700
+        )  # offscreen may not resize
         _grab(win, "full_mode")
         win.close()
 
     def test_no_fixed_size_constraint(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         # On offscreen, maximumWidth may be 0; check that fixed compact size is NOT applied
@@ -151,6 +167,7 @@ class TestFullMode:
 
     def test_sidebar_navigation(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         sidebar = win._full_widget._sidebar
@@ -166,6 +183,7 @@ class TestFullMode:
 
     def test_collapse(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         win._full_widget.collapse_requested.emit()
@@ -176,6 +194,7 @@ class TestFullMode:
 
     def test_stats_update(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         win._full_widget.update_stats(npu_pct=72.5, mem_gb=6.2)
@@ -190,6 +209,7 @@ class TestWindowSizes:
     @pytest.mark.parametrize("w,h", [(800, 600), (1280, 720), (1920, 1080)])
     def test_full_resizable(self, qapp, settings_manager, w, h):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         win.resize(w, h)
@@ -199,6 +219,7 @@ class TestWindowSizes:
 
     def test_compact_fixed(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         win.resize(1200, 1200)
@@ -213,6 +234,7 @@ class TestWindowSizes:
 class TestChatWidget:
     def test_send_button(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -227,6 +249,7 @@ class TestChatWidget:
     def test_enter_sends(self, qtbot, settings_manager):
         from PyQt5.QtCore import Qt
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -239,6 +262,7 @@ class TestChatWidget:
     def test_shift_enter_newline(self, qtbot, settings_manager):
         from PyQt5.QtCore import Qt
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -250,6 +274,7 @@ class TestChatWidget:
 
     def test_empty_no_send(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -261,6 +286,7 @@ class TestChatWidget:
 
     def test_streaming_blocks_send(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -276,6 +302,7 @@ class TestChatWidget:
 
     def test_clear_conversation(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -283,12 +310,17 @@ class TestChatWidget:
         w.append_assistant_message("reply")
         w.clear_conversation()
         layout = w._msg_layout
-        count = sum(1 for i in range(layout.count()) if layout.itemAt(i) and layout.itemAt(i).widget())
+        count = sum(
+            1
+            for i in range(layout.count())
+            if layout.itemAt(i) and layout.itemAt(i).widget()
+        )
         assert count == 0
         _grab(w, "chat_cleared")
 
     def test_user_bubble(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -297,6 +329,7 @@ class TestChatWidget:
 
     def test_assistant_bubble(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -310,6 +343,7 @@ class TestChatWidget:
 class TestScreenshotOnSend:
     def test_capture_called_when_enabled(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         settings_manager.set("ui.auto_send_screen", True, save=False)
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
@@ -323,6 +357,7 @@ class TestScreenshotOnSend:
 
     def test_no_capture_when_disabled(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         settings_manager.set("ui.auto_send_screen", False, save=False)
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
@@ -336,6 +371,7 @@ class TestScreenshotOnSend:
 
     def test_no_hide_show(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         settings_manager.set("ui.auto_send_screen", True, save=False)
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
@@ -343,10 +379,15 @@ class TestScreenshotOnSend:
         hidden = []
 
         class FakeWin:
-            def hide(self): hidden.append("hide")
+            def hide(self):
+                hidden.append("hide")
+
             def setVisible(self, v):
-                if not v: hidden.append("setVisible")
-            def setWindowOpacity(self, v): pass
+                if not v:
+                    hidden.append("setVisible")
+
+            def setWindowOpacity(self, v):
+                pass
 
         w.set_screenshot_fn(lambda: b"ok")
         with patch.object(w, "window", return_value=FakeWin()):
@@ -356,6 +397,7 @@ class TestScreenshotOnSend:
 
     def test_exception_handled(self, qtbot, settings_manager):
         from src.gui.chat_widget import ChatWidget
+
         settings_manager.set("ui.auto_send_screen", True, save=False)
         w = ChatWidget(settings_manager)
         qtbot.addWidget(w)
@@ -372,17 +414,24 @@ class TestScreenshotOnSend:
 class TestScreenshotTool:
     def test_name(self):
         from src.tools.screenshot_tool import ScreenshotTool
+
         assert ScreenshotTool.name == "screenshot"
 
     def test_in_registry(self):
         from src.tools import build_default_registry
+
         reg = build_default_registry({})
-        names = reg.names() if hasattr(reg, "names") else list(getattr(reg, "_tools", {}).keys())
+        names = (
+            reg.names()
+            if hasattr(reg, "names")
+            else list(getattr(reg, "_tools", {}).keys())
+        )
         assert "screenshot" in names
 
     def test_run_returns_base64(self, tmp_path):
         from src.tools.screenshot_tool import ScreenshotTool
-        fake = bytes([0xff, 0xd8, 0xff]) + bytes(50)
+
+        fake = bytes([0xFF, 0xD8, 0xFF]) + bytes(50)
         with patch("src.screen_capture.capture", return_value=fake):
             result = ScreenshotTool().run({"save": False})
         assert not result.error  # empty string or None = no error
@@ -390,6 +439,7 @@ class TestScreenshotTool:
 
     def test_opacity_order(self):
         from src.tools.screenshot_tool import ScreenshotTool
+
         calls = []
         tool = ScreenshotTool(hide_opacity_fn=lambda v: calls.append(v))
         with patch("src.screen_capture.capture", return_value=b"\xff\xd8\xff"):
@@ -399,6 +449,7 @@ class TestScreenshotTool:
 
     def test_opacity_restored_on_error(self):
         from src.tools.screenshot_tool import ScreenshotTool
+
         calls = []
         tool = ScreenshotTool(hide_opacity_fn=lambda v: calls.append(v))
         with patch("src.screen_capture.capture", side_effect=RuntimeError("fail")):
@@ -413,6 +464,7 @@ class TestScreenshotTool:
 class TestStatusWidget:
     def test_renders(self, qtbot):
         from src.gui.status_widget import StatusWidget
+
         w = StatusWidget()
         qtbot.addWidget(w)
         w.show()
@@ -420,19 +472,26 @@ class TestStatusWidget:
 
     def test_update_metrics(self, qtbot):
         from src.gui.status_widget import StatusWidget
+
         w = StatusWidget()
         qtbot.addWidget(w)
         w.show()
         if hasattr(w, "update_metrics"):
-            w.update_metrics({
-                "npu_utilization": 82.5, "memory_used_gb": 5.3,
-                "memory_total_gb": 8.0, "throughput_tps": 45.2,
-                "latency_ms": 120.0, "engine_status": "online",
-            })
+            w.update_metrics(
+                {
+                    "npu_utilization": 82.5,
+                    "memory_used_gb": 5.3,
+                    "memory_total_gb": 8.0,
+                    "throughput_tps": 45.2,
+                    "latency_ms": 120.0,
+                    "engine_status": "online",
+                }
+            )
         _grab(w, "status_metrics")
 
     def test_npu_offline(self, qtbot):
         from src.gui.status_widget import StatusWidget
+
         w = StatusWidget()
         qtbot.addWidget(w)
         w.show()
@@ -447,6 +506,7 @@ class TestStatusWidget:
 class TestNPUSettingsWidget:
     def test_renders(self, qtbot, settings_manager):
         from src.gui.npu_settings_widget import NPUSettingsWidget
+
         w = NPUSettingsWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -455,6 +515,7 @@ class TestNPUSettingsWidget:
     def test_buttons_clickable(self, qtbot, settings_manager):
         from PyQt5.QtWidgets import QPushButton, QToolButton
         from src.gui.npu_settings_widget import NPUSettingsWidget
+
         w = NPUSettingsWidget(settings_manager)
         qtbot.addWidget(w)
         w.show()
@@ -472,8 +533,9 @@ class TestNPUSettingsWidget:
 class TestHotkeyListener:
     def test_start_stop(self):
         from src.hotkey_listener import HotkeyListener
+
         cb = MagicMock()
-        hl = HotkeyListener(hotkey='ctrl+shift+space', callback=cb)
+        hl = HotkeyListener(hotkey="ctrl+shift+space", callback=cb)
         hl.start()
         time.sleep(0.05)
         hl.stop()
@@ -484,8 +546,9 @@ class TestHotkeyListener:
 
     def test_callback_fires(self):
         from src.hotkey_listener import HotkeyListener
+
         fired = threading.Event()
-        hl = HotkeyListener(hotkey='ctrl+shift+space', callback=fired.set)
+        hl = HotkeyListener(hotkey="ctrl+shift+space", callback=fired.set)
         if hasattr(hl, "_fire"):
             hl._fire()
             assert fired.is_set()
@@ -494,7 +557,11 @@ class TestHotkeyListener:
 
     def test_exception_in_callback_safe(self):
         from src.hotkey_listener import HotkeyListener
-        hl = HotkeyListener(hotkey='ctrl+shift+space', callback=lambda: (_ for _ in ()).throw(ValueError("bad")))
+
+        hl = HotkeyListener(
+            hotkey="ctrl+shift+space",
+            callback=lambda: (_ for _ in ()).throw(ValueError("bad")),
+        )
         if hasattr(hl, "_fire"):
             try:
                 hl._fire()
@@ -506,12 +573,26 @@ class TestHotkeyListener:
 
 
 class TestDesktopEnvironments:
-    DES = ["GNOME", "KDE", "XFCE", "MATE", "Cinnamon", "Sway", "Hyprland",
-           "i3", "LXQt", "Budgie", "Pantheon", "Deepin", "unknown-de"]
+    DES = [
+        "GNOME",
+        "KDE",
+        "XFCE",
+        "MATE",
+        "Cinnamon",
+        "Sway",
+        "Hyprland",
+        "i3",
+        "LXQt",
+        "Budgie",
+        "Pantheon",
+        "Deepin",
+        "unknown-de",
+    ]
 
     @pytest.mark.parametrize("de", DES)
     def test_theme_no_crash(self, qapp, de):
         from src.gui.theme import apply_to_app
+
         with patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": de}):
             try:
                 apply_to_app(qapp)
@@ -521,6 +602,7 @@ class TestDesktopEnvironments:
     @pytest.mark.parametrize("de", DES)
     def test_window_opens(self, qapp, settings_manager, de):
         from src.gui.main_window import MainWindow
+
         with patch.dict(os.environ, {"XDG_CURRENT_DESKTOP": de}):
             win = MainWindow(settings_manager=settings_manager, start_mode="compact")
             win.show()
@@ -532,15 +614,23 @@ class TestDesktopEnvironments:
 
 
 class TestShells:
-    SHELLS = [("bash", "/bin/bash"), ("zsh", "/usr/bin/zsh"),
-              ("fish", "/usr/bin/fish"), ("sh", "/bin/sh"),
-              ("dash", "/bin/dash"), ("ksh", "/bin/ksh"),
-              ("tcsh", "/bin/tcsh"), ("nushell", "/usr/bin/nu"),
-              ("elvish", "/usr/bin/elvish"), ("xonsh", "/usr/bin/xonsh")]
+    SHELLS = [
+        ("bash", "/bin/bash"),
+        ("zsh", "/usr/bin/zsh"),
+        ("fish", "/usr/bin/fish"),
+        ("sh", "/bin/sh"),
+        ("dash", "/bin/dash"),
+        ("ksh", "/bin/ksh"),
+        ("tcsh", "/bin/tcsh"),
+        ("nushell", "/usr/bin/nu"),
+        ("elvish", "/usr/bin/elvish"),
+        ("xonsh", "/usr/bin/xonsh"),
+    ]
 
     @pytest.mark.parametrize("name,path", SHELLS)
     def test_detected(self, name, path):
         from src.shell_detector import detect
+
         with patch.dict(os.environ, {"SHELL": path}):
             info = detect()
             assert info is not None
@@ -558,6 +648,7 @@ class TestHistoryPlain:
 
     def test_max_messages(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(max_messages=3, persist_path=None, encrypt=False)
         for i in range(5):
             h.add("user", f"msg{i}")
@@ -571,6 +662,7 @@ class TestHistoryPlain:
 
     def test_persist_reload(self, tmp_path):
         from src.conversation import ConversationHistory
+
         p = tmp_path / "h.json"
         h1 = ConversationHistory(persist_path=p, encrypt=False)
         h1.add("user", "persist me")
@@ -586,15 +678,22 @@ class TestHistoryPlain:
 
     def test_thread_safety(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(max_messages=1000, persist_path=None, encrypt=False)
         errors = []
+
         def _add(n):
             try:
-                for i in range(20): h.add("user", f"t{n}m{i}")
-            except Exception as exc: errors.append(exc)
+                for i in range(20):
+                    h.add("user", f"t{n}m{i}")
+            except Exception as exc:
+                errors.append(exc)
+
         threads = [threading.Thread(target=_add, args=(i,)) for i in range(5)]
-        for t in threads: t.start()
-        for t in threads: t.join()
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
         assert errors == []
 
 
@@ -604,6 +703,7 @@ class TestHistoryPlain:
 class TestHistoryEncryption:
     def test_file_not_json(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(persist_path=tmp_path / "h.json", encrypt=True)
         h.add("user", "secret")
         enc = (tmp_path / "h.json").with_suffix(".enc")
@@ -613,6 +713,7 @@ class TestHistoryEncryption:
 
     def test_roundtrip(self, tmp_path):
         from src.conversation import ConversationHistory
+
         p = tmp_path / "h.json"
         h1 = ConversationHistory(persist_path=p, encrypt=True)
         h1.add("user", "roundtrip")
@@ -622,11 +723,14 @@ class TestHistoryEncryption:
 
     def test_wrong_key_empty(self, tmp_path):
         from src.conversation import ConversationHistory, generate_encryption_key
+
         p = tmp_path / "h.json"
         h1 = ConversationHistory(persist_path=p, encrypt=True)
         h1.add("user", "private")
         del h1
-        h2 = ConversationHistory(persist_path=p, encrypt=True, encryption_key=generate_encryption_key())
+        h2 = ConversationHistory(
+            persist_path=p, encrypt=True, encryption_key=generate_encryption_key()
+        )
         assert len(h2) == 0
 
     def test_is_encrypted_true(self, history_enc):
@@ -634,6 +738,7 @@ class TestHistoryEncryption:
 
     def test_key_file_0600(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(persist_path=tmp_path / "h.json", encrypt=True)
         h.add("user", "x")
         kp = tmp_path / "history.key"
@@ -647,6 +752,7 @@ class TestHistoryEncryption:
 class TestHistoryPassword:
     def test_set_password(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(persist_path=tmp_path / "h.json", encrypt=True)
         h.add("user", "secret")
         h.set_password("mypass")
@@ -654,6 +760,7 @@ class TestHistoryPassword:
 
     def test_roundtrip_with_password(self, tmp_path):
         from src.conversation import ConversationHistory, _derive_key_from_password
+
         p = tmp_path / "h.json"
         h1 = ConversationHistory(persist_path=p, encrypt=True)
         h1.add("user", "pw content")
@@ -665,6 +772,7 @@ class TestHistoryPassword:
 
     def test_change_password(self, tmp_path):
         from src.conversation import ConversationHistory, _derive_key_from_password
+
         p = tmp_path / "h.json"
         h = ConversationHistory(persist_path=p, encrypt=True)
         h.add("user", "change pw")
@@ -677,6 +785,7 @@ class TestHistoryPassword:
 
     def test_wrong_old_password_raises(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(persist_path=tmp_path / "h.json", encrypt=True)
         h.add("user", "x")
         h.set_password("correct")
@@ -685,6 +794,7 @@ class TestHistoryPassword:
 
     def test_salt_permissions(self, tmp_path):
         from src.conversation import ConversationHistory
+
         h = ConversationHistory(persist_path=tmp_path / "h.json", encrypt=True)
         h.set_password("test")
         sp = tmp_path / "history.salt"
@@ -706,26 +816,43 @@ class TestHistoryImportExport:
     def test_import_plain_replace(self, tmp_path, history_plain):
         history_plain.add("user", "original")
         inp = tmp_path / "import.json"
-        inp.write_text(json.dumps([
-            {"role": "user", "content": "imported",
-             "timestamp": "2024-01-01T00:00:00+00:00", "has_image": False}
-        ]))
+        inp.write_text(
+            json.dumps(
+                [
+                    {
+                        "role": "user",
+                        "content": "imported",
+                        "timestamp": "2024-01-01T00:00:00+00:00",
+                        "has_image": False,
+                    }
+                ]
+            )
+        )
         history_plain.import_history(inp, merge=False)
         assert history_plain.all_messages()[0].content == "imported"
 
     def test_import_plain_merge(self, tmp_path, history_plain):
         history_plain.add("user", "kept")
         inp = tmp_path / "new.json"
-        inp.write_text(json.dumps([
-            {"role": "user", "content": "added",
-             "timestamp": "2025-01-01T00:00:00+00:00", "has_image": False}
-        ]))
+        inp.write_text(
+            json.dumps(
+                [
+                    {
+                        "role": "user",
+                        "content": "added",
+                        "timestamp": "2025-01-01T00:00:00+00:00",
+                        "has_image": False,
+                    }
+                ]
+            )
+        )
         history_plain.import_history(inp, merge=True)
         contents = {m.content for m in history_plain.all_messages()}
         assert "kept" in contents and "added" in contents
 
     def test_import_encrypted_correct_pw(self, tmp_path):
         from src.conversation import ConversationHistory
+
         src = tmp_path / "src" / "h.json"
         src.parent.mkdir()
         h1 = ConversationHistory(persist_path=src, encrypt=True)
@@ -741,6 +868,7 @@ class TestHistoryImportExport:
 
     def test_import_encrypted_wrong_pw_raises(self, tmp_path):
         from src.conversation import ConversationHistory
+
         src = tmp_path / "src" / "h.json"
         src.parent.mkdir()
         h1 = ConversationHistory(persist_path=src, encrypt=True)
@@ -753,6 +881,7 @@ class TestHistoryImportExport:
 
     def test_import_looks_encrypted_no_pw_raises(self, tmp_path):
         from src.conversation import ConversationHistory
+
         fake = tmp_path / "fake.enc"
         fake.write_text("gAAAAAbadtoken")
         h = ConversationHistory(persist_path=tmp_path / "h.json", encrypt=False)
@@ -776,6 +905,7 @@ class TestHistoryImportExport:
 class TestSettingsWindow:
     def test_opens(self, qtbot, settings_manager):
         from src.gui.settings_window import SettingsWindow
+
         win = SettingsWindow(settings_manager)
         qtbot.addWidget(win)
         win.show()
@@ -784,6 +914,7 @@ class TestSettingsWindow:
 
     def test_history_tab(self, qtbot, settings_manager, history_plain):
         from src.gui.settings_window import SettingsWindow
+
         win = SettingsWindow(settings_manager, history=history_plain)
         qtbot.addWidget(win)
         win.show()
@@ -794,6 +925,7 @@ class TestSettingsWindow:
 
     def test_updates_tab(self, qtbot, settings_manager):
         from src.gui.settings_window import SettingsWindow
+
         win = SettingsWindow(settings_manager)
         qtbot.addWidget(win)
         win.show()
@@ -808,6 +940,7 @@ class TestSettingsWindow:
 
     def test_all_tabs_navigable(self, qtbot, settings_manager, history_plain):
         from src.gui.settings_window import SettingsWindow
+
         win = SettingsWindow(settings_manager, history=history_plain)
         qtbot.addWidget(win)
         win.show()
@@ -823,23 +956,35 @@ class TestSettingsWindow:
 class TestNPUSuitability:
     def _hw(self, tops=0, ram=8, npu=False):
         from src.npu_benchmark import HardwareCapabilities
-        return HardwareCapabilities(npu_tops=tops, ram_gb=ram, cpu_cores=8, npu_available=npu)
+
+        return HardwareCapabilities(
+            npu_tops=tops, ram_gb=ram, cpu_cores=8, npu_available=npu
+        )
 
     def test_no_npu_demotes(self):
         from src.npu_benchmark import adjust_npu_fit
-        assert adjust_npu_fit("excellent", self._hw(0, 8, False)) in ("fair", "not_recommended")
+
+        assert adjust_npu_fit("excellent", self._hw(0, 8, False)) in (
+            "fair",
+            "not_recommended",
+        )
 
     def test_high_tops_promotes(self):
         from src.npu_benchmark import adjust_npu_fit
+
         assert adjust_npu_fit("good", self._hw(50, 16, True)) in ("excellent", "good")
 
     def test_low_ram_demotes(self):
         from src.npu_benchmark import adjust_npu_fit
-        assert adjust_npu_fit("good", self._hw(16, 4, True)) in ("fair", "not_recommended")
 
+        assert adjust_npu_fit("good", self._hw(16, 4, True)) in (
+            "fair",
+            "not_recommended",
+        )
 
     def test_unrecognized_fit_string(self):
         from src.npu_benchmark import adjust_npu_fit
+
         # If no adjustment is triggered (e.g. good hardware, but not high end)
         assert adjust_npu_fit("unknown", self._hw(16, 16, True)) == "unknown"
         # If adjustment is triggered (e.g. low ram), it treats "unknown" as "good"
@@ -849,21 +994,25 @@ class TestNPUSuitability:
     def test_catalog_adjusted_label(self):
         from src.npu_model_installer import MODEL_CATALOG
         from src.npu_benchmark import HardwareCapabilities
+
         hw = HardwareCapabilities(npu_tops=50, ram_gb=16, npu_available=True)
         assert MODEL_CATALOG[0].hardware_adjusted_label(hw)
 
     def test_probe_returns_capabilities(self):
         from src.npu_benchmark import probe_hardware, HardwareCapabilities
+
         probe_hardware.cache_clear()
         hw = probe_hardware()
         assert isinstance(hw, HardwareCapabilities)
         assert hw.tier in ("low", "mid", "high")
 
-    @pytest.mark.parametrize("tops,tier", [
-        (0, "low"), (5, "low"), (10, "mid"), (20, "mid"), (30, "high"), (50, "high")
-    ])
+    @pytest.mark.parametrize(
+        "tops,tier",
+        [(0, "low"), (5, "low"), (10, "mid"), (20, "mid"), (30, "high"), (50, "high")],
+    )
     def test_tier_from_tops(self, tops, tier):
         from src.npu_benchmark import HardwareCapabilities
+
         hw = HardwareCapabilities(npu_tops=tops, ram_gb=16, npu_available=tops > 0)
         assert hw.tier == tier
 
@@ -876,8 +1025,16 @@ class TestAIModels:
         cfg = MagicMock()
         cfg.get = lambda k, d=None: {
             "backend": backend,
-            "ollama": {"base_url": "http://localhost:11434", "model": model, "timeout": 30},
-            "openai": {"base_url": "http://localhost:1234/v1", "model": model, "api_key_env": ""},
+            "ollama": {
+                "base_url": "http://localhost:11434",
+                "model": model,
+                "timeout": 30,
+            },
+            "openai": {
+                "base_url": "http://localhost:1234/v1",
+                "model": model,
+                "api_key_env": "",
+            },
             "npu": {"model_path": "auto"},
             "network": {"allow_external": False},
             "security": {"rate_limit_per_minute": 0},
@@ -886,14 +1043,17 @@ class TestAIModels:
 
     def test_ollama_builds(self):
         from src.ai_assistant import AIAssistant
+
         assert AIAssistant(self._cfg("ollama", "llama3.2:3b")) is not None
 
     def test_openai_builds(self):
         from src.ai_assistant import AIAssistant
+
         assert AIAssistant(self._cfg("openai", "local-model")) is not None
 
     def test_large_model_warns(self):
         from src.model_selector import ModelSelector, ModelInfo
+
         cfg = self._cfg("ollama", "llama2:70b")
         sel = ModelSelector(cfg)
         warn = sel.npu_warning(ModelInfo(name="llama2:70b", size_bytes=40_000_000_000))
@@ -901,27 +1061,36 @@ class TestAIModels:
 
     def test_small_quantized_ok(self):
         from src.model_selector import ModelSelector, ModelInfo
+
         cfg = self._cfg("ollama", "llama3.2:3b-q4_K_M")
         sel = ModelSelector(cfg)
-        warn = sel.npu_warning(ModelInfo(name="llama3.2:3b-q4_K_M", size_bytes=2_000_000_000))
+        warn = sel.npu_warning(
+            ModelInfo(name="llama3.2:3b-q4_K_M", size_bytes=2_000_000_000)
+        )
         assert warn is None or warn == "" or "ok" in warn.lower()
 
     def test_npu_unavailable(self):
         from src.npu_manager import NPUManager
-        mgr = NPUManager({"model_path": "nonexistent.onnx", "auto_install_default_model": False})
+
+        mgr = NPUManager(
+            {"model_path": "nonexistent.onnx", "auto_install_default_model": False}
+        )
         assert not mgr.is_npu_available()
 
     def test_catalog_count(self):
         from src.npu_model_installer import MODEL_CATALOG
+
         assert len(MODEL_CATALOG) >= 5
 
     def test_catalog_vision_models(self):
         from src.npu_model_installer import MODEL_CATALOG
+
         assert any(e.is_vision for e in MODEL_CATALOG)
 
     @pytest.mark.parametrize("key", ["phi3-vision-128k-int4", "phi3-mini-int4"])
     def test_catalog_entry_fields(self, key):
         from src.npu_model_installer import MODEL_CATALOG
+
         entry = next((e for e in MODEL_CATALOG if e.key == key), None)
         if entry is None:
             pytest.skip(f"{key} not in catalog")
@@ -935,6 +1104,7 @@ class TestAIModels:
 class TestModeSwitching:
     def test_compact_to_full(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="compact")
         win.show()
         win.show_full()
@@ -943,6 +1113,7 @@ class TestModeSwitching:
 
     def test_full_to_compact(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         win.show_compact()
@@ -952,6 +1123,7 @@ class TestModeSwitching:
 
     def test_round_trip(self, qapp, settings_manager):
         from src.gui.main_window import MainWindow
+
         win = MainWindow(settings_manager=settings_manager, start_mode="full")
         win.show()
         win.show_compact()
@@ -964,9 +1136,12 @@ class TestModeSwitching:
 
 
 class TestFullWindowPages:
-    @pytest.mark.parametrize("page", ["chat", "status", "models", "logs", "api", "settings"])
+    @pytest.mark.parametrize(
+        "page", ["chat", "status", "models", "logs", "api", "settings"]
+    )
     def test_page_renders(self, qtbot, settings_manager, page):
         from src.gui.full_window import FullWindow
+
         fw = FullWindow(settings_manager=settings_manager)
         qtbot.addWidget(fw)
         fw.show()
