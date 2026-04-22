@@ -4,3 +4,8 @@
 **Prevention:**
 1. Wrap all computationally expensive standard library functions (like `math.factorial`) in custom functions that check bounds before evaluating.
 2. Resolve `ast.Attribute` evaluations strictly against a pre-populated allow-list mapping dictionary (`_MATH_NAMES`) rather than delegating dynamically back to module scope (`getattr(module, attr)`).
+
+## 2026-04-22 - [Security Enhancement: Prevent XSS in PyQt5 Status Widget]
+**Vulnerability:** The `_kernel_line` function in `src/gui/status_widget.py` rendered user-supplied text directly into a Qt `QLabel` parsing `Qt.RichText`, allowing malicious inputs to inject arbitrary HTML tags and execute JavaScript context logic.
+**Learning:** When displaying dynamic command names or tool status in rich text UI frameworks, failing to escape inputs can introduce Cross-Site Scripting (XSS) type vulnerabilities within desktop application environments.
+**Prevention:** Always use `html.escape()` around untrusted string variables before substituting them into formatted HTML strings destined for Rich Text labels.
