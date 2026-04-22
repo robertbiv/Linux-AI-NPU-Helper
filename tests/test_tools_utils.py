@@ -4,12 +4,12 @@ from src.tools._utils import read_sys_file, run_command
 
 
 def test_read_sys_file_success():
-    with patch("pathlib.Path.read_text", return_value="  content  \n"):
+    with patch("builtins.open", mock_open(read_data="  content  \n")):
         assert read_sys_file("/fake/path") == "content"
 
 
 def test_read_sys_file_failure():
-    with patch("pathlib.Path.read_text", side_effect=OSError):
+    with patch("builtins.open", side_effect=OSError):
         assert read_sys_file("/fake/path", "default") == "default"
 
 

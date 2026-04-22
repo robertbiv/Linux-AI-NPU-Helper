@@ -9,7 +9,9 @@ from pathlib import Path
 def read_sys_file(path: str, default: str = "") -> str:
     """Read a single-line file from /proc or /sys, stripping whitespace."""
     try:
-        return Path(path).read_text(errors="replace").strip()
+        # Performance optimization: using open() is faster than Path().read_text()
+        with open(path, "r", errors="replace") as f:
+            return f.read().strip()
     except OSError:
         return default
 

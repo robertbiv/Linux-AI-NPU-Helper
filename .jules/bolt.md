@@ -44,3 +44,7 @@ For caching repetitive dependency checks like module presence and version retrie
 ## 2024-05-24
 - Documented that `lru_cache` optimization for `detect_desktop_environment` was successfully implemented and measured to provide a 30x speedup in caching DE detection logic. (Task was to optimize, but code already had it).
 - Fixed implicit GitHub Action `submit-pypi` failure due to deprecated node20 version and lack of `contents: write` permissions by explicitly overriding the workflow with `.github/workflows/dependency-submission.yml` configured to use node24 environment.
+
+## 2025-05-15 - [Optimizing Sys File Reads and Existence Checks]
+**Learning:** Instantiating `pathlib.Path` objects to read short sys files (e.g., `Path(path).read_text()`) or to check for file existence (e.g., `Path(path).exists()`) incurs significant instantiation overhead in hot paths that access `/proc` or `/sys` files. Benchmarks show `open(path, "r")` is ~35-50% faster than `Path.read_text()` and `os.path.exists()` is ~2-4x faster than `Path.exists()`.
+**Action:** When performing high-frequency reads or existence checks on `/proc` or `/sys` files (e.g., in `process_info.py`, `system_info.py`, or `npu_benchmark.py`), always use standard Python built-ins like `open()` and `os.path.exists()` rather than `pathlib.Path` to avoid unnecessary object allocation overhead.
