@@ -37,6 +37,7 @@ which accepts a plain dict so callers can populate it however they like
 
 from __future__ import annotations
 
+import html
 import logging
 from typing import Any
 
@@ -251,12 +252,15 @@ if _HAS_QT:
 
     def _kernel_line(cmd: str, name: str, status: str) -> QLabel:
         status_color = T.GREEN if status in ("READY", "OK") else T.TEXT_SECONDARY
-        html = (
-            f'<span style="color:{T.TEXT_GREEN};">&gt;&nbsp;{cmd}:</span>'
-            f'<span style="color:{T.TEXT_PRIMARY};"> {name}</span>'
-            f'<span style="color:{status_color};"> [{status}]</span>'
+        cmd_esc = html.escape(cmd)
+        name_esc = html.escape(name)
+        status_esc = html.escape(status)
+        html_str = (
+            f'<span style="color:{T.TEXT_GREEN};">&gt;&nbsp;{cmd_esc}:</span>'
+            f'<span style="color:{T.TEXT_PRIMARY};"> {name_esc}</span>'
+            f'<span style="color:{status_color};"> [{status_esc}]</span>'
         )
-        lbl = QLabel(html)
+        lbl = QLabel(html_str)
         lbl.setTextFormat(Qt.RichText)
         lbl.setFont(QFont("Monospace", 10))
         lbl.setStyleSheet("background: transparent; padding: 1px 0;")
