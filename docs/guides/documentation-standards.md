@@ -69,3 +69,33 @@ By default, the `mkdocs.yml` configuration hides private members (those starting
 
 -   Only document internal functions/classes if they are complex and require explanation for other developers working on the codebase.
 -   Focus documentation efforts on public APIs that users or other modules will interact with.
+
+### 6. Exception and Return Formatting
+
+Ensure that `Raises` and `Returns` sections follow the strictly required syntax for `mkdocstrings[python]` to parse them correctly:
+
+-   **Returns**: Describe the return value directly. **Do not** specify the return type in the docstring (rely on the function signature's type hint).
+    -   *Correct*:
+        ```python
+        Returns:
+            The loaded configuration object.
+        ```
+    -   *Incorrect*:
+        ```python
+        Returns:
+            Config:
+                The loaded configuration object.
+        ```
+
+-   **Raises**: Format exceptions as `ExceptionType: Description` on a single line.
+    -   *Correct*:
+        ```python
+        Raises:
+            ValueError: If the configuration file is invalid.
+        ```
+    -   *Incorrect*:
+        ```python
+        Raises:
+            ValueError:
+                If the configuration file is invalid.
+        ```

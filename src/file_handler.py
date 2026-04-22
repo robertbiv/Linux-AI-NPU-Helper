@@ -167,7 +167,7 @@ def load_attachment(
     for binary files.
 
     Raises:
-        If *path* does not exist.
+        FileNotFoundError: If *path* does not exist.
     """
     p = Path(path)
     if not p.exists():

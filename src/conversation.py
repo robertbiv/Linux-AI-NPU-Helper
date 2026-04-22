@@ -157,7 +157,6 @@ def _derive_key_from_password(
             When ``True`` a new salt is generated if none exists yet.
 
     Returns:
-        bytes | None
         A 44-byte URL-safe base64 Fernet key, or ``None`` when
         ``create_salt`` is ``False`` and no salt file exists.
     """
