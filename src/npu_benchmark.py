@@ -112,7 +112,9 @@ class HardwareCapabilities:
 
 def _read_sys(path: str) -> str:
     try:
-        return Path(path).read_text(errors="replace").strip()
+        # Performance optimization: using open() is faster than Path().read_text()
+        with open(path, "r", errors="replace") as f:
+            return f.read().strip()
     except OSError:
         return ""
 
@@ -181,10 +183,10 @@ _INTEL_NPU_SYS_PATHS = [
 def _detect_npu_from_sys() -> tuple[bool, str, float]:
     """Return (available, vendor, tops_estimate) from /sys."""
     for p in _AMD_NPU_SYS_PATHS:
-        if Path(p).exists():
+        if os.path.exists(p):
             return True, "amd_ryzen_ai", 10.0  # conservative; refined below
     for p in _INTEL_NPU_SYS_PATHS:
-        if Path(p).exists():
+        if os.path.exists(p):
             return True, "intel_arc", 34.0
     return False, "unknown", 0.0
 
@@ -208,8 +210,8 @@ def _detect_npu_from_onnx() -> bool:
 
 
 def _gpu_model_from_sys() -> str:
-    drm = Path("/sys/class/drm")
-    if not drm.exists():
+    drm = "/sys/class/drm"
+    if not os.path.exists(drm):
         return ""
     try:
         with os.scandir(drm) as it:
