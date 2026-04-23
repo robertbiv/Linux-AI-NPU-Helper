@@ -9,3 +9,8 @@
 **Vulnerability:** The `_kernel_line` function in `src/gui/status_widget.py` rendered user-supplied text directly into a Qt `QLabel` parsing `Qt.RichText`, allowing malicious inputs to inject arbitrary HTML tags and execute JavaScript context logic.
 **Learning:** When displaying dynamic command names or tool status in rich text UI frameworks, failing to escape inputs can introduce Cross-Site Scripting (XSS) type vulnerabilities within desktop application environments.
 **Prevention:** Always use `html.escape()` around untrusted string variables before substituting them into formatted HTML strings destined for Rich Text labels.
+
+## 2025-02-27 - [Security Enhancement: Prevent SSRF Bypass via DNS Resolution]
+**Vulnerability:** The `_is_private_ip` check in `web_fetch.py` only checked if a host string matched `"localhost"` or `"::1"` or parsed directly as a local IP address using `ipaddress.ip_address`. This could be bypassed using public hostnames configured to resolve to loopback IPs (e.g. `localtest.me` resolving to `127.0.0.1`).
+**Learning:** Checking hostnames directly against IP-based rules is insufficient for SSRF protection because attackers can control DNS records.
+**Prevention:** Resolve the hostname into an IP address first (e.g., via `socket.gethostbyname`) before verifying if it falls within loopback/private ranges.

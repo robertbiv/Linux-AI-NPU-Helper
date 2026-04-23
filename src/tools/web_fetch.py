@@ -37,15 +37,25 @@ def _is_private_ip(host: str) -> bool:
     probe localhost or internal network services.
     """
     import ipaddress
+    import socket
 
     if host.lower() in ("localhost", "::1"):
         return True
+
+    # First, try to parse it directly as an IP address
     try:
         addr = ipaddress.ip_address(host)
         return addr.is_loopback or addr.is_private or addr.is_link_local
     except ValueError:
-        # It's a hostname, not a bare IP — cannot confirm; allow the request
-        # (the OS resolver will handle it; we cannot reliably pre-block DNS).
+        pass
+
+    # If it's a hostname, resolve it to an IP and check the resolved IP
+    try:
+        resolved_ip = socket.gethostbyname(host)
+        addr = ipaddress.ip_address(resolved_ip)
+        return addr.is_loopback or addr.is_private or addr.is_link_local
+    except Exception:
+        # If DNS resolution fails, let the actual request handle the failure
         return False
 
 
