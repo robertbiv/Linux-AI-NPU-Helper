@@ -18,6 +18,21 @@ def test_is_private_ip():
     assert _is_private_ip("8.8.8.8") is False
     assert _is_private_ip("example.com") is False
 
+@patch("socket.gethostbyname")
+def test_is_private_ip_dns_resolution(mock_gethostbyname):
+    # Test that a domain resolving to a private IP is blocked
+    mock_gethostbyname.return_value = "127.0.0.1"
+    assert _is_private_ip("attacker.com") is True
+
+    mock_gethostbyname.return_value = "192.168.1.100"
+    assert _is_private_ip("internal.network") is True
+
+    mock_gethostbyname.return_value = "8.8.8.8"
+    assert _is_private_ip("public.domain") is False
+
+    mock_gethostbyname.side_effect = Exception("DNS failure")
+    assert _is_private_ip("unknown.domain") is False
+
 
 def test_html_to_text():
     html = "<html><head><title>Title</title><script>js</script></head><body><p>Hello <b>world</b>!</p></body></html>"
@@ -102,5 +117,6 @@ def test_web_fetch_tool_run_exception(mock_session_cls):
 
     tool = WebFetchTool()
     res = tool.run({"url": "http://example.com"})
+
     assert res.error
     assert "Request failed: network error" in res.error
