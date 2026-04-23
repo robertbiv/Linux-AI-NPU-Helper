@@ -590,6 +590,7 @@ if _HAS_QT:
 
             # Scrollable card area
             scroll = QScrollArea()
+            scroll.setAccessibleName("Model Catalog Cards")
             scroll.setWidgetResizable(True)
             scroll.setFrameShape(QFrame.NoFrame)
 
