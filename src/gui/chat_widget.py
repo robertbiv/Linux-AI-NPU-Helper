@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from PyQt5.QtCore import Qt, pyqtSignal, QTimer
-    from PyQt5.QtGui import QColor, QFont, QPainter, QPainterPath, QBrush, QPen
+    from PyQt5.QtGui import QFont
     from PyQt5.QtWidgets import (
         QFrame,
         QHBoxLayout,
@@ -38,7 +38,6 @@ try:
         QPushButton,
         QScrollArea,
         QSizePolicy,
-        QSpacerItem,
         QToolButton,
         QVBoxLayout,
         QWidget,

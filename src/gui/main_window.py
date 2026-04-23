@@ -42,8 +42,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 try:
-    from PyQt5.QtCore import Qt, QPoint, QSize, pyqtSignal, QTimer
-    from PyQt5.QtGui import QColor, QFont
+    from PyQt5.QtCore import Qt, QSize, pyqtSignal
     from PyQt5.QtWidgets import (
         QApplication,
         QFrame,

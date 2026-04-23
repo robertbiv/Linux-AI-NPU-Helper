@@ -43,8 +43,6 @@ try:
         QLabel,
         QLineEdit,
         QPushButton,
-        QScrollArea,
-        QSizePolicy,
         QSpinBox,
         QTabWidget,
         QVBoxLayout,

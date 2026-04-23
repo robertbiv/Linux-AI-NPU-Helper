@@ -9,6 +9,8 @@ A privacy-first AI assistant for Linux that runs entirely on the **AMD Ryzen AI 
 
 📖 **[Full documentation → robertbiv.github.io/Linux-AI-NPU-Assistant](https://robertbiv.github.io/Linux-AI-NPU-Assistant/)**
 
+![Models Tab](docs/assets/models-tab.png)
+
 ## Features
 
 - 🧠 **NPU-accelerated inference** via ONNX Runtime + VitisAI (AMD Ryzen AI)

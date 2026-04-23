@@ -31,7 +31,6 @@ logger = logging.getLogger(__name__)
 
 try:
     from PyQt5.QtCore import Qt, pyqtSignal
-    from PyQt5.QtGui import QFont
     from PyQt5.QtWidgets import (
         QButtonGroup,
         QCheckBox,
@@ -40,7 +39,6 @@ try:
         QLabel,
         QPushButton,
         QScrollArea,
-        QSizePolicy,
         QSlider,
         QVBoxLayout,
         QWidget,

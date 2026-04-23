@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Generator, Iterator
+from typing import TYPE_CHECKING, Generator, Iterator, Any
 
 from src.npu_benchmark import probe_hardware
 from src.security import (

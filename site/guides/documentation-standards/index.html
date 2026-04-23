@@ -570,6 +570,17 @@
   </a>
   
 </li>
+
+          <li class="md-nav__item">
+  <a href="#6-exception-and-return-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+
+        6. Exception and Return Formatting
+
+    </span>
+  </a>
+
+</li>
         
       </ul>
     </nav>
@@ -1154,6 +1165,17 @@
   </a>
   
 </li>
+
+          <li class="md-nav__item">
+  <a href="#6-exception-and-return-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+
+        6. Exception and Return Formatting
+
+    </span>
+  </a>
+
+</li>
         
       </ul>
     </nav>
@@ -1285,6 +1307,38 @@
 <ul>
 <li>Only document internal functions/classes if they are complex and require explanation for other developers working on the codebase.</li>
 <li>Focus documentation efforts on public APIs that users or other modules will interact with.</li>
+</ul>
+<h3 id="6-exception-and-return-formatting">6. Exception and Return Formatting<a class="headerlink" href="#6-exception-and-return-formatting" title="Permanent link">&para;</a></h3>
+<p>Ensure that <code>Raises</code> and <code>Returns</code> sections follow the strictly required syntax for <code>mkdocstrings[python]</code> to parse them correctly:</p>
+<ul>
+<li>
+<p><strong>Returns</strong>: Describe the return value directly. <strong>Do not</strong> specify the return type in the docstring (rely on the function signature's type hint).</p>
+<ul>
+<li><em>Correct</em>:
+    <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">Returns</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">The</span> <span class="n">loaded</span> <span class="n">configuration</span> <span class="nb">object</span><span class="o">.</span>
+</span></code></pre></div></li>
+<li><em>Incorrect</em>:
+    <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Returns</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">Config</span><span class="p">:</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="n">The</span> <span class="n">loaded</span> <span class="n">configuration</span> <span class="nb">object</span><span class="o">.</span>
+</span></code></pre></div></li>
+</ul>
+</li>
+<li>
+<p><strong>Raises</strong>: Format exceptions as <code>ExceptionType: Description</code> on a single line.</p>
+<ul>
+<li><em>Correct</em>:
+    <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">Raises</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="ne">ValueError</span><span class="p">:</span> <span class="n">If</span> <span class="n">the</span> <span class="n">configuration</span> <span class="n">file</span> <span class="ow">is</span> <span class="n">invalid</span><span class="o">.</span>
+</span></code></pre></div></li>
+<li><em>Incorrect</em>:
+    <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Raises</span><span class="p">:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="ne">ValueError</span><span class="p">:</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="n">If</span> <span class="n">the</span> <span class="n">configuration</span> <span class="n">file</span> <span class="ow">is</span> <span class="n">invalid</span><span class="o">.</span>
+</span></code></pre></div></li>
+</ul>
+</li>
 </ul>
 
 
