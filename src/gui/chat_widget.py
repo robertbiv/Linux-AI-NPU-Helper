@@ -405,6 +405,7 @@ if _HAS_QT:
 
             # Scroll area for messages
             self._scroll = QScrollArea()
+            self._scroll.setAccessibleName("Chat Message History")
             self._scroll.setWidgetResizable(True)
             self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 

@@ -4,3 +4,6 @@
 ## 2024-04-20 - Adding Accessibility Names to Text Buttons with Unicode Icons
 **Learning:** In PyQt applications, UI elements (such as `QPushButton`) that use decorative unicode symbols or spacing in their `.setText()` (e.g., `f" {icon} {label}"`) cause screen readers to read out the non-semantic characters, leading to a degraded, confusing experience for accessibility users.
 **Action:** When implementing buttons with inline unicode icons, always explicitly call `setAccessibleName(label)` with the purely semantic label to ensure screen readers ignore the prepended visual decorators.
+## 2026-04-23 - Adding Accessible Names to QScrollArea
+**Learning:** In PyQt applications, scrollable areas (`QScrollArea`) can receive keyboard focus. When these areas lack an accessible name, screen reader users receive no context about the scrollable region they have entered, which can be disorienting.
+**Action:** Always assign a descriptive `setAccessibleName()` to `QScrollArea` instances to ensure screen readers announce the purpose of the scrollable region upon focus.

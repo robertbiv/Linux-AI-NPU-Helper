@@ -425,6 +425,7 @@ if _HAS_QT:
             outer.setContentsMargins(0, 0, 0, 0)
 
             scroll = QScrollArea()
+            scroll.setAccessibleName("NPU Settings Area")
             scroll.setWidgetResizable(True)
             scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 

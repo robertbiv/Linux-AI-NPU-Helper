@@ -285,6 +285,7 @@ if _HAS_QT:
             outer.setSpacing(0)
 
             scroll = QScrollArea()
+            scroll.setAccessibleName("Status Dashboard")
             scroll.setWidgetResizable(True)
             scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
