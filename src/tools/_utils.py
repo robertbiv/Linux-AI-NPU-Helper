@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 
 def read_sys_file(path: str, default: str = "") -> str:

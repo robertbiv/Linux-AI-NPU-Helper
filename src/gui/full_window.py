@@ -28,16 +28,12 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 try:
-    from PyQt5.QtCore import Qt, pyqtSignal, QTimer
-    from PyQt5.QtGui import QColor, QFont, QIcon
+    from PyQt5.QtCore import Qt, pyqtSignal
     from PyQt5.QtWidgets import (
         QFrame,
         QHBoxLayout,
         QLabel,
         QPushButton,
-        QScrollArea,
-        QSizePolicy,
-        QSplitter,
         QStackedWidget,
         QToolButton,
         QVBoxLayout,

@@ -238,7 +238,6 @@ class NPUManager:
                 Optional callable receiving download-progress strings.
 
         Returns:
-            NPUSession | None
             Loaded session, or ``None`` if no model is available.
         """
         model_path = self._config.get("model_path", "")

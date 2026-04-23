@@ -161,7 +161,6 @@ class ToolPermissions:
         """Enforce permissions for *tool_name* with *args*.
 
         Returns:
-            ToolResult | None
             A ``ToolResult`` with an error message if the tool is blocked or
             the user declines.  ``None`` means the tool **may proceed**.
         """
@@ -479,7 +478,6 @@ class ToolRegistry:
                 Text containing a ``[TOOL: name {...}]`` marker.
 
         Returns:
-            ToolResult | None
             Result of the tool call, or ``None`` if no marker was found.
         """
         m = self._CALL_RE.search(call_text)

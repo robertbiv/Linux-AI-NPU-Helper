@@ -346,7 +346,6 @@ class ModelSelector:
                 A :class:`ModelInfo` instance or a bare model name string.
 
         Returns:
-            str | None
             Human-readable warning, or ``None`` if no warning applies.
         """
         if isinstance(model, str):
