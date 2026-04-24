@@ -14,3 +14,8 @@
 **Vulnerability:** The `_is_private_ip` check in `web_fetch.py` only checked if a host string matched `"localhost"` or `"::1"` or parsed directly as a local IP address using `ipaddress.ip_address`. This could be bypassed using public hostnames configured to resolve to loopback IPs (e.g. `localtest.me` resolving to `127.0.0.1`).
 **Learning:** Checking hostnames directly against IP-based rules is insufficient for SSRF protection because attackers can control DNS records.
 **Prevention:** Resolve the hostname into an IP address first (e.g., via `socket.gethostbyname`) before verifying if it falls within loopback/private ranges.
+
+## 2025-02-27 - [Security Enhancement: Ensure Full SSRF Protection Across All Network Guards]
+**Vulnerability:** While `web_fetch.py` was updated previously to resolve DNS for SSRF protection, the centralized URL guard `is_local_url` in `src/security.py` still lacked DNS resolution. This meant the `ai_assistant.py` (which uses `assert_local_url` / `is_local_url` for backend API routing) could still be bypassed by using public hostnames configured to resolve to loopback IPs (e.g. `localtest.me` resolving to `127.0.0.1`).
+**Learning:** Security fixes for a specific vulnerability class (e.g. SSRF bypass) must be audited across the entire codebase to ensure no centralized utilities or secondary paths are left exposed.
+**Prevention:** Always update the central security utilities (`src/security.py`) when discovering a network boundary bypass, and perform a codebase-wide audit for similar logic.

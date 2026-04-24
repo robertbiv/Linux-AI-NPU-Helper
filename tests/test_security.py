@@ -32,6 +32,12 @@ from src.security import (
 
 
 class TestIsLocalUrl:
+    @patch("socket.gethostbyname", return_value="127.0.0.1")
+    def test_local_dns_resolution(self, mock_gethostbyname):
+        # localtest.me theoretically resolves to 127.0.0.1
+        # Mock it to avoid external network dependency in tests
+        assert is_local_url("http://localtest.me") is True
+
     def test_localhost(self):
         assert is_local_url("http://localhost:11434") is True
 
