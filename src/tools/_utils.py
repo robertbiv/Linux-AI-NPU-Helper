@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 
-
 def read_sys_file(path: str, default: str = "") -> str:
     """Read a single-line file from /proc or /sys, stripping whitespace."""
     try:
