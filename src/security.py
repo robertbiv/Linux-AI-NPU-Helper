@@ -22,6 +22,7 @@ import logging
 import os
 import re
 import stat
+import socket
 import threading
 import time
 from pathlib import Path
@@ -54,12 +55,19 @@ def is_local_url(url: str) -> bool:
     treated as potentially external and rejected when external traffic is off.
     """
     host = urlparse(url).hostname or ""
-    if host in ("localhost", "::1"):
+    if host.lower() in ("localhost", "::1"):
         return True
     try:
         addr = ipaddress.ip_address(host)
         return addr.is_loopback or addr.is_private
     except ValueError:
+        pass
+
+    try:
+        resolved_ip = socket.gethostbyname(host)
+        addr = ipaddress.ip_address(resolved_ip)
+        return addr.is_loopback or addr.is_private
+    except Exception:
         return False
 
 
