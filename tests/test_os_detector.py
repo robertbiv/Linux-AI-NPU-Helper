@@ -22,11 +22,10 @@ class TestDetectInit:
     def test_detect_init_oserror(self):
         """Test that OSError when resolving /proc/1/exe falls back gracefully."""
         with (
-            patch("src.os_detector.Path") as mock_path,
+            patch("src.os_detector.os.path.realpath", side_effect=OSError),
+            patch("src.os_detector.os.path.exists", return_value=False),
             patch("src.os_detector.shutil.which", return_value=None),
         ):
-            mock_path.return_value.resolve.side_effect = OSError
-            mock_path.return_value.exists.return_value = False
             assert _detect_init() == "unknown"
 
 
@@ -180,10 +179,11 @@ class TestDetect:
 INVALID_LINE_NO_EQUALS
 VALID_KEY="valid_value"
 """
+        from io import StringIO
         with (
             patch("platform.freedesktop_os_release", side_effect=OSError),
-            patch.object(Path, "exists", return_value=True),
-            patch.object(Path, "read_text", return_value=malformed_content),
+            patch("src.os_detector.os.path.exists", return_value=True),
+            patch("builtins.open", return_value=StringIO(malformed_content)),
         ):
             result = _read_os_release()
 

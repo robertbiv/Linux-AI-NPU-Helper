@@ -26,7 +26,6 @@ import re
 import shutil
 from dataclasses import dataclass, field
 from functools import lru_cache
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -114,8 +113,10 @@ def _detect_init() -> str:
     """Return the init system name: 'systemd', 'openrc', 'runit', 'sysv', or 'unknown'."""
     # systemd: PID 1 is /lib/systemd/systemd or similar
     try:
-        exe = Path("/proc/1/exe").resolve()
-        name = exe.name.lower()
+        # Performance optimization: Use native os.path operations instead of pathlib.Path
+        # to avoid object instantiation overhead in this hot path.
+        exe = os.path.realpath("/proc/1/exe")
+        name = os.path.basename(exe).lower()
         if "systemd" in name:
             return "systemd"
         if "runit" in name:
@@ -129,9 +130,9 @@ def _detect_init() -> str:
         pass
 
     # Fallback: check for well-known paths
-    if Path("/run/systemd/system").exists():
+    if os.path.exists("/run/systemd/system"):
         return "systemd"
-    if Path("/run/openrc").exists():
+    if os.path.exists("/run/openrc"):
         return "openrc"
     if shutil.which("runit"):
         return "runit"
@@ -280,18 +281,21 @@ def _read_os_release() -> dict[str, str]:
     # Manual parse as fallback
     result: dict[str, str] = {}
     for candidate in ("/etc/os-release", "/usr/lib/os-release"):
-        path = Path(candidate)
-        if not path.exists():
+        # Performance optimization: Use native os.path checks instead of pathlib.Path
+        if not os.path.exists(candidate):
             continue
         try:
-            for line in path.read_text(errors="replace").splitlines():
-                line = line.strip()
-                if not line or line.startswith("#") or "=" not in line:
-                    continue
-                key, _, val = line.partition("=")
-                # Strip surrounding quotes
-                val = val.strip().strip('"').strip("'")
-                result[key] = val
+            # Performance optimization: File iterator avoids the memory and allocation
+            # overhead of read_text().splitlines() for large files.
+            with open(candidate, errors="replace") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, _, val = line.partition("=")
+                    # Strip surrounding quotes
+                    val = val.strip().strip('"').strip("'")
+                    result[key] = val
             if result:
                 return result
         except OSError:
@@ -309,14 +313,17 @@ def _read_legacy_release() -> dict[str, str]:
         ("/etc/void-release", "void", "Void Linux"),
     ]
     for path_str, distro_id, distro_name in checks:
-        if Path(path_str).exists():
-            version = Path(path_str).read_text(errors="replace").strip()
+        # Performance optimization: Native os.path.exists and open() avoid pathlib.Path overhead.
+        if os.path.exists(path_str):
+            with open(path_str, errors="replace") as f:
+                version = f.read().strip()
             return {"ID": distro_id, "NAME": distro_name, "VERSION_ID": version}
 
     # Red Hat / CentOS style
-    rh = Path("/etc/redhat-release")
-    if rh.exists():
-        text = rh.read_text(errors="replace").strip()
+    # Performance optimization: Native os.path.exists and open() avoid pathlib.Path overhead.
+    if os.path.exists("/etc/redhat-release"):
+        with open("/etc/redhat-release", errors="replace") as f:
+            text = f.read().strip()
         m = re.search(r"release\s+([\d.]+)", text, re.IGNORECASE)
         version = m.group(1) if m else ""
         distro_id = "rhel"
@@ -327,9 +334,9 @@ def _read_legacy_release() -> dict[str, str]:
         return {"ID": distro_id, "NAME": text, "VERSION_ID": version}
 
     # Debian legacy
-    deb = Path("/etc/debian_version")
-    if deb.exists():
-        version = deb.read_text(errors="replace").strip()
+    if os.path.exists("/etc/debian_version"):
+        with open("/etc/debian_version", errors="replace") as f:
+            version = f.read().strip()
         return {"ID": "debian", "NAME": "Debian GNU/Linux", "VERSION_ID": version}
 
     return {}
