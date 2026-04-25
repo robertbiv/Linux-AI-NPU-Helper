@@ -7,3 +7,6 @@
 ## 2026-04-23 - Adding Accessible Names to QScrollArea
 **Learning:** In PyQt applications, scrollable areas (`QScrollArea`) can receive keyboard focus. When these areas lack an accessible name, screen reader users receive no context about the scrollable region they have entered, which can be disorienting.
 **Action:** Always assign a descriptive `setAccessibleName()` to `QScrollArea` instances to ensure screen readers announce the purpose of the scrollable region upon focus.
+## 2026-04-25 - Added Keyboard Focus to Custom Toggle
+**Learning:** The custom iOS-style toggle in `_ToggleSwitch` was purely mouse-driven and completely ignored keyboard users, failing accessibility standards. By adding `setFocusPolicy(Qt.StrongFocus)`, implementing `keyPressEvent` for Space and Enter, and dynamically updating the border thickness during `focusInEvent` and `focusOutEvent`, we make the control usable via keyboard.
+**Action:** Always ensure custom QWidget subclasses acting as interactive controls implement keyboard event handling and focus indicators, rather than relying solely on `mousePressEvent`.
