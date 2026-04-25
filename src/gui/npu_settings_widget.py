@@ -186,21 +186,25 @@ if _HAS_QT:
         toggled = pyqtSignal(bool)
 
         def __init__(
-            self, checked: bool = False, parent: QWidget | None = None
+            self, checked: bool = False, accessible_name: str = "Toggle", parent: QWidget | None = None
         ) -> None:
             super().__init__(parent)
             self._checked = checked
             self.setFixedSize(52, 28)
             self.setCursor(Qt.PointingHandCursor)
+            self.setFocusPolicy(Qt.StrongFocus)
+            self.setAccessibleName(accessible_name)
             self._update_style()
 
         def _update_style(self) -> None:
             bg = T.BLUE if self._checked else T.BG_CARD2
+            border = T.BLUE if (self._checked or self.hasFocus()) else T.BORDER
+            border_width = 2 if self.hasFocus() else 1
             self.setStyleSheet(
                 f"QWidget {{"
                 f"  background-color: {bg};"
                 f"  border-radius: 14px;"
-                f"  border: 1px solid {T.BORDER if not self._checked else T.BLUE};"
+                f"  border: {border_width}px solid {border};"
                 f"}}"
             )
 
@@ -212,11 +216,29 @@ if _HAS_QT:
             self._update_style()
             self.update()
 
+        def focusInEvent(self, event: object) -> None:
+            super().focusInEvent(event)
+            self._update_style()
+
+        def focusOutEvent(self, event: object) -> None:
+            super().focusOutEvent(event)
+            self._update_style()
+
         def mousePressEvent(self, event: object) -> None:
             self._checked = not self._checked
             self._update_style()
             self.update()
             self.toggled.emit(self._checked)
+
+        def keyPressEvent(self, event: object) -> None:
+            from PyQt5.QtCore import Qt as _Qt
+            if event.key() in (_Qt.Key_Space, _Qt.Key_Return, _Qt.Key_Enter):
+                self._checked = not self._checked
+                self._update_style()
+                self.update()
+                self.toggled.emit(self._checked)
+            else:
+                super().keyPressEvent(event)
 
         def paintEvent(self, event: object) -> None:
             from PyQt5.QtGui import QPainter, QBrush, QColor
@@ -515,7 +537,7 @@ if _HAS_QT:
             )
             cc_toggle_row.addWidget(cc_state_lbl)
             cc_toggle_row.addStretch()
-            self._capture_toggle = _ToggleSwitch(checked=True)
+            self._capture_toggle = _ToggleSwitch(checked=True, accessible_name="Toggle Contextual Capture")
             self._capture_toggle.toggled.connect(self._on_capture_toggled)
             cc_toggle_row.addWidget(self._capture_toggle)
             cc_layout.addLayout(cc_toggle_row)
