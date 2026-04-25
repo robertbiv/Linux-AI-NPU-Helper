@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Any
@@ -122,14 +123,15 @@ def _read_meminfo() -> dict[str, int]:
     """Parse /proc/meminfo into a {key: kB} dict."""
     result: dict[str, int] = {}
     raw = _read_sys("/proc/meminfo")
-    for line in raw.splitlines():
-        parts = line.split()
-        if len(parts) >= 2:
-            key = parts[0].rstrip(":")
-            try:
-                result[key] = int(parts[1])
-            except ValueError:
-                pass
+    # Performance optimization: Use finditer with MULTILINE instead of splitlines
+    # to avoid creating temporary string objects for every line in /proc/meminfo.
+    pattern = re.compile(r"^([^:]+):\s*(\d+)", re.MULTILINE)
+    for m in pattern.finditer(raw):
+        key, val = m.groups()
+        try:
+            result[key] = int(val)
+        except ValueError:
+            pass
     return result
 
 
@@ -138,15 +140,24 @@ def _read_cpuinfo() -> list[dict[str, str]]:
     procs: list[dict[str, str]] = []
     current: dict[str, str] = {}
     raw = _read_sys("/proc/cpuinfo")
-    for line in raw.splitlines():
-        if ":" in line:
-            k, _, v = line.partition(":")
-            current[k.strip()] = v.strip()
-        elif not line.strip() and current:
+
+    # Fast path: split by \n\n to isolate processors
+    # This avoids .splitlines() overhead per-line and cleanly separates CPU blocks
+    blocks = raw.split("\n\n")
+    for block in blocks:
+        if not block.strip():
+            continue
+
+        current = {}
+        # We can safely use splitlines() here since block sizes are very small
+        for line in block.split("\n"):
+            if ":" in line:
+                k, _, v = line.partition(":")
+                current[k.strip()] = v.strip()
+
+        if current:
             procs.append(current)
-            current = {}
-    if current:
-        procs.append(current)
+
     return procs
 
 
