@@ -30,22 +30,23 @@ _SAFE_CONTENT_TYPES: frozenset[str] = frozenset(
 _FETCH_ABSOLUTE_MAX = 200_000
 
 
-def _is_private_ip(host: str) -> bool:
-    """Return True if *host* resolves to a loopback or RFC-1918 private address.
+def _resolve_and_check_ip(host: str) -> tuple[bool, str | None]:
+    """Resolve *host* to an IP and return (is_private, resolved_ip).
 
-    Used for SSRF protection — prevents the AI from using the fetch tool to
-    probe localhost or internal network services.
+    Returns (True, None) if the host is private, loopback, or cannot be resolved.
+    Returns (False, ip) if the host is public and safe to fetch.
     """
     import ipaddress
     import socket
 
     if host.lower() in ("localhost", "::1"):
-        return True
+        return True, None
 
     # First, try to parse it directly as an IP address
     try:
         addr = ipaddress.ip_address(host)
-        return addr.is_loopback or addr.is_private or addr.is_link_local
+        is_priv = addr.is_loopback or addr.is_private or addr.is_link_local
+        return is_priv, host
     except ValueError:
         pass
 
@@ -53,10 +54,29 @@ def _is_private_ip(host: str) -> bool:
     try:
         resolved_ip = socket.gethostbyname(host)
         addr = ipaddress.ip_address(resolved_ip)
-        return addr.is_loopback or addr.is_private or addr.is_link_local
+        is_priv = addr.is_loopback or addr.is_private or addr.is_link_local
+        return is_priv, resolved_ip
     except Exception:
-        # If DNS resolution fails, let the actual request handle the failure
-        return False
+        # If DNS resolution fails, fail closed to prevent SSRF bypass
+        return True, None
+
+
+import socket
+import threading
+
+# Use thread-local to safely override DNS resolution for this specific request
+_dns_local = threading.local()
+_original_getaddrinfo = socket.getaddrinfo
+
+def _custom_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    if hasattr(_dns_local, "mapping") and host in _dns_local.mapping:
+        return _original_getaddrinfo(
+            _dns_local.mapping[host], port, family, type, proto, flags
+        )
+    return _original_getaddrinfo(host, port, family, type, proto, flags)
+
+# Apply global monkey patch exactly once at module load time.
+socket.getaddrinfo = _custom_getaddrinfo
 
 
 def _html_to_text(html: str) -> str:
@@ -203,32 +223,38 @@ class WebFetchTool(Tool):
         self._connect_timeout = cfg.connect_timeout
         self._read_timeout = cfg.read_timeout
 
-    def _validate_url(self, url: str) -> ToolResult | None:
-        """Validate URL to ensure it is safe and allowed."""
+    def _validate_url(self, url: str) -> tuple[ToolResult | None, str | None, str | None]:
+        """Validate URL to ensure it is safe and allowed.
+
+        Returns:
+            (ToolResult, None, None) on validation error.
+            (None, host, resolved_ip) on success.
+        """
         try:
             from urllib.parse import urlparse
 
             parsed = urlparse(url)
         except Exception as exc:  # noqa: BLE001
-            return ToolResult(tool_name=self.name, error=f"Invalid URL: {exc}")
+            return ToolResult(tool_name=self.name, error=f"Invalid URL: {exc}"), None, None
 
         if parsed.scheme not in ("http", "https"):
             return ToolResult(
                 tool_name=self.name,
                 error=f"Only http:// and https:// URLs are supported, got: {parsed.scheme!r}",
-            )
+            ), None, None
 
         host = (parsed.hostname or "").lower()
 
-        # SSRF guard
-        if _is_private_ip(host):
+        # SSRF guard with DNS resolution
+        is_private, resolved_ip = _resolve_and_check_ip(host)
+        if is_private or not resolved_ip:
             return ToolResult(
                 tool_name=self.name,
                 error=(
-                    f"Fetching private/loopback addresses is blocked for security. "
-                    f"Host: {host!r}"
+                    f"Fetching private/loopback addresses (or unresolvable hosts) "
+                    f"is blocked for security. Host: {host!r}"
                 ),
-            )
+            ), None, None
 
         # Domain allow-list
         if self._domain_allowlist:
@@ -242,7 +268,7 @@ class WebFetchTool(Tool):
                         f"Domain {host!r} is not in the allowed list. "
                         f"Allowed: {', '.join(sorted(self._domain_allowlist))}"
                     ),
-                )
+                ), None, None
 
         # Domain block-list
         if any(
@@ -252,9 +278,9 @@ class WebFetchTool(Tool):
             return ToolResult(
                 tool_name=self.name,
                 error=f"Domain {host!r} is blocked by configuration.",
-            )
+            ), None, None
 
-        return None
+        return None, host, resolved_ip
 
     def run(self, args: dict[str, Any]) -> ToolResult:
         url: str = args.get("url", "").strip()
@@ -265,13 +291,13 @@ class WebFetchTool(Tool):
             int(args.get("max_chars", self._max_chars)), _FETCH_ABSOLUTE_MAX
         )
 
-        validation_result = self._validate_url(url)
+        validation_result, initial_host, initial_ip = self._validate_url(url)
         if validation_result:
             return validation_result
 
-        return self._execute_request(url, max_chars)
+        return self._execute_request(url, max_chars, initial_host, initial_ip)
 
-    def _execute_request(self, url: str, max_chars: int) -> ToolResult:
+    def _execute_request(self, url: str, max_chars: int, initial_host: str, initial_ip: str) -> ToolResult:
         """Execute the HTTP request and return the result."""
         try:
             import requests as _requests  # lazy import
@@ -283,56 +309,98 @@ class WebFetchTool(Tool):
 
         logger.info("WebFetchTool: fetching %s", url)
 
+        # Set thread-local mapping to safely override DNS resolution for this specific request
+        _dns_local.mapping = {initial_host: initial_ip}
+
         session = _requests.Session()
-        session.max_redirects = self._max_redirects
         # Backend efficiency: close the socket after this single request
         session.headers.update({"Connection": "close"})
         # TLS: always verify; this cannot be overridden by args
         session.verify = True
 
-        try:
-            resp = session.get(
-                url,
-                timeout=(self._connect_timeout, self._read_timeout),
-                stream=True,
-            )
-            resp.raise_for_status()
+        redirects = 0
+        current_url = url
 
-            # Content-type check before reading the body
-            ct_header = resp.headers.get("Content-Type", "")
-            ct_base = ct_header.split(";")[0].strip().lower()
-            if ct_base and ct_base not in self._allowed_types:
-                return ToolResult(
-                    tool_name=self.name,
-                    error=(
-                        f"Content-Type {ct_base!r} is not in the allowed list. "
-                        "Only text and JSON responses are returned."
-                    ),
+        try:
+            while True:
+                resp = session.get(
+                    current_url,
+                    timeout=(self._connect_timeout, self._read_timeout),
+                    stream=True,
+                    allow_redirects=False,
                 )
 
-            # Read up to (max_chars * 4) bytes — UTF-8 chars can be 1-4 bytes
-            body_bytes = resp.raw.read(max_chars * 4, decode_content=True)
-            encoding = resp.encoding or "utf-8"
-            body = body_bytes.decode(encoding, errors="replace")
+                if resp.is_redirect:
+                    redirects += 1
+                    if redirects > self._max_redirects:
+                        return ToolResult(
+                            tool_name=self.name,
+                            error=f"Too many redirects fetching {url!r} (limit: {self._max_redirects}).",
+                        )
+
+                    next_url = resp.headers.get("location")
+                    if not next_url:
+                        return ToolResult(
+                            tool_name=self.name,
+                            error=f"Redirect missing location header for {current_url!r}.",
+                        )
+
+                    # Resolve relative URLs
+                    from urllib.parse import urljoin
+                    current_url = urljoin(current_url, next_url)
+
+                    # Validate the new URL against SSRF and block/allow lists
+                    validation_result, next_host, next_ip = self._validate_url(current_url)
+                    if validation_result:
+                        return ToolResult(
+                            tool_name=self.name,
+                            error=f"Redirect to {current_url!r} blocked: {validation_result.error}",
+                        )
+
+                    # Update the DNS mapping to enforce the resolved IP for the redirect
+                    if next_host and next_ip:
+                        _dns_local.mapping[next_host] = next_ip
+
+                    # Consume body to release connection back to pool if needed
+                    resp.raw.read(1024)
+                    resp.close()
+                    continue
+
+                resp.raise_for_status()
+
+                # Content-type check before reading the body
+                ct_header = resp.headers.get("Content-Type", "")
+                ct_base = ct_header.split(";")[0].strip().lower()
+                if ct_base and ct_base not in self._allowed_types:
+                    return ToolResult(
+                        tool_name=self.name,
+                        error=(
+                            f"Content-Type {ct_base!r} is not in the allowed list. "
+                            "Only text and JSON responses are returned."
+                        ),
+                    )
+
+                # Read up to (max_chars * 4) bytes — UTF-8 chars can be 1-4 bytes
+                body_bytes = resp.raw.read(max_chars * 4, decode_content=True)
+                encoding = resp.encoding or "utf-8"
+                body = body_bytes.decode(encoding, errors="replace")
+                break
 
         except _requests.exceptions.SSLError as exc:
             return ToolResult(
                 tool_name=self.name,
-                error=f"TLS/SSL error fetching {url!r}: {exc}",
+                error=f"TLS/SSL error fetching {current_url!r}: {exc}",
             )
         except _requests.exceptions.Timeout:
             return ToolResult(
                 tool_name=self.name,
-                error=f"Request timed out fetching {url!r}.",
-            )
-        except _requests.exceptions.TooManyRedirects:
-            return ToolResult(
-                tool_name=self.name,
-                error=f"Too many redirects fetching {url!r} (limit: {self._max_redirects}).",
+                error=f"Request timed out fetching {current_url!r}.",
             )
         except _requests.exceptions.RequestException as exc:
             return ToolResult(tool_name=self.name, error=f"Request failed: {exc}")
         finally:
+            if hasattr(_dns_local, "mapping"):
+                _dns_local.mapping.clear()  # Clear thread-local mapping
             session.close()  # release the TCP socket immediately
 
         # Convert HTML to readable text; leave JSON/plain as-is

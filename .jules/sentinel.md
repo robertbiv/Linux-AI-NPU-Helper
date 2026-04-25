@@ -19,3 +19,8 @@
 **Vulnerability:** While `web_fetch.py` was updated previously to resolve DNS for SSRF protection, the centralized URL guard `is_local_url` in `src/security.py` still lacked DNS resolution. This meant the `ai_assistant.py` (which uses `assert_local_url` / `is_local_url` for backend API routing) could still be bypassed by using public hostnames configured to resolve to loopback IPs (e.g. `localtest.me` resolving to `127.0.0.1`).
 **Learning:** Security fixes for a specific vulnerability class (e.g. SSRF bypass) must be audited across the entire codebase to ensure no centralized utilities or secondary paths are left exposed.
 **Prevention:** Always update the central security utilities (`src/security.py`) when discovering a network boundary bypass, and perform a codebase-wide audit for similar logic.
+
+## 2025-04-25 - [SSRF Bypass via Redirects and DNS Rebinding]
+**Vulnerability:** The web_fetch tool was vulnerable to SSRF bypasses because it resolved DNS twice (once for validation and once via `requests`) allowing for DNS rebinding attacks. Also, `requests` automatically followed redirects by default, allowing attackers to supply an external URL that redirects to internal endpoints (like localhost).
+**Learning:** Checking a domain for a private IP must be coupled with strict control over exactly what URL is fetched. Relying on default HTTP client redirection behaviors or independent DNS lookups creates bypasses. Also, DNS resolution failures must fail-closed.
+**Prevention:** Always follow redirects manually to validate every redirect target. Ensure DNS resolution failures result in blocking the request (fail-closed), or better yet, inject the resolved IP into the request so DNS rebinding is impossible.
