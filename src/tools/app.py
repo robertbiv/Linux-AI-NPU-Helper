@@ -309,6 +309,7 @@ class AppTool(Tool):
             try:
                 proc = subprocess.run(
                     cmd + [query],
+                    shell=False,
                     capture_output=True,
                     text=True,
                     timeout=20,

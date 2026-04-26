@@ -287,6 +287,7 @@ class CommandExecutor:
                 try:
                     p = subprocess.Popen(
                         cmd_args,
+                        shell=False,
                         stdin=stdin_dest,
                         stdout=stdout_dest,
                         stderr=stderr_f,

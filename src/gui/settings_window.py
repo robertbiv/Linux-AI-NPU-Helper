@@ -351,7 +351,7 @@ if _HAS_QT:
 
             url = "https://github.com/robertbiv/Linux-AI-NPU-Assistant/releases"
             try:
-                subprocess.Popen(["xdg-open", url])  # noqa: S603, S607
+                subprocess.Popen(["xdg-open", url], shell=False)  # noqa: S603, S607
             except Exception:  # noqa: BLE001
                 try:
                     import webbrowser  # noqa: PLC0415

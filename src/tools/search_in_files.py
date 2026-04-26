@@ -175,7 +175,7 @@ class SearchInFilesTool(Tool):
         if file_pattern:
             cmd += ["--glob", file_pattern]
         cmd += ["--", query, str(search_path)]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
+        proc = subprocess.run(cmd, shell=False, capture_output=True, text=True, timeout=20)
         return _parse_grep_output(proc.stdout, limit)
 
     @staticmethod
@@ -195,7 +195,7 @@ class SearchInFilesTool(Tool):
             cmd += ["--include", file_pattern]
         cmd += ["--", query, str(search_path)]
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            proc = subprocess.run(cmd, shell=False, capture_output=True, text=True, timeout=30)
         except subprocess.TimeoutExpired:
             logger.warning("grep timed out; returning partial results.")
             return []

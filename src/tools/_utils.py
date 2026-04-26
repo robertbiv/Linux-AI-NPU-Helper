@@ -25,7 +25,7 @@ def run_command(cmd: list[str], timeout: int = 8) -> str:
     if not shutil.which(cmd[0]):
         return ""
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run(cmd, shell=False, capture_output=True, text=True, timeout=timeout)
         return r.stdout.strip()
     except Exception:  # noqa: BLE001
         return ""

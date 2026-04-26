@@ -90,6 +90,7 @@ def _version(shell_path: str) -> str:
     try:
         r = subprocess.run(
             [shell_path, "--version"],
+            shell=False,
             capture_output=True,
             text=True,
             timeout=3,

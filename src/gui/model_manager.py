@@ -1029,6 +1029,7 @@ if _HAS_QT:
                 try:
                     result = subprocess.run(
                         ["ollama", "rm", name],
+                        shell=False,
                         capture_output=True,
                         text=True,
                         timeout=30,
