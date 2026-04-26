@@ -82,11 +82,9 @@ class ManPageTool(Tool):
     and never contacts any network resource.
 
     Args:
-        max_chars:
-            Maximum characters returned per call.  Defaults to 8 000, which is
+        max_chars: Maximum characters returned per call.  Defaults to 8 000, which is
             enough for SYNOPSIS + OPTIONS of most commands.
-        default_sections:
-            Section names to extract when the caller doesn't specify any.  Use
+        default_sections: Section names to extract when the caller doesn't specify any.  Use
             ``[]`` to return the full man page (up to *max_chars*).
     """
 

@@ -82,8 +82,7 @@ def load_or_create_key(key_path: Path) -> bytes:
     contents are returned unchanged.
 
     Args:
-        key_path:
-            Path to the ``history.key`` file.
+        key_path: Path to the ``history.key`` file.
 
     Returns:
         The Fernet key bytes.
@@ -149,12 +148,9 @@ def _derive_key_from_password(
     ``create_salt=False`` to skip creation (returns ``None`` if no salt file).
 
     Args:
-        password:
-            User-chosen password string.
-        key_dir:
-            Directory containing (or that will contain) ``history.salt``.
-        create_salt:
-            When ``True`` a new salt is generated if none exists yet.
+        password: User-chosen password string.
+        key_dir: Directory containing (or that will contain) ``history.salt``.
+        create_salt: When ``True`` a new salt is generated if none exists yet.
 
     Returns:
         A 44-byte URL-safe base64 Fernet key, or ``None`` when
@@ -223,25 +219,20 @@ class ConversationHistory:
     """Thread-safe, persistent conversation history.
 
     Args:
-        max_messages:
-            Maximum number of messages kept in memory.  When the list exceeds
+        max_messages: Maximum number of messages kept in memory.  When the list exceeds
             this limit the oldest messages are removed first.
-        persist_path:
-            JSON file path for persistence.  Pass ``None`` to disable disk
+        persist_path: JSON file path for persistence.  Pass ``None`` to disable disk
             persistence (history lives only for the current session).  When
             *encrypt* is ``True`` the path is rewritten with a ``.enc``
             extension automatically.
-        system_prompt:
-            An optional system message prepended to every API call to establish
+        system_prompt: An optional system message prepended to every API call to establish
             the assistant's persona / instructions.
-        encrypt:
-            When ``True`` (and the ``cryptography`` package is installed), the
+        encrypt: When ``True`` (and the ``cryptography`` package is installed), the
             history file is encrypted with Fernet symmetric encryption.  A key
             file is stored alongside the history file with ``0o600`` permissions.
             Defaults to ``True`` when *cryptography* is available, ``False``
             otherwise (graceful degradation).
-        encryption_key:
-            Optional pre-existing Fernet key bytes.  When omitted the key is
+        encryption_key: Optional pre-existing Fernet key bytes.  When omitted the key is
             loaded from (or created in) a ``history.key`` file next to the
             history file.
     """
@@ -309,12 +300,9 @@ class ConversationHistory:
         """Append a message and persist immediately.
 
         Args:
-            role:
-                ``"user"`` or ``"assistant"``.
-            content:
-                Text content of the message.
-            has_image:
-                Set to ``True`` when the turn included an image (screenshot or
+            role: ``"user"`` or ``"assistant"``.
+            content: Text content of the message.
+            has_image: Set to ``True`` when the turn included an image (screenshot or
                 uploaded file).  The image itself is not stored here.
 
         Returns:
@@ -366,10 +354,8 @@ class ConversationHistory:
         """Return the message list in OpenAI ``/chat/completions`` format.
 
         Args:
-            include_system:
-                Prepend the system prompt if one is configured.
-            max_context:
-                Only include the most recent *max_context* messages (besides the
+            include_system: Prepend the system prompt if one is configured.
+            max_context: Only include the most recent *max_context* messages (besides the
                 system message).  Use this to avoid hitting context-length limits.
         """
         messages: list[dict] = []
@@ -411,8 +397,7 @@ class ConversationHistory:
         key.
 
         Args:
-            password:
-                User-chosen password.  An empty string disables password-based
+            password: User-chosen password.  An empty string disables password-based
                 encryption and falls back to the auto-generated random key.
 
         Raises:
@@ -471,8 +456,7 @@ class ConversationHistory:
         permissions — callers are responsible for handling it securely.
 
         Args:
-            export_path:
-                Destination file path (will be created or overwritten).
+            export_path: Destination file path (will be created or overwritten).
         """
         with self._lock:
             data = [m.to_dict() for m in self._messages]
@@ -556,16 +540,13 @@ class ConversationHistory:
         Supports both plain-JSON exports and Fernet-encrypted ``.enc`` files.
 
         Args:
-            import_path:
-                Path to the file to import.  May be a plain-JSON file produced by
+            import_path: Path to the file to import.  May be a plain-JSON file produced by
                 :meth:`export_plaintext` or an encrypted ``.enc`` produced when
                 *encrypt* is enabled.
-            password:
-                Password for encrypted files.  Pass ``None`` for plain-JSON.
+            password: Password for encrypted files.  Pass ``None`` for plain-JSON.
                 If the file looks encrypted and no password is supplied a
                 :class:`ValueError` is raised.
-            merge:
-                When ``True`` messages from the import are merged with the
+            merge: When ``True`` messages from the import are merged with the
                 existing history (deduplication by timestamp).  When ``False``
                 (default) the current history is **replaced** by the imported one.
 

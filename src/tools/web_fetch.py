@@ -177,8 +177,7 @@ class WebFetchTool(Tool):
 
     .. code-block:: yaml
 
-       tools:
-         web_fetch:
+       tools: web_fetch:
            enabled: true
 
     And ensure it stays in ``requires_approval`` so every fetch is confirmed

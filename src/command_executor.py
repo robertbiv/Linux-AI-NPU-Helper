@@ -41,10 +41,8 @@ class CommandExecutor:
     """Extracts and safely executes shell commands from AI responses.
 
     Args:
-        safety_config:
-            The ``safety`` section from the application config.
-        confirm_callback:
-            A callable that receives a command string and returns ``True`` if the
+        safety_config: The ``safety`` section from the application config.
+        confirm_callback: A callable that receives a command string and returns ``True`` if the
             user approves execution, ``False`` otherwise.  Defaults to a
             terminal-based confirmation prompt.
     """
@@ -103,8 +101,7 @@ class CommandExecutor:
         """Ask for confirmation and run *command* if approved.
 
         Args:
-            command:
-                Raw shell command string.
+            command: Raw shell command string.
 
         Returns:
             Contains the exit code, stdout, and stderr.  The subprocess is

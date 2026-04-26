@@ -323,14 +323,10 @@ if _HAS_QT:
         or let the default (compact) apply.
 
         Args:
-            settings_manager:
-                The application :class:`~src.settings.SettingsManager`.
-            ai_assistant:
-                The application :class:`~src.ai_assistant.AIAssistant`.
-            start_mode:
-                ``"compact"`` (default) or ``"full"``.
-            parent:
-                Optional parent widget.
+            settings_manager: The application :class:`~src.settings.SettingsManager`.
+            ai_assistant: The application :class:`~src.ai_assistant.AIAssistant`.
+            start_mode: ``"compact"`` (default) or ``"full"``.
+            parent: Optional parent widget.
         """
 
         def __init__(
@@ -528,12 +524,9 @@ def open_main_window(
     installed).
 
     Args:
-        settings_manager:
-            Optional :class:`~src.settings.SettingsManager`.
-        ai_assistant:
-            Optional :class:`~src.ai_assistant.AIAssistant`.
-        start_mode:
-            ``"compact"`` (default) or ``"full"``.
+        settings_manager: Optional :class:`~src.settings.SettingsManager`.
+        ai_assistant: Optional :class:`~src.ai_assistant.AIAssistant`.
+        start_mode: ``"compact"`` (default) or ``"full"``.
     """
     if not _HAS_QT:
         logger.error("PyQt5 is required for the GUI. Install with: pip install PyQt5")

@@ -390,16 +390,12 @@ if _HAS_QT:
         """Full desktop-layout window for Neural Monolith.
 
         Args:
-            settings_manager:
-                Application :class:`~src.settings.SettingsManager` (optional).
-            ai_assistant:
-                Application :class:`~src.ai_assistant.AIAssistant` (optional).
-            parent:
-                Optional parent widget.
+            settings_manager: Application :class:`~src.settings.SettingsManager` (optional).
+            ai_assistant: Application :class:`~src.ai_assistant.AIAssistant` (optional).
+            parent: Optional parent widget.
 
             Signals:
-            collapse_requested:
-                Emitted when the user clicks the shrink / ⤡ button.
+            collapse_requested: Emitted when the user clicks the shrink / ⤡ button.
         """
 
         collapse_requested = pyqtSignal()

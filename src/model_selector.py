@@ -95,18 +95,12 @@ class ModelInfo:
     """Metadata about a single model available from the backend.
 
     Attributes
-    name:
-        Model identifier as returned by the backend (e.g. ``"llama3:8b-q4_K_M"``).
-    size_bytes:
-        Raw model size in bytes as reported by the backend (0 if unknown).
-    family:
-        Model family string (e.g. ``"llama"``), lower-cased.
-    quantization:
-        Quantization level string if detectable from the name (e.g. ``"q4_k_m"``).
-    is_vision:
-        ``True`` when the model is known to accept image inputs.
-    raw:
-        Full raw dict from the backend API for advanced use.
+    name: Model identifier as returned by the backend (e.g. ``"llama3:8b-q4_K_M"``).
+    size_bytes: Raw model size in bytes as reported by the backend (0 if unknown).
+    family: Model family string (e.g. ``"llama"``), lower-cased.
+    quantization: Quantization level string if detectable from the name (e.g. ``"q4_k_m"``).
+    is_vision: ``True`` when the model is known to accept image inputs.
+    raw: Full raw dict from the backend API for advanced use.
     """
 
     name: str
@@ -192,8 +186,7 @@ class ModelSelector:
     """List, select, and validate models for the configured AI backend.
 
         Args:
-            config:
-                The application :class:`~src.config.Config` object.
+            config: The application :class:`~src.config.Config` object.
     ## Usage
 
             ::
@@ -221,8 +214,7 @@ class ModelSelector:
         unreachable rather than raising an exception.
 
         Args:
-            timeout:
-                Seconds to wait for the backend to respond.
+            timeout: Seconds to wait for the backend to respond.
 
         Returns:
             Future that resolves to models sorted alphabetically by name.
@@ -321,8 +313,7 @@ class ModelSelector:
         :meth:`~src.settings.SettingsManager.save` to write the change.
 
         Args:
-            model_name:
-                Model identifier accepted by the active backend.
+            model_name: Model identifier accepted by the active backend.
         """
         backend = self._config.backend
         if backend == "ollama":
@@ -342,8 +333,7 @@ class ModelSelector:
         fine on the AMD Ryzen AI NPU or the current backend is not NPU).
 
         Args:
-            model:
-                A :class:`ModelInfo` instance or a bare model name string.
+            model: A :class:`ModelInfo` instance or a bare model name string.
 
         Returns:
             Human-readable warning, or ``None`` if no warning applies.

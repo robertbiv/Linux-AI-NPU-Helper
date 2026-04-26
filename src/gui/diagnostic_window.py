@@ -137,14 +137,10 @@ if _HAS_QT:
         """Live diagnostic dashboard.
 
         Args:
-            config:
-                The application :class:`~src.config.Config` object.
-            registry:
-                Optional :class:`~src.tools.ToolRegistry` for tool status.
-            settings_manager:
-                Optional :class:`~src.settings.SettingsManager`.
-            parent:
-                Optional parent widget.
+            config: The application :class:`~src.config.Config` object.
+            registry: Optional :class:`~src.tools.ToolRegistry` for tool status.
+            settings_manager: Optional :class:`~src.settings.SettingsManager`.
+            parent: Optional parent widget.
         """
 
         def __init__(

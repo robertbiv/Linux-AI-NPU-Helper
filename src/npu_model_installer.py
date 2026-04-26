@@ -67,48 +67,29 @@ class ModelCatalogEntry:
     """A single model in the curated NPU-recommended catalog.
 
     Attributes
-    key:
-        Unique short identifier used as the install sub-directory name.
-    name:
-        Human-readable model name.
-    publisher:
-        Model publisher / organisation.
-    description:
-        One-sentence description for display in the GUI.
-    hf_repo:
-        Hugging Face repository slug (e.g. ``"microsoft/Phi-3-vision-128k-instruct-onnx"``).
-    hf_variant:
-        Sub-path within the repo that contains the ONNX files.
-    onnx_filename:
-        Name of the primary ``.onnx`` weights file.
-    extra_files:
-        Additional required files (tokenizer, config, etc.).  Each tuple is
+    key: Unique short identifier used as the install sub-directory name.
+    name: Human-readable model name.
+    publisher: Model publisher / organisation.
+    description: One-sentence description for display in the GUI.
+    hf_repo: Hugging Face repository slug (e.g. ``"microsoft/Phi-3-vision-128k-instruct-onnx"``).
+    hf_variant: Sub-path within the repo that contains the ONNX files.
+    onnx_filename: Name of the primary ``.onnx`` weights file.
+    extra_files: Additional required files (tokenizer, config, etc.).  Each tuple is
         ``(filename, sha256_or_None)``.
-    min_size_bytes:
-        Minimum acceptable size of the primary ONNX file after download.
-    is_vision:
-        ``True`` when the model can process image inputs (screenshots).
-    npu_fit:
-        Qualitative NPU compatibility: ``"excellent"``, ``"good"``, ``"fair"``,
+    min_size_bytes: Minimum acceptable size of the primary ONNX file after download.
+    is_vision: ``True`` when the model can process image inputs (screenshots).
+    npu_fit: Qualitative NPU compatibility: ``"excellent"``, ``"good"``, ``"fair"``,
         or ``"not_recommended"``.
-    size_description:
-        Human-readable size hint shown in the GUI (e.g. ``"~4.2 GB"``).
-    license_spdx:
-        SPDX license identifier (e.g. ``"MIT"``).
-    license_url:
-        URL to the full license text.
-    notes:
-        Optional extra notes shown in the GUI (e.g. hardware requirements).
-    is_default:
-        ``True`` for the single model that is installed by default.
-    requires_tos:
-        ``True`` when the publisher requires accepting a Terms of Service
+    size_description: Human-readable size hint shown in the GUI (e.g. ``"~4.2 GB"``).
+    license_spdx: SPDX license identifier (e.g. ``"MIT"``).
+    license_url: URL to the full license text.
+    notes: Optional extra notes shown in the GUI (e.g. hardware requirements).
+    is_default: ``True`` for the single model that is installed by default.
+    requires_tos: ``True`` when the publisher requires accepting a Terms of Service
         agreement before downloading.  The GUI shows a confirmation dialog
         before starting the download.
-    tos_url:
-        URL to the full Terms of Service document.
-    tos_summary:
-        Short plain-text summary of the key TOS restrictions shown in the
+    tos_url: URL to the full Terms of Service document.
+    tos_summary: Short plain-text summary of the key TOS restrictions shown in the
         GUI dialog so the user doesn't have to leave the application.
     """
 
@@ -164,8 +145,7 @@ class ModelCatalogEntry:
         """Return the NPU fit adjusted for the detected host hardware.
 
         Args:
-            hw:
-                A :class:`~src.npu_benchmark.HardwareCapabilities` instance.
+            hw: A :class:`~src.npu_benchmark.HardwareCapabilities` instance.
                 When ``None`` the hardware is probed automatically via
                 :func:`~src.npu_benchmark.probe_hardware`.
 
@@ -538,11 +518,9 @@ class NPUModelInstaller:
     """Download and manage a single NPU model (default or catalog entry).
 
         Args:
-            install_dir:
-                Override the install directory.  Defaults to
+            install_dir: Override the install directory.  Defaults to
                 ``MODELS_ROOT / entry.key`` for the given *entry*.
-            entry:
-                Catalog entry to install.  Defaults to :func:`get_default_entry`
+            entry: Catalog entry to install.  Defaults to :func:`get_default_entry`
                 (Phi-3-vision-128k-instruct).
 
 
@@ -614,12 +592,9 @@ class NPUModelInstaller:
         """Download and install the model.
 
         Args:
-            progress_callback:
-                Optional callable receiving human-readable progress strings.
-            skip_verify:
-                Skip SHA-256 verification (not recommended).
-            allow_external:
-                Allow downloads from the internet.  When ``False`` and the model is
+            progress_callback: Optional callable receiving human-readable progress strings.
+            skip_verify: Skip SHA-256 verification (not recommended).
+            allow_external: Allow downloads from the internet.  When ``False`` and the model is
                 not installed, :class:`InstallError` is raised with manual-install
                 instructions.
 
@@ -820,14 +795,10 @@ def install_model_from_catalog(
     """Install a model from the catalog and return its ONNX path.
 
     Args:
-        entry:
-            A :class:`ModelCatalogEntry` from :data:`MODEL_CATALOG`.
-        install_dir:
-            Override the default install location.
-        progress_callback:
-            Optional callable receiving progress strings.
-        allow_external:
-            Allow downloading from the internet.
+        entry: A :class:`ModelCatalogEntry` from :data:`MODEL_CATALOG`.
+        install_dir: Override the default install location.
+        progress_callback: Optional callable receiving progress strings.
+        allow_external: Allow downloading from the internet.
 
     Returns:
         Path to the primary ONNX file.
@@ -866,12 +837,9 @@ def ensure_default_model(
     fall back to the Ollama/OpenAI backend gracefully.
 
     Args:
-        install_dir:
-            Override the default install location.
-        progress_callback:
-            Optional callable receiving progress strings.
-        allow_external:
-            Whether to allow downloading from the internet.
+        install_dir: Override the default install location.
+        progress_callback: Optional callable receiving progress strings.
+        allow_external: Whether to allow downloading from the internet.
 
     Returns:
         Path to the ONNX file, or ``None`` if installation failed.

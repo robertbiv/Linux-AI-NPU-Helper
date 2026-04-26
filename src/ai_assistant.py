@@ -53,10 +53,8 @@ class AIAssistant:
     """Facade for talking to a vision-capable LLM backend.
 
     Args:
-        config:
-            The application :class:`~src.config.Config` object.
-        npu_manager:
-            An optional :class:`~src.npu_manager.NPUManager`.  Only used when
+        config: The application :class:`~src.config.Config` object.
+        npu_manager: An optional :class:`~src.npu_manager.NPUManager`.  Only used when
             ``backend == "npu"``.
     """
 
@@ -115,19 +113,13 @@ class AIAssistant:
         to free memory.
 
         Args:
-            prompt:
-                The user's natural-language question or instruction.
-            history:
-                :class:`~src.conversation.ConversationHistory` whose past messages
+            prompt: The user's natural-language question or instruction.
+            history: :class:`~src.conversation.ConversationHistory` whose past messages
                 are passed to the model for multi-turn context.
-            screenshot_jpeg:
-                JPEG bytes of the current screen (optional).
-            attachment_image_jpegs:
-                List of JPEG bytes for user-uploaded images (optional).
-            attachment_texts:
-                List of text file contents to include in the context (optional).
-            max_context_messages:
-                How many of the most recent past messages to include in the
+            screenshot_jpeg: JPEG bytes of the current screen (optional).
+            attachment_image_jpegs: List of JPEG bytes for user-uploaded images (optional).
+            attachment_texts: List of text file contents to include in the context (optional).
+            max_context_messages: How many of the most recent past messages to include in the
                 request.  ``None`` includes all of them.
 
         Yields:
