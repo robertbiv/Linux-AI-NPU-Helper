@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import logging
 import pytest
-import io
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from src.file_handler import (

@@ -31,7 +31,6 @@ import logging
 import os
 import re
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from src.tools._base import SearchResult, Tool, ToolResult
@@ -82,8 +81,9 @@ def _query_uptime() -> str:
 
 def _query_battery() -> str:
     """Read battery info from /sys/class/power_supply/."""
-    ps_root = Path("/sys/class/power_supply")
-    if not ps_root.exists():
+    # Performance optimization: Use native os.path checks instead of pathlib.Path
+    ps_root = "/sys/class/power_supply"
+    if not os.path.exists(ps_root):
         return "No power supply information found (may be a desktop system)."
 
     lines: list[str] = []
@@ -148,8 +148,9 @@ def _query_battery() -> str:
 
 def _query_battery_health() -> str:
     """Calculate battery health from charge_full vs charge_full_design."""
-    ps_root = Path("/sys/class/power_supply")
-    if not ps_root.exists():
+    # Performance optimization: Use native os.path checks instead of pathlib.Path
+    ps_root = "/sys/class/power_supply"
+    if not os.path.exists(ps_root):
         return "No power supply information found."
 
     lines: list[str] = []

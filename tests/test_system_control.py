@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from src.tools.system_control import SystemControlTool, _run_first_available
 

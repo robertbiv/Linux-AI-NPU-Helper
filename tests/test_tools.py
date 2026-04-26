@@ -2,26 +2,18 @@
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from src.tools import (
     ToolPermissions,
     ToolRegistry,
     ToolResult,
-    SearchResult,
     build_default_registry,
 )
-from src.tools.find_files import FindFilesTool
 from src.tools.search_in_files import SearchInFilesTool
 from src.tools.web_search import WebSearchTool
-from src.tools.web_fetch import WebFetchTool
 from src.tools.man_reader import ManPageTool, _extract_sections, _strip_man_formatting
-from src.tools.system_control import SystemControlTool
-from src.tools.app import AppTool
-from src.tools.system_info import SystemInfoTool
 
 
 # ── _strip_man_formatting ─────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 from __future__ import annotations
 import pytest
 from unittest.mock import MagicMock, patch
-from src.model_selector import ModelInfo, ModelSelector, _parse_model_info, _NPU_RULES
+from src.model_selector import ModelInfo, ModelSelector, _parse_model_info
 
 
 class TestModelInfo:

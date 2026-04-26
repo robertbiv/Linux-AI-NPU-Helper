@@ -1,13 +1,11 @@
 import os
 import subprocess
-import shutil
-import shlex
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 import pytest
 from src.tools.app import AppTool, _launch_app
 import src.tools.app as app_mod
-from src.tools._base import ToolResult, SearchResult
+from src.tools._base import ToolResult
 
 
 @pytest.fixture

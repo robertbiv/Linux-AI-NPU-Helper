@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from src.screen_capture import (
     capture,
@@ -8,7 +7,6 @@ from src.screen_capture import (
     image_to_base64,
     load_image_as_jpeg,
 )
-import io
 
 import sys
 

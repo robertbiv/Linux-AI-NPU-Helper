@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 import os
 import time
-from pathlib import Path
 from typing import Any
 
 from src.tools._base import SearchResult, Tool, ToolResult
@@ -162,7 +161,8 @@ def _fmt_table(procs: list[dict], sort_key: str) -> str:
 
 
 def _battery_rate() -> str:
-    ps_root = Path("/sys/class/power_supply")
+    # Performance optimization: Use native os.path checks instead of pathlib.Path
+    ps_root = "/sys/class/power_supply"
     lines: list[str] = []
     try:
         with os.scandir(ps_root) as it:

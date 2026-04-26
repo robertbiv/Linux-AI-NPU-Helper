@@ -1,8 +1,7 @@
 """Tests for src/command_executor.py."""
 
 from __future__ import annotations
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.command_executor import CommandExecutor, CommandResult, CommandOutput
 
 

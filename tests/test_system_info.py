@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from src.tools.system_info import (
     SystemInfoTool,
@@ -6,7 +5,6 @@ from src.tools.system_info import (
     _query_time,
     _query_uptime,
     _query_battery,
-    _query_battery_health,
     _query_gpu,
     _query_cpu,
     _query_memory,
@@ -16,7 +14,6 @@ from src.tools.system_info import (
     _query_all,
     _QUERIES,
 )
-import os
 
 
 def test_fmt_seconds():
@@ -44,16 +41,14 @@ def test_query_uptime(m_run, m_read):
 
 @patch("os.scandir")
 @patch("src.tools.system_info.read_sys_file")
-@patch("src.tools.system_info.Path")
-def test_query_battery(m_path, m_read, m_scan, tmp_path):
+@patch("src.tools.system_info.os.path.exists")
+def test_query_battery(m_exists, m_read, m_scan, tmp_path):
     ps_dir = tmp_path / "ps"
     ps_dir.mkdir()
     bat = ps_dir / "BAT0"
     bat.mkdir()
 
-    m_path_obj = MagicMock()
-    m_path_obj.exists.return_value = True
-    m_path.return_value = m_path_obj
+    m_exists.return_value = True
 
     class DummyDirEntry:
         def __init__(self, name, path):

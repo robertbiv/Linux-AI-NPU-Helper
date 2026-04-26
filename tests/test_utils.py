@@ -1,4 +1,3 @@
-import pytest
 from src.utils import _deep_merge
 
 

@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.tools.installed_apps import (
     InstalledAppsTool,
     _scan_desktop,
@@ -8,8 +7,6 @@ from src.tools.installed_apps import (
     _scan_packages,
     _scan_path,
 )
-import os
-from pathlib import Path
 
 
 @patch("src.tools.app._load_desktop_cache")
