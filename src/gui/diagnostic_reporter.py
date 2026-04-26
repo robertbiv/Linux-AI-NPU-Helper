@@ -524,6 +524,7 @@ class DiagnosticReporter:
             t0 = time.monotonic()
             proc = subprocess.run(
                 cmd,
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=120,

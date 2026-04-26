@@ -103,7 +103,7 @@ class ClipboardTool(Tool):
                 else:
                     cmd = ["xclip", "-selection", "clipboard", "-o"]
 
-                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                proc = subprocess.run(cmd, shell=False, capture_output=True, text=True, timeout=5)
                 if proc.returncode != 0:
                     return ToolResult(
                         tool_name=self.name,
@@ -122,7 +122,7 @@ class ClipboardTool(Tool):
                     cmd = ["xclip", "-selection", "clipboard", "-i"]
 
                 proc = subprocess.run(
-                    cmd, input=text, capture_output=True, text=True, timeout=5
+                    cmd, shell=False, input=text, capture_output=True, text=True, timeout=5
                 )
                 if proc.returncode != 0:
                     return ToolResult(

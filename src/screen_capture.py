@@ -86,6 +86,7 @@ def _capture_scrot(jpeg_quality: int) -> bytes:
     try:
         subprocess.run(
             ["scrot", str(tmp_path)],
+            shell=False,
             check=True,
             capture_output=True,
         )

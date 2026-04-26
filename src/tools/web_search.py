@@ -96,6 +96,7 @@ class WebSearchTool(Tool):
             # The subprocess is fully detached — we do not wait for it.
             subprocess.Popen(
                 ["xdg-open", url],
+                shell=False,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 close_fds=True,

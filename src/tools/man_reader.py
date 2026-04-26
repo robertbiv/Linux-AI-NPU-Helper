@@ -179,6 +179,7 @@ class ManPageTool(Tool):
         try:
             proc = subprocess.run(
                 cmd,
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=10,

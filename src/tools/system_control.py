@@ -148,6 +148,7 @@ def _run_first_available(candidates: list[list[str]]) -> "tuple[bool, str]":
         try:
             proc = subprocess.run(
                 cmd,
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=8,

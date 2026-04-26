@@ -71,13 +71,15 @@ def _find_terminal() -> tuple[str, str] | None:
 def _build_launch_cmd(
     terminal: str, style: str, script_path: str, shell_path: str
 ) -> list[str]:
-    shell_q = shlex.quote(shell_path)
-    script_q = shlex.quote(script_path)
+    # When shell=False, passing arguments to `--command=` or `-e` with
+    # explicit quotes via shlex.quote() passes literal single quotes to
+    # the terminal emulator, causing "command not found" errors.
+    # Therefore, we just pass the raw space-separated paths.
     if style == "dashdash":
         return [terminal, "--", shell_path, script_path]
     if style == "execute":
-        return [terminal, f"--command={shell_q} {script_q}"]
-    return [terminal, "-e", f"{shell_q} {script_q}"]
+        return [terminal, f"--command={shell_path} {script_path}"]
+    return [terminal, "-e", f"{shell_path} {script_path}"]
 
 
 # ---------------------------------------------------------------------------
@@ -260,6 +262,7 @@ def open_with_command(command: str) -> tuple[bool, str]:
 
         subprocess.Popen(
             launch_cmd,
+            shell=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             close_fds=True,

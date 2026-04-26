@@ -124,6 +124,7 @@ class FindFilesTool(Tool):
         args = [cmd, "--basename", "-l", str(limit * 2), pattern]
         proc = subprocess.run(
             args,
+            shell=False,
             capture_output=True,
             text=True,
             timeout=10,
@@ -149,6 +150,7 @@ class FindFilesTool(Tool):
         try:
             proc = subprocess.run(
                 cmd,
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=30,
