@@ -3,11 +3,7 @@ tool-arg validation, secret masking."""
 
 from __future__ import annotations
 
-import json
-import os
-import stat
 import threading
-import time
 from pathlib import Path
 from unittest.mock import patch
 
@@ -328,17 +324,14 @@ class TestMaskSecret:
 class TestGetApiKeyFromEnv:
     def test_returns_env_value(self, monkeypatch):
         monkeypatch.setenv("MY_API_KEY", "secret-value")
-        from src.security import get_api_key_from_env
 
         assert get_api_key_from_env("MY_API_KEY") == "secret-value"
 
     def test_returns_empty_when_unset(self):
-        from src.security import get_api_key_from_env
 
         # Use a name that is definitely not set
         assert get_api_key_from_env("__DEFINITELY_NOT_SET_XYZ__") == ""
 
     def test_empty_env_var_name(self):
-        from src.security import get_api_key_from_env
 
         assert get_api_key_from_env("") == ""

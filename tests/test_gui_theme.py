@@ -1,9 +1,7 @@
 """Tests for src/gui/theme.py — DE detection and theme selection."""
 
 from __future__ import annotations
-import os
 import pytest
-from unittest.mock import patch
 from src.gui.theme import (
     detect_desktop_environment,
     get_theme_for_de,

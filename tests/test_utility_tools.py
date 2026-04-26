@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from src.tools.calculator import CalculatorTool
 from src.tools.hash_tool import HashTool

@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.tools.process_info import (
     ProcessInfoTool,
     _proc_name,
@@ -112,7 +111,11 @@ def test_battery_rate(m_read, tmp_path):
     bat = ps_dir / "BAT0"
     bat.mkdir()
 
-    with patch("src.tools.process_info.Path", return_value=ps_dir):
+    class DummyContext:
+        def __enter__(self): return [type("entry", (), {"name": "BAT0", "path": str(bat)})()]
+        def __exit__(self, *args): pass
+
+    with patch("src.tools.process_info.os.scandir", return_value=DummyContext()):
         m_read.side_effect = lambda path: "battery" if "type" in path else "10000000"
 
         res = _battery_rate()

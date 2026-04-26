@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, mock_open
 from src.tools._utils import read_sys_file, run_command
 

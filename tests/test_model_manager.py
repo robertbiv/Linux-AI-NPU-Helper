@@ -1,9 +1,8 @@
 import pytest
 from unittest.mock import MagicMock, patch
-import os
 
 from PyQt5.QtWidgets import QWidget, QDialogButtonBox
-from src.gui.model_manager import _TosDialog, ModelManagerWidget, NPUCatalogWidget, _BackendModelPanel, _BADGE_FAIL, _BADGE_WARN, _BADGE_OK
+from src.gui.model_manager import _TosDialog, ModelManagerWidget, NPUCatalogWidget, _BackendModelPanel
 
 # Mock settings manager
 @pytest.fixture
@@ -193,7 +192,6 @@ def test_npu_catalog_use_requested(qtbot, mock_settings):
         mock_settings.set.assert_any_call("npu.model_path", "/path/to/model")
 
 def test_backend_model_panel_init_refresh(qtbot, mock_settings):
-    from src.gui.model_manager import _BackendModelPanel
     with patch("src.gui.model_manager._BackendModelPanel._build_ui"):
         with patch("src.gui.model_manager._BackendModelPanel.refresh") as mock_refresh:
             with patch("src.model_selector.ModelSelector"):
@@ -203,7 +201,6 @@ def test_backend_model_panel_init_refresh(qtbot, mock_settings):
                 mock_refresh.assert_called_once()
 
 def test_backend_model_panel_selector_fail(qtbot, mock_settings):
-    from src.gui.model_manager import _BackendModelPanel
     with patch("src.gui.model_manager._BackendModelPanel._build_ui"):
         with patch("src.gui.model_manager._BackendModelPanel.refresh"):
             with patch("src.model_selector.ModelSelector", side_effect=Exception("Selector err")):
@@ -214,7 +211,6 @@ def test_backend_model_panel_selector_fail(qtbot, mock_settings):
                     assert panel._selector is None
 
 def test_backend_model_panel_refresh_thread(qtbot, mock_settings):
-    from src.gui.model_manager import _BackendModelPanel
     with patch("src.gui.model_manager._BackendModelPanel._build_ui"), patch("src.gui.model_manager._BackendModelPanel.refresh"):
         panel = _BackendModelPanel(mock_settings)
 

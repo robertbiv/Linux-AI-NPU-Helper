@@ -1,11 +1,8 @@
 """Tests for src/conversation.py."""
 
 from __future__ import annotations
-import json
 import threading
 from unittest.mock import patch
-import pytest
-from pathlib import Path
 from src.conversation import ConversationHistory, Message
 
 

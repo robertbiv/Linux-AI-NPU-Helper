@@ -1,7 +1,5 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import Qt
 import sys
 
 from src.gui.diagnostic_window import DiagnosticWindow
@@ -53,7 +51,6 @@ def test_diagnostic_window_theme_error(qtbot, mock_reporter):
             qtbot.addWidget(window)
 
 def test_no_qt():
-    import sys
     with patch.dict(sys.modules, {'PyQt5.QtWidgets': None, 'PyQt5.QtCore': None, 'PyQt5.QtGui': None}):
         import importlib
         import src.gui.diagnostic_window

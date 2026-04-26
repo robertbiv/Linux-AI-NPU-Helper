@@ -195,17 +195,17 @@ class NPUManager:
             info["providers"] = []
 
         # Detect AMD GPU/APU via /sys
-        amd_gpu_path = Path("/sys/class/drm")
-        if amd_gpu_path.exists():
+        # Performance optimization: Use native os.path operations instead of pathlib.Path
+        amd_gpu_path = "/sys/class/drm"
+        if os.path.exists(amd_gpu_path):
             amd_devices = []
             try:
                 with os.scandir(amd_gpu_path) as it:
                     for d in it:
                         try:
-                            if (Path(d.path) / "device" / "vendor").read_text(
-                                errors="replace"
-                            ).strip().lower() == "0x1002":  # AMD vendor ID
-                                amd_devices.append(d.name)
+                            with open(f"{d.path}/device/vendor", "r", errors="replace") as f:
+                                if f.read().strip().lower() == "0x1002":  # AMD vendor ID
+                                    amd_devices.append(d.name)
                         except OSError:
                             pass
             except OSError:

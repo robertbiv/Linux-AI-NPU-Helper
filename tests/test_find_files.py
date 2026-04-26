@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from src.tools.find_files import FindFilesTool, _has_hidden_component
 from pathlib import Path

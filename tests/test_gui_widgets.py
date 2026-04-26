@@ -16,11 +16,9 @@ from __future__ import annotations
 import base64
 import json
 import os
-import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest

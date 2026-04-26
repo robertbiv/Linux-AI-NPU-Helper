@@ -1,6 +1,5 @@
 import pytest
 import subprocess
-import os
 from unittest.mock import patch, MagicMock
 from src.command_executor import CommandExecutor
 
