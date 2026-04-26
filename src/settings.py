@@ -72,12 +72,10 @@ class SettingsManager:
     """Thread-safe settings manager with JSON persistence and change listeners.
 
     Args:
-        path:
-            Path to the ``settings.json`` file.  Created (with secure permissions)
+        path: Path to the ``settings.json`` file.  Created (with secure permissions)
             if it does not exist.  Pass ``None`` to disable persistence (useful in
             tests).
-        defaults:
-            Base default values deep-merged *before* the file is loaded.  Typically
+        defaults: Base default values deep-merged *before* the file is loaded.  Typically
             the ``_DEFAULTS`` dict from :mod:`src.config`.
     """
 
@@ -186,12 +184,9 @@ class SettingsManager:
         Notifies all registered change listeners synchronously before returning.
 
         Args:
-            key_path:
-                Dot-separated path, e.g. ``"ollama.model"`` or ``"tools.allowed"``.
-            value:
-                New value (any JSON-serialisable type).
-            save:
-                Write to disk immediately (default: ``True``).  Set to ``False``
+            key_path: Dot-separated path, e.g. ``"ollama.model"`` or ``"tools.allowed"``.
+            value: New value (any JSON-serialisable type).
+            save: Write to disk immediately (default: ``True``).  Set to ``False``
                 when making several changes in a batch and calling :meth:`save`
                 manually afterwards.
         """
@@ -206,8 +201,7 @@ class SettingsManager:
         """Apply multiple changes atomically and save once.
 
                 Args:
-                    changes:
-                        Dict mapping dot-separated key paths to new values.
+                    changes: Dict mapping dot-separated key paths to new values.
         ## Example
 
                         settings.set_many({
@@ -227,10 +221,8 @@ class SettingsManager:
         """Deep-merge *values* into an existing top-level *section* and save.
 
         Args:
-            section:
-                Top-level key (e.g. ``"tools"``, ``"ollama"``).
-            values:
-                Dict of new values to merge in.
+            section: Top-level key (e.g. ``"tools"``, ``"ollama"``).
+            values: Dict of new values to merge in.
         """
         with self._lock:
             existing = self._data.get(section, {})

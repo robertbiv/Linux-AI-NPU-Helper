@@ -339,11 +339,9 @@ def adjust_npu_fit(static_fit: str, hw: HardwareCapabilities) -> str:
     """Return a hardware-adjusted NPU fit rating.
 
     Args:
-        static_fit:
-            The pre-defined catalog rating (``"excellent"`` / ``"good"`` /
+        static_fit: The pre-defined catalog rating (``"excellent"`` / ``"good"`` /
             ``"fair"`` / ``"not_recommended"``).
-        hw:
-            :class:`HardwareCapabilities` for the current machine.
+        hw: :class:`HardwareCapabilities` for the current machine.
 
     Returns:
         Adjusted fit rating — may be better or worse than *static_fit*.

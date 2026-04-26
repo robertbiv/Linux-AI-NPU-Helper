@@ -51,13 +51,10 @@ class ScreenshotTool(Tool):
     ``$XDG_RUNTIME_DIR/npu-assistant-screenshots/``.
 
     Args:
-        monitor:
-            Monitor index.  ``0`` = virtual desktop (all monitors), ``1`` =
+        monitor: Monitor index.  ``0`` = virtual desktop (all monitors), ``1`` =
             primary physical monitor.  Default ``0``.
-        jpeg_quality:
-            JPEG compression quality 1–95.  Default ``75``.
-        save:
-            When ``true`` (default) persist the JPEG to disk in addition to
+        jpeg_quality: JPEG compression quality 1–95.  Default ``75``.
+        save: When ``true`` (default) persist the JPEG to disk in addition to
             returning the base64 string.
     """
 
@@ -91,8 +88,7 @@ class ScreenshotTool(Tool):
     def __init__(self, hide_opacity_fn: "callable | None" = None) -> None:
         """
         Args:
-            hide_opacity_fn:
-                Optional callable ``(opacity: float) -> None`` that adjusts the
+            hide_opacity_fn: Optional callable ``(opacity: float) -> None`` that adjusts the
                 application window's opacity before and after capture.  When
                 provided the window is made transparent (opacity=0) during capture
                 and restored (opacity=1) afterwards.  The UI layer should supply
@@ -106,8 +102,7 @@ class ScreenshotTool(Tool):
         """Execute the screenshot capture.
 
         Args:
-            args:
-                Dict with optional keys: ``monitor``, ``jpeg_quality``,
+            args: Dict with optional keys: ``monitor``, ``jpeg_quality``,
                 ``save``.
         """
         monitor = int(args.get("monitor", 0))
@@ -156,13 +151,10 @@ class ScreenshotTool(Tool):
         opacity-fade technique so there is no visible flicker.
 
         Args:
-            window:
-                A ``QWidget`` (or any object with ``setWindowOpacity(float)``
+            window: A ``QWidget`` (or any object with ``setWindowOpacity(float)``
                 and ``update()``).  Pass ``None`` to skip the hide/show step.
-            monitor:
-                Monitor index for ``src.screen_capture.capture``.
-            jpeg_quality:
-                JPEG compression quality 1–95.
+            monitor: Monitor index for ``src.screen_capture.capture``.
+            jpeg_quality: JPEG compression quality 1–95.
         """
         from PyQt5.QtWidgets import QApplication  # noqa: PLC0415
 

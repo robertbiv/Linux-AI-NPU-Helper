@@ -108,12 +108,9 @@ def read_image_file(
     that large photos don't consume excessive memory or network bandwidth.
 
     Args:
-        path:
-            Path to any image format supported by Pillow.
-        jpeg_quality:
-            JPEG quality (1–95).  Lower values reduce memory and transfer size.
-        max_dimension:
-            If the image is larger than this in either dimension it is resized
+        path: Path to any image format supported by Pillow.
+        jpeg_quality: JPEG quality (1–95).  Lower values reduce memory and transfer size.
+        max_dimension: If the image is larger than this in either dimension it is resized
             while preserving aspect ratio before encoding.
 
     Returns:

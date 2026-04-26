@@ -249,10 +249,8 @@ if _HAS_QT:
         enabled.  Clicking 'Read full terms' opens the TOS URL in the browser.
 
         Args:
-            entry:
-                The catalog entry whose TOS should be displayed.
-            parent:
-                Optional parent widget.
+            entry: The catalog entry whose TOS should be displayed.
+            parent: Optional parent widget.
         """
 
         def __init__(self, entry: Any, parent: QWidget | None = None) -> None:
@@ -555,10 +553,8 @@ if _HAS_QT:
         """Scrollable panel showing all catalog models with Download/Remove/Use buttons.
 
         Args:
-            settings_manager:
-                The application :class:`~src.settings.SettingsManager`.
-            parent:
-                Optional parent widget.
+            settings_manager: The application :class:`~src.settings.SettingsManager`.
+            parent: Optional parent widget.
         """
 
         model_activated = pyqtSignal(str)  # ONNX path chosen as active
@@ -1070,10 +1066,8 @@ if _HAS_QT:
         """Tabbed model manager combining the backend browser and NPU catalog.
 
         Args:
-            manager:
-                The application :class:`~src.settings.SettingsManager`.
-            parent:
-                Optional parent widget.
+            manager: The application :class:`~src.settings.SettingsManager`.
+            parent: Optional parent widget.
         """
 
         def __init__(self, manager: Any, parent: QWidget | None = None) -> None:

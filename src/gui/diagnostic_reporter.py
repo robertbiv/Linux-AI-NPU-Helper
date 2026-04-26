@@ -46,12 +46,9 @@ class DiagnosticReporter:
     """Collect live status information from all application subsystems.
 
     Args:
-        config:
-            The application :class:`~src.config.Config` object.
-        registry:
-            Optional :class:`~src.tools.ToolRegistry` for tool status checks.
-        settings_manager:
-            Optional :class:`~src.settings.SettingsManager` for settings checks.
+        config: The application :class:`~src.config.Config` object.
+        registry: Optional :class:`~src.tools.ToolRegistry` for tool status checks.
+        settings_manager: Optional :class:`~src.settings.SettingsManager` for settings checks.
     """
 
     def __init__(
@@ -70,7 +67,7 @@ class DiagnosticReporter:
         """Check connectivity to the AI backend.
 
         Returns:
-            Keys: `status`, ``backend``, ``url``, ``model``,
+            A dictionary with keys: `status`, ``backend``, ``url``, ``model``,
             ``latency_ms``, ``error``.
         """
         backend = self._config.backend
@@ -136,7 +133,7 @@ class DiagnosticReporter:
         """Check AMD NPU / ONNX Runtime availability.
 
         Returns:
-            Keys: `status`, ``available``, ``providers``,
+            A dictionary with keys: `status`, ``available``, ``providers``,
             ``onnxruntime_version``, ``model_path``, ``model_exists``,
             ``error``.
         """
@@ -217,7 +214,7 @@ class DiagnosticReporter:
         """Run security checks on files and configuration.
 
         Returns:
-            Keys: `status`, ``checks`` (list of individual check dicts),
+            A dictionary with keys: `status`, ``checks`` (list of individual check dicts),
             ``issues``.
         """
         checks = []
@@ -310,7 +307,7 @@ class DiagnosticReporter:
         """Check the settings file and manager status.
 
         Returns:
-            Keys: `status`, ``path``, ``exists``, ``listener_count``,
+            A dictionary with keys: `status`, ``path``, ``exists``, ``listener_count``,
             ``backend``, ``model``, ``error``.
         """
         result: dict[str, Any] = {
@@ -347,7 +344,7 @@ class DiagnosticReporter:
         """Collect system information.
 
         Returns:
-            Keys: `status`, ``os_name``, ``os_version``, ``distro_id``,
+            A dictionary with keys: `status`, ``os_name``, ``os_version``, ``distro_id``,
             ``package_manager``, ``desktop_environment``, ``shell``,
             ``kernel``, ``architecture``, ``python_version``,
             ``is_immutable``, ``app_version``.
@@ -403,7 +400,7 @@ class DiagnosticReporter:
         """Check network configuration and local URL validity.
 
         Returns:
-            Keys: `status`, ``allow_external``, ``backend_url``,
+            A dictionary with keys: `status`, ``allow_external``, ``backend_url``,
             ``backend_url_is_local``, ``error``.
         """
         from src.security import is_local_url
@@ -494,7 +491,7 @@ class DiagnosticReporter:
         """Run the test suite programmatically and return a summary.
 
         Returns:
-            Keys: `status`, ``passed``, ``failed``, ``errors``,
+            A dictionary with keys: `status`, ``passed``, ``failed``, ``errors``,
             ``total``, ``duration_s``, ``output``.
         """
         import subprocess
@@ -559,7 +556,7 @@ class DiagnosticReporter:
         """Collect all status checks and return a single aggregated dict.
 
         Returns:
-            Keys: ``timestamp``, ``app_version``, ``overall_status``,
+            A dictionary with keys: ``timestamp``, ``app_version``, ``overall_status``,
             ``backend``, ``npu``, ``tools``, ``security``, ``settings``,
             ``system``, ``network``, ``dependencies``.
 

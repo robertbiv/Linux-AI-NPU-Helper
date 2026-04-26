@@ -27,12 +27,9 @@ class NPUSession:
         # session memory freed here
 
     Args:
-        model_path:
-            Path to a pre-compiled ONNX model.
-        providers:
-            Ordered list of ONNX Runtime Execution Providers to try.
-        vitisai_config:
-            Optional path to the VitisAI EP JSON configuration file.
+        model_path: Path to a pre-compiled ONNX model.
+        providers: Ordered list of ONNX Runtime Execution Providers to try.
+        vitisai_config: Optional path to the VitisAI EP JSON configuration file.
     """
 
     def __init__(
@@ -121,8 +118,7 @@ class NPUSession:
         """Run inference.
 
         Args:
-            feeds:
-                Dict mapping input names to numpy arrays.
+            feeds: Dict mapping input names to numpy arrays.
 
         Returns:
             Raw ONNX Runtime output tensors.
@@ -234,8 +230,7 @@ class NPUManager:
         automatically from Hugging Face on first call.
 
         Args:
-            progress_callback:
-                Optional callable receiving download-progress strings.
+            progress_callback: Optional callable receiving download-progress strings.
 
         Returns:
             Loaded session, or ``None`` if no model is available.
@@ -312,10 +307,8 @@ class NPUManager:
         released straight away.
 
         Args:
-            feeds:
-                Dict mapping input names to numpy arrays.
-            progress_callback:
-                Optional callable for download-progress messages on first run.
+            feeds: Dict mapping input names to numpy arrays.
+            progress_callback: Optional callable for download-progress messages on first run.
         """
         session = self.load_model(progress_callback=progress_callback)
         if session is None:
@@ -332,8 +325,7 @@ class NPUManager:
         """Return the cached session, loading it if necessary.
 
         Args:
-            progress_callback:
-                Optional callable for download-progress messages on first run.
+            progress_callback: Optional callable for download-progress messages on first run.
         """
         if self._session is None:
             return self.load_model(progress_callback=progress_callback)

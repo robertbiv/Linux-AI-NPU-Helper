@@ -369,8 +369,7 @@ if _HAS_QT:
         """Full chat page widget.
 
         Signals:
-        message_submitted:
-            Emitted when the user sends a new message.
+        message_submitted: Emitted when the user sends a new message.
         """
 
         message_submitted = pyqtSignal(str)
@@ -604,8 +603,7 @@ if _HAS_QT:
             """Inject a custom screenshot callable (for testing or custom UI).
 
             Args:
-                fn:
-                    ``Callable[[], bytes | None]`` — called instead of the default
+                fn: ``Callable[[], bytes | None]`` — called instead of the default
                     opacity-trick capture when ``ui.auto_send_screen`` is True.
                     Pass ``None`` to restore the default behaviour.
             """

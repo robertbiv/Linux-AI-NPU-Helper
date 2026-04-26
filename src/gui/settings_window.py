@@ -597,10 +597,8 @@ if _HAS_QT:
         and persisted to ``settings.json`` immediately — no Apply button needed.
 
         Args:
-            manager:
-                The application :class:`~src.settings.SettingsManager` instance.
-            parent:
-                Optional parent widget.
+            manager: The application :class:`~src.settings.SettingsManager` instance.
+            parent: Optional parent widget.
         """
 
         def __init__(
@@ -683,12 +681,9 @@ def open_settings(
     """Open the settings dialog (convenience function).
 
     Args:
-        manager:
-            The application :class:`~src.settings.SettingsManager`.
-        parent:
-            Optional parent widget.
-        history:
-            Optional :class:`~src.conversation.ConversationHistory` — enables
+        manager: The application :class:`~src.settings.SettingsManager`.
+        parent: Optional parent widget.
+        history: Optional :class:`~src.conversation.ConversationHistory` — enables
             the History tab controls (encryption, password, export, import).
 
     Raises:

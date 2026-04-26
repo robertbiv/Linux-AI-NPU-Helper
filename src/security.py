@@ -76,10 +76,8 @@ def assert_local_url(url: str, allow_external: bool) -> None:
     external traffic is not permitted.
 
     Args:
-        url:
-            Full URL to validate.
-        allow_external:
-            If ``True`` the check is skipped entirely.  Set this only when the
+        url: Full URL to validate.
+        allow_external: If ``True`` the check is skipped entirely.  Set this only when the
             user has explicitly opted in via ``network.allow_external: true``.
     """
     if allow_external:
@@ -117,10 +115,8 @@ def sanitize_ai_response(text: str, max_chars: int = _MAX_RESPONSE_CHARS) -> str
     - Truncates to *max_chars* to prevent memory exhaustion from a runaway model.
 
     Args:
-        text:
-            Raw text received from the AI backend.
-        max_chars:
-            Maximum number of characters to return.  Text beyond this is silently
+        text: Raw text received from the AI backend.
+        max_chars: Maximum number of characters to return.  Text beyond this is silently
             dropped (the UI will show the truncation naturally during streaming).
 
     Returns:
@@ -150,12 +146,9 @@ def secure_write(path: str | Path, data: str, mode: int = 0o600) -> None:
     to *mode* (default ``0o600`` — owner read/write only).
 
     Args:
-        path:
-            Destination file path.
-        data:
-            Text content to write (UTF-8 encoded).
-        mode:
-            POSIX file permission bits.  Default ``0o600`` restricts the file to
+        path: Destination file path.
+        data: Text content to write (UTF-8 encoded).
+        mode: POSIX file permission bits.  Default ``0o600`` restricts the file to
             the owning user, preventing other local users from reading sensitive
             data such as conversation history or config files.
     """
@@ -196,10 +189,8 @@ def check_path_permissions(path: str | Path, label: str = "file") -> None:
     readable only by the owning user (mode ``0o600`` or ``0o400``).
 
     Args:
-        path:
-            File to inspect.
-        label:
-            Human-readable label used in warning messages (e.g. ``"config file"``).
+        path: File to inspect.
+        label: Human-readable label used in warning messages (e.g. ``"config file"``).
     """
     p = Path(path)
     if not p.exists():
@@ -226,8 +217,7 @@ class RateLimiter:
     """Thread-safe token-bucket rate limiter for AI backend calls.
 
         Args:
-            calls_per_minute:
-                Maximum number of calls allowed per minute.  ``0`` disables limiting.
+            calls_per_minute: Maximum number of calls allowed per minute.  ``0`` disables limiting.
     ## Usage
 
             ::
@@ -295,10 +285,8 @@ def validate_tool_args(
       ensure required fields are present and types match.
 
     Args:
-        args:
-            Raw argument dict supplied by the AI (already JSON-decoded).
-        schema:
-            Optional JSON Schema dict with a ``"properties"`` key.  Used only for
+        args: Raw argument dict supplied by the AI (already JSON-decoded).
+        schema: Optional JSON Schema dict with a ``"properties"`` key.  Used only for
             presence and basic type checks; full JSON Schema validation is not
             performed.
 
@@ -407,8 +395,7 @@ def get_api_key_from_env(env_var: str) -> str:
     version control.
 
     Args:
-        env_var:
-            Name of the environment variable to read.
+        env_var: Name of the environment variable to read.
 
     Returns:
         The API key value, or an empty string if the variable is not set.

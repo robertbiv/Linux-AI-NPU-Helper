@@ -87,25 +87,16 @@ class Theme:
     """Complete theme description for a desktop environment.
 
     Attributes
-    de:
-        Canonical DE name (e.g. ``"gnome"``, ``"kde"``, ``"xfce"``).
-    style_name:
-        Qt style name passed to ``QApplication.setStyle()``.
+    de: Canonical DE name (e.g. ``"gnome"``, ``"kde"``, ``"xfce"``).
+    style_name: Qt style name passed to ``QApplication.setStyle()``.
         ``""`` means use the system default (recommended for KDE/Plasma).
-    light:
-        Colour palette for light mode.
-    dark:
-        Colour palette for dark mode.
-    accent_hex:
-        Primary accent colour in ``#RRGGBB`` (used for highlights).
-    font_family:
-        Preferred font family (empty = Qt default).
-    font_size_pt:
-        Preferred font size in points (0 = Qt default).
-    icon_theme:
-        Preferred XDG icon theme name (empty = system default).
-    extra_stylesheet:
-        Additional QSS applied on top of the base style.
+    light: Colour palette for light mode.
+    dark: Colour palette for dark mode.
+    accent_hex: Primary accent colour in ``#RRGGBB`` (used for highlights).
+    font_family: Preferred font family (empty = Qt default).
+    font_size_pt: Preferred font size in points (0 = Qt default).
+    icon_theme: Preferred XDG icon theme name (empty = system default).
+    extra_stylesheet: Additional QSS applied on top of the base style.
     """
 
     de: str = "unknown"
@@ -413,8 +404,7 @@ def get_theme_for_de(de: str) -> Theme:
     """Return a :class:`Theme` for the given desktop environment name.
 
     Args:
-        de:
-            Canonical DE name as returned by :func:`detect_desktop_environment`.
+        de: Canonical DE name as returned by :func:`detect_desktop_environment`.
 
     Returns:
         Fully populated theme object.  Falls back to Fusion if *de* is
@@ -443,10 +433,8 @@ def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
     Imports PyQt5 lazily so this module is importable without Qt installed.
 
     Args:
-        app:
-            A ``PyQt5.QtWidgets.QApplication`` instance.
-        theme:
-            Theme to apply.  If ``None``, :func:`get_current_theme` is called
+        app: A ``PyQt5.QtWidgets.QApplication`` instance.
+        theme: Theme to apply.  If ``None``, :func:`get_current_theme` is called
             automatically.
 
     Returns:

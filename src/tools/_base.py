@@ -111,18 +111,14 @@ class ToolPermissions:
     3. ``requires_approval`` — tool may run, but only after the user confirms.
 
     Args:
-        allowed:
-            Whitelist of tool names the AI may call.  An empty set means *all*
+        allowed: Whitelist of tool names the AI may call.  An empty set means *all*
             registered tools are allowed (subject to the disallowed list).
-        disallowed:
-            Blacklist of tool names that are completely blocked.  Takes precedence
+        disallowed: Blacklist of tool names that are completely blocked.  Takes precedence
             over ``allowed``.
-        requires_approval:
-            Tool names that need explicit user confirmation before executing.
+        requires_approval: Tool names that need explicit user confirmation before executing.
             The approval callback receives the tool name and the argument dict and
             must return ``True`` to proceed.
-        approve_callback:
-            Called as ``approve_callback(tool_name, args) -> bool`` when a tool
+        approve_callback: Called as ``approve_callback(tool_name, args) -> bool`` when a tool
             in ``requires_approval`` is invoked.  Defaults to a terminal prompt.
     """
 
@@ -339,16 +335,11 @@ class ToolRegistry:
         is ``True``, in which case the instance is released after every call.
 
         Args:
-            name:
-                Tool name used in ``[TOOL: name {...}]`` markers.
-            description:
-                One-line description shown to the AI in the system prompt.
-            schema:
-                JSON Schema dict for the tool's parameters.
-            factory:
-                Zero-argument callable that returns a fresh ``Tool`` instance.
-            unload_after_use:
-                Override the registry's default unload policy for this tool.
+            name: Tool name used in ``[TOOL: name {...}]`` markers.
+            description: One-line description shown to the AI in the system prompt.
+            schema: JSON Schema dict for the tool's parameters.
+            factory: Zero-argument callable that returns a fresh ``Tool`` instance.
+            unload_after_use: Override the registry's default unload policy for this tool.
                 ``None`` → inherit the registry default.
         """
         unload = self._default_unload if unload_after_use is None else unload_after_use
@@ -474,8 +465,7 @@ class ToolRegistry:
            instance immediately so memory is reclaimed.
 
         Args:
-            call_text:
-                Text containing a ``[TOOL: name {...}]`` marker.
+            call_text: Text containing a ``[TOOL: name {...}]`` marker.
 
         Returns:
             Result of the tool call, or ``None`` if no marker was found.

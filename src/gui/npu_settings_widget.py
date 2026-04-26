@@ -423,11 +423,9 @@ if _HAS_QT:
         """Settings page with NPU-themed cards matching the mockup design.
 
         Args:
-            settings_manager:
-                The application :class:`~src.settings.SettingsManager` instance.
+            settings_manager: The application :class:`~src.settings.SettingsManager` instance.
                 Can be ``None`` (settings are shown but not persisted).
-            parent:
-                Optional parent widget.
+            parent: Optional parent widget.
         """
 
         def __init__(

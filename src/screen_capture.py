@@ -31,13 +31,10 @@ def capture(
     """Capture the screen and return JPEG image bytes.
 
     Args:
-        method:
-            ``"mss"`` (default) or ``"scrot"``.
-        monitor:
-            Monitor index.  ``0`` means the full virtual desktop (all monitors
+        method: ``"mss"`` (default) or ``"scrot"``.
+        monitor: Monitor index.  ``0`` means the full virtual desktop (all monitors
             combined) when using mss; ``1`` is the primary physical monitor.
-        jpeg_quality:
-            JPEG compression quality (1 – 95).
+        jpeg_quality: JPEG compression quality (1 – 95).
 
     Returns:
         Raw JPEG bytes of the captured screen.
@@ -113,8 +110,7 @@ def capture_region(
             Top-left corner of the region.
         width, height:
             Dimensions of the region.
-        jpeg_quality:
-            JPEG compression quality (1 – 95).
+        jpeg_quality: JPEG compression quality (1 – 95).
     """
     try:
         import mss  # type: ignore[import]
@@ -146,10 +142,8 @@ def load_image_as_jpeg(path: str | Path, jpeg_quality: int = 85) -> bytes:
     """Load an image file and convert it to JPEG bytes.
 
     Args:
-        path:
-            Path to any image format supported by Pillow.
-        jpeg_quality:
-            JPEG compression quality (1 – 95).
+        path: Path to any image format supported by Pillow.
+        jpeg_quality: JPEG compression quality (1 – 95).
     """
     from PIL import Image  # type: ignore[import]
 
