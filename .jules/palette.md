@@ -10,3 +10,6 @@
 ## 2026-04-25 - Added Keyboard Focus to Custom Toggle
 **Learning:** The custom iOS-style toggle in `_ToggleSwitch` was purely mouse-driven and completely ignored keyboard users, failing accessibility standards. By adding `setFocusPolicy(Qt.StrongFocus)`, implementing `keyPressEvent` for Space and Enter, and dynamically updating the border thickness during `focusInEvent` and `focusOutEvent`, we make the control usable via keyboard.
 **Action:** Always ensure custom QWidget subclasses acting as interactive controls implement keyboard event handling and focus indicators, rather than relying solely on `mousePressEvent`.
+## 2024-05-18 - Adding Accessibility Names to Text Buttons
+**Learning:** In PyQt applications, text buttons (like `QPushButton`) that have a mixture of text and icon-like characters (e.g., `✔ Use this model`) or standard text can be poorly read by screen readers if their text is too terse or context-dependent.
+**Action:** Always assign a clear, descriptive `setAccessibleName` to UI elements (e.g., `"Set this model as the active NPU model"`) to provide precise context to screen readers, improving usability and meeting WCAG AAA guidelines.

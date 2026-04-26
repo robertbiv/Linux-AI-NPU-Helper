@@ -768,6 +768,7 @@ if _HAS_QT:
             btn_row.addWidget(self._btn_download_url)
 
             self._btn_use = QPushButton("✔ Use this model")
+            self._btn_use.setAccessibleName("Set this model as the active NPU model")
             self._btn_use.setEnabled(False)
             self._btn_use.clicked.connect(self._use_model)
             btn_row.addWidget(self._btn_use)
