@@ -342,6 +342,7 @@ def _read_legacy_release() -> dict[str, str]:
     return {}
 
 
+@lru_cache(maxsize=1)
 def _detect_package_manager(distro_id: str, id_like: str) -> str:
     """Return the best package manager name for the detected distro."""
     # 1. Look up by exact distro ID

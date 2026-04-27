@@ -79,7 +79,9 @@ def _scan_packages(query: str = "") -> list[dict]:
     out = run_command(["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Status}\n"])
     if out:
         results: list[dict] = []
-        for line in out.splitlines():
+        for line in out.split("\n"):
+            if not line:
+                continue
             parts = line.split("\t")
             if len(parts) < 3 or "installed" not in parts[2]:
                 continue
@@ -89,7 +91,9 @@ def _scan_packages(query: str = "") -> list[dict]:
         return results
     out = run_command(["rpm", "-qa", "--qf", "%{NAME}\t%{VERSION}\n"])
     results = []
-    for line in out.splitlines():
+    for line in out.split("\n"):
+        if not line:
+            continue
         parts = line.split("\t")
         if q and q not in parts[0].lower():
             continue
@@ -108,11 +112,10 @@ def _scan_path(query: str = "") -> list[dict]:
     results: list[dict] = []
     seen: set[str] = set()
     for d in os.environ.get("PATH", "").split(":"):
-        p = Path(d)
-        if not p.is_dir():
+        if not d or not os.path.isdir(d):
             continue
         try:
-            with os.scandir(p) as it:
+            with os.scandir(d) as it:
                 for entry in it:
                     if entry.name in seen:
                         continue
