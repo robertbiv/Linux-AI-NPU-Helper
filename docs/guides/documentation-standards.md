@@ -80,20 +80,25 @@ Ensure that `Raises` and `Returns` sections follow the strictly required syntax 
         Returns:
             The loaded configuration object.
         ```
-    -   *Incorrect*:
+    -   *Incorrect* (specifying the type before the description):
+        ```python
+        Returns:
+            Config: The loaded configuration object.
+        ```
+    -   *Incorrect* (putting the description on a new line):
         ```python
         Returns:
             Config:
                 The loaded configuration object.
         ```
 
--   **Raises**: Format exceptions as `ExceptionType: Description` on a single line.
+-   **Raises**: Format exceptions as `ExceptionType: Description` on a single line. The `mkdocstrings` plugin requires the exception and description to be on the same line to correctly parse it.
     -   *Correct*:
         ```python
         Raises:
             ValueError: If the configuration file is invalid.
         ```
-    -   *Incorrect*:
+    -   *Incorrect* (description on the next line):
         ```python
         Raises:
             ValueError:

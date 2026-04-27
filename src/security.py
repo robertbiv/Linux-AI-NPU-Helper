@@ -306,8 +306,8 @@ def validate_tool_args(
         Sanitised copy of *args*.
 
     Raises:
-        ValueError: If a required field from the schema is missing.
-        TypeError: If a field\'s value is of the wrong primitive type.
+        If a required field from the schema is missing.
+        If a field\'s value is of the wrong primitive type.
     """
     cleaned: dict[str, Any] = {}
     for key, value in args.items():

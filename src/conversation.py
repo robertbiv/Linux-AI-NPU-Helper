@@ -573,8 +573,8 @@ class ConversationHistory:
             Number of messages successfully imported.
 
         Raises:
-            FileNotFoundError: If *import_path* does not exist.
-            ValueError: If the password is wrong, the file is not valid history JSON, or the file appears encrypted but no password was given.
+            If *import_path* does not exist.
+            If the password is wrong, the file is not valid history JSON, or the file appears encrypted but no password was given.
         """
         path = Path(import_path)
         if not path.exists():
