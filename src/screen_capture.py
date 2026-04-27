@@ -107,10 +107,10 @@ def capture_region(
     """Capture a rectangular region of the screen and return JPEG bytes.
 
     Args:
-        x, y:
-            Top-left corner of the region.
-        width, height:
-            Dimensions of the region.
+        x: Top-left x coordinate of the region.
+        y: Top-left y coordinate of the region.
+        width: Width of the region.
+        height: Height of the region.
         jpeg_quality: JPEG compression quality (1 – 95).
     """
     try:

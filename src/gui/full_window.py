@@ -394,7 +394,7 @@ if _HAS_QT:
             ai_assistant: Application :class:`~src.ai_assistant.AIAssistant` (optional).
             parent: Optional parent widget.
 
-            Signals:
+        Attributes:
             collapse_requested: Emitted when the user clicks the shrink / ⤡ button.
         """
 

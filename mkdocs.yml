@@ -116,6 +116,13 @@ nav:
     - api/tools.md
     - api/npu_manager.md
     - api/gui.md
+    - api/command_executor.md
+    - api/file_handler.md
+    - api/hotkey_listener.md
+    - api/npu_benchmark.md
+    - api/npu_model_installer.md
+    - api/screen_capture.md
+    - api/terminal_launcher.md
 
 extra:
   social:
