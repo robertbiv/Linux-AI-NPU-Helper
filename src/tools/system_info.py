@@ -215,9 +215,10 @@ def _query_gpu() -> str:
     if lspci:
         for row in lspci.splitlines():
             low = row.lower()
-            if any(
-                k in low
-                for k in ("vga compatible", "3d controller", "display controller")
+            if (
+                "vga compatible" in low
+                or "3d controller" in low
+                or "display controller" in low
             ):
                 # Remove PCI address prefix
                 parts = row.split(":", 2)
