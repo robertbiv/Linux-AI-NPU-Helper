@@ -1,8 +1,16 @@
 """Tests for src/model_selector.py."""
 
 from __future__ import annotations
-import pytest
+import sys
 from unittest.mock import MagicMock, patch
+
+# Mock missing dependencies
+if "requests" not in sys.modules:
+    sys.modules["requests"] = MagicMock()
+if "yaml" not in sys.modules:
+    sys.modules["yaml"] = MagicMock()
+
+import pytest
 from src.model_selector import ModelInfo, ModelSelector, _parse_model_info
 
 
@@ -70,6 +78,18 @@ class TestParseModelInfo:
     def test_f16_detected(self):
         m = _parse_model_info("llama3:8b-f16", {})
         assert "f16" in m.quantization.lower()
+
+    def test_parse_malformed_raw(self):
+        """Verify that _parse_model_info handles missing/None fields gracefully."""
+        # Case 1: 'details' is None (crashes original code)
+        m = _parse_model_info("test", {"details": None})
+        assert m.name == "test"
+        assert m.family == ""
+
+        # Case 2: 'details' is missing entirely
+        m = _parse_model_info("test", {})
+        assert m.name == "test"
+        assert m.family == ""
 
 
 class TestNpuWarning:
