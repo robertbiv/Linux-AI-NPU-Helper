@@ -39,6 +39,7 @@ python -m src
 ## Documentation
 
 - [Building the Flatpak locally](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/building-flatpak/)
+- [Documentation Standards](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/documentation-standards/)
 - [AI Model Guide — browse, add, delete models](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/model-guide/)
 - [Settings Guide](https://robertbiv.github.io/Linux-AI-NPU-Assistant/guides/settings-guide/)
 - [API Reference](https://robertbiv.github.io/Linux-AI-NPU-Assistant/api/config/)

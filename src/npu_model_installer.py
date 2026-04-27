@@ -804,7 +804,7 @@ def install_model_from_catalog(
         Path to the primary ONNX file.
 
     Raises:
-        InstallError: Download or verification failed.
+        Download or verification failed.
     """
     installer = NPUModelInstaller(install_dir=install_dir, entry=entry)
     return installer.install(
