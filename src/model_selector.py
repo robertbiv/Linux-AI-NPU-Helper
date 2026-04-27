@@ -130,13 +130,14 @@ def _parse_model_info(name: str, raw: dict) -> ModelInfo:
     size_bytes: int = raw.get("size", 0)
     if not size_bytes:
         # Ollama stores size under details.parameter_size sometimes
-        details = raw.get("details", {})
+        details = raw.get("details") or {}
         param_size = details.get("parameter_size", "")
         if isinstance(param_size, (int, float)):
             size_bytes = int(param_size)
 
     # Family
-    family: str = raw.get("details", {}).get("family", "")
+    details = raw.get("details") or {}
+    family: str = details.get("family", "")
     if not family:
         # Guess from name
         for f in (
@@ -161,7 +162,7 @@ def _parse_model_info(name: str, raw: dict) -> ModelInfo:
     quantization: str = (
         quant_match.group(1)
         if quant_match
-        else (raw.get("details", {}).get("quantization_level", ""))
+        else (details.get("quantization_level", ""))
     )
 
     # Vision

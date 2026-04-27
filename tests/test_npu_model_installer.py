@@ -4,8 +4,16 @@ from __future__ import annotations
 
 import hashlib
 import stat
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+# Mock missing dependencies
+if "requests" not in sys.modules:
+    sys.modules["requests"] = MagicMock()
+if "yaml" not in sys.modules:
+    sys.modules["yaml"] = MagicMock()
+
 import pytest
 
 from src.npu_model_installer import (
@@ -544,6 +552,13 @@ class TestVerifySha256:
         f.write_bytes(content)
         expected = hashlib.sha256(content).hexdigest().upper()
         NPUModelInstaller._verify_sha256(f, expected)
+
+
+class TestInstallError:
+    def test_install_error_serialization(self):
+        """Verify InstallError can be instantiated with a message."""
+        err = InstallError("Failed to download")
+        assert str(err) == "Failed to download"
 
 
 class TestDownloadFile:
