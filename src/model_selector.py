@@ -269,6 +269,12 @@ class ModelSelector:
         allow_external = self._config.network.get("allow_external", False)
         assert_local_url(url, allow_external)
 
+        if api_key and not url.startswith("https://"):
+            raise ValueError(
+                "API keys cannot be sent over insecure HTTP connections. "
+                "Please use https:// in your base URL."
+            )
+
         headers = {"Connection": "close"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
