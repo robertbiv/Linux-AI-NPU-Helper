@@ -186,7 +186,10 @@ if _HAS_QT:
         toggled = pyqtSignal(bool)
 
         def __init__(
-            self, checked: bool = False, accessible_name: str = "Toggle", parent: QWidget | None = None
+            self,
+            checked: bool = False,
+            accessible_name: str = "Toggle",
+            parent: QWidget | None = None,
         ) -> None:
             super().__init__(parent)
             self._checked = checked
@@ -232,6 +235,7 @@ if _HAS_QT:
 
         def keyPressEvent(self, event: object) -> None:
             from PyQt5.QtCore import Qt as _Qt
+
             if event.key() in (_Qt.Key_Space, _Qt.Key_Return, _Qt.Key_Enter):
                 self._checked = not self._checked
                 self._update_style()
@@ -272,6 +276,8 @@ if _HAS_QT:
             self._model_id = model_id
             self._is_primary = is_primary
             self.setCursor(Qt.PointingHandCursor)
+            self.setFocusPolicy(Qt.StrongFocus)
+            self.setAccessibleName(f"Model: {name}. {description}")
             self._set_style(is_primary)
 
             layout = QHBoxLayout(self)
@@ -333,27 +339,36 @@ if _HAS_QT:
                 )
                 layout.addWidget(check)
 
-        def _set_style(self, primary: bool) -> None:
+        def _set_style(self, primary: bool, has_focus: bool = False) -> None:
             self.setObjectName("modelCard")
-            if primary:
-                self.setStyleSheet(
-                    f"QFrame#modelCard {{"
-                    f"  background-color: {T.GREEN_DIM};"
-                    f"  border: 1px solid {T.GREEN};"
-                    f"  border-radius: 10px;"
-                    f"}}"
-                )
-            else:
-                self.setStyleSheet(
-                    f"QFrame#modelCard {{"
-                    f"  background-color: {T.BG_CARD2};"
-                    f"  border: 1px solid {T.BORDER};"
-                    f"  border-radius: 10px;"
-                    f"}}"
-                )
+            border_color = T.BLUE if has_focus else (T.GREEN if primary else T.BORDER)
+            bg_color = T.GREEN_DIM if primary else T.BG_CARD2
+            self.setStyleSheet(
+                f"QFrame#modelCard {{"
+                f"  background-color: {bg_color};"
+                f"  border: 1px solid {border_color};"
+                f"  border-radius: 10px;"
+                f"}}"
+            )
 
         def mousePressEvent(self, event: object) -> None:
             self.selected.emit(self._model_id)
+
+        def keyPressEvent(self, event: object) -> None:
+            from PyQt5.QtCore import Qt as _Qt
+
+            if event.key() in (_Qt.Key_Space, _Qt.Key_Return, _Qt.Key_Enter):
+                self.selected.emit(self._model_id)
+            else:
+                super().keyPressEvent(event)
+
+        def focusInEvent(self, event: object) -> None:
+            super().focusInEvent(event)
+            self._set_style(self._is_primary, has_focus=True)
+
+        def focusOutEvent(self, event: object) -> None:
+            super().focusOutEvent(event)
+            self._set_style(self._is_primary, has_focus=False)
 
     # ── Theme card ────────────────────────────────────────────────────────────
 
@@ -373,18 +388,13 @@ if _HAS_QT:
             super().__init__(parent)
             self._theme_id = theme_id
             self._active = active
+            self._dark = dark
             self.setCursor(Qt.PointingHandCursor)
+            self.setFocusPolicy(Qt.StrongFocus)
+            self.setAccessibleName(f"Theme: {label}")
             self.setObjectName("themeCard")
 
-            bg = T.BG_CARD if dark else "#f0f2f5"
-            border = T.GREEN if active else T.BORDER
-            self.setStyleSheet(
-                f"QFrame#themeCard {{"
-                f"  background-color: {bg};"
-                f"  border: 2px solid {border};"
-                f"  border-radius: 10px;"
-                f"}}"
-            )
+            self._set_style(active)
             self.setFixedHeight(72)
 
             layout = QVBoxLayout(self)
@@ -414,8 +424,35 @@ if _HAS_QT:
             )
             layout.addWidget(name_lbl)
 
+        def _set_style(self, active: bool, has_focus: bool = False) -> None:
+            bg = T.BG_CARD if self._dark else "#f0f2f5"
+            border = T.BLUE if has_focus else (T.GREEN if active else T.BORDER)
+            self.setStyleSheet(
+                f"QFrame#themeCard {{"
+                f"  background-color: {bg};"
+                f"  border: 2px solid {border};"
+                f"  border-radius: 10px;"
+                f"}}"
+            )
+
         def mousePressEvent(self, event: object) -> None:
             self.selected.emit(self._theme_id)
+
+        def keyPressEvent(self, event: object) -> None:
+            from PyQt5.QtCore import Qt as _Qt
+
+            if event.key() in (_Qt.Key_Space, _Qt.Key_Return, _Qt.Key_Enter):
+                self.selected.emit(self._theme_id)
+            else:
+                super().keyPressEvent(event)
+
+        def focusInEvent(self, event: object) -> None:
+            super().focusInEvent(event)
+            self._set_style(self._active, has_focus=True)
+
+        def focusOutEvent(self, event: object) -> None:
+            super().focusOutEvent(event)
+            self._set_style(self._active, has_focus=False)
 
     # ── Main settings widget ──────────────────────────────────────────────────
 
@@ -535,7 +572,9 @@ if _HAS_QT:
             )
             cc_toggle_row.addWidget(cc_state_lbl)
             cc_toggle_row.addStretch()
-            self._capture_toggle = _ToggleSwitch(checked=True, accessible_name="Toggle Contextual Capture")
+            self._capture_toggle = _ToggleSwitch(
+                checked=True, accessible_name="Toggle Contextual Capture"
+            )
             self._capture_toggle.toggled.connect(self._on_capture_toggled)
             cc_toggle_row.addWidget(self._capture_toggle)
             cc_layout.addLayout(cc_toggle_row)
