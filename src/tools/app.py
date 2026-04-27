@@ -308,7 +308,7 @@ class AppTool(Tool):
             _exe, cmd = pm_info
             try:
                 proc = subprocess.run(
-                    cmd + [query],
+                    cmd + ["--", query],
                     shell=False,
                     capture_output=True,
                     text=True,
