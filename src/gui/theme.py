@@ -441,7 +441,7 @@ def apply_to_app(app: object, theme: Theme | None = None) -> Theme:
         The theme that was applied (useful for inspection / testing).
 
     Raises:
-        If PyQt5 is not installed.
+        ImportError: If PyQt5 is not installed.
     """
     try:
         from PyQt5.QtGui import QColor, QPalette

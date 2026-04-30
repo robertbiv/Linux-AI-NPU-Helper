@@ -91,7 +91,7 @@ QTabBar::tab:focus {{
 }}
 
 /* ── Item Views (Lists and Tables) ──────────────────────────────────────── */
-QListWidget:focus, QTableWidget:focus, QScrollArea:focus {{
+QListWidget:focus, QTableWidget:focus, QScrollArea:focus, QTabWidget:focus {{
     border: 1px solid {BLUE};
     outline: none;
 }}

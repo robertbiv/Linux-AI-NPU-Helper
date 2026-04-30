@@ -602,7 +602,7 @@ class NPUModelInstaller:
             Path to the primary ONNX file.
 
         Raises:
-            InstallError: Download or verification failed.
+            InstallError: InstallError: Download or verification failed.
         """
         if self.is_installed():
             _cb(progress_callback, f"Model already installed at {self.model_path()}")
@@ -804,7 +804,7 @@ def install_model_from_catalog(
         Path to the primary ONNX file.
 
     Raises:
-        Download or verification failed.
+        InstallError: Download or verification failed.
     """
     installer = NPUModelInstaller(install_dir=install_dir, entry=entry)
     return installer.install(

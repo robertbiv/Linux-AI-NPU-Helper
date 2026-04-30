@@ -6,7 +6,9 @@ from unittest.mock import MagicMock, patch
 
 # Mock missing dependencies
 if "requests" not in sys.modules:
+    import requests
     sys.modules["requests"] = MagicMock()
+    sys.modules["requests"].exceptions = requests.exceptions
 if "yaml" not in sys.modules:
     sys.modules["yaml"] = MagicMock()
 

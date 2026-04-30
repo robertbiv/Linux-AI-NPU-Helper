@@ -164,7 +164,6 @@ def test_web_fetch_tool_run_unsupported_type(mock_session_cls):
 @patch("requests.Session")
 def test_web_fetch_tool_run_exception(mock_session_cls):
     import requests
-
     mock_session = MagicMock()
     mock_session.get.side_effect = requests.exceptions.RequestException("network error")
     mock_session_cls.return_value = mock_session
