@@ -16,3 +16,6 @@
 ## 2024-05-19 - Adding Keyboard Accessibility to Custom QFrame Cards
 **Learning:** Custom UI components in PyQt that inherit from `QFrame` or `QWidget` and act like buttons (using `mousePressEvent`) are completely inaccessible to keyboard users and screen readers by default. They lack semantic meaning and focus states.
 **Action:** When implementing custom cards that act as buttons (e.g., `_ModelCard`, `_ThemeCard`), always inject `setFocusPolicy(Qt.StrongFocus)`, `setAccessibleName()`, `keyPressEvent` for Space and Enter, and dynamic border styling in `focusInEvent` and `focusOutEvent` to ensure they are fully navigable and understandable via keyboard and screen reader.
+## 2024-05-20 - Adding Focus State for QTabWidget
+**Learning:** In PyQt applications, screen reader and keyboard accessibility require visible focus indicators for all navigable elements. While `QTabBar::tab` might have a focus style, the parent container `QTabWidget` can also receive focus when navigating tab structures. If `QTabWidget:focus` lacks explicit outline styling, keyboard users lose their visual orientation within complex tabbed dialogs.
+**Action:** When defining custom stylesheets (like in `src/gui/npu_theme.py`), always explicitly include `:focus` outline styles for container widgets such as `QTabWidget`, similar to `QListWidget`, `QTableWidget`, and `QScrollArea`.
